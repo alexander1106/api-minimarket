@@ -7,3 +7,4 @@ import com.gadbacorp.api.entity.inventario.Productos;
 public interface ProductosRepository extends JpaRepository<Productos, Integer>{
 
 }
+ 

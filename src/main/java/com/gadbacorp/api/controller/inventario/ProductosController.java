@@ -18,7 +18,7 @@ import com.gadbacorp.api.service.inventario.IProductosService;
 
 @RestController
 @RequestMapping("/api/minimarket")
-public class ProductosController {
+public class ProductosController { 
     @Autowired
     private IProductosService serviceProductos;
 

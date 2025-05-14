@@ -1,6 +1,8 @@
 package com.gadbacorp.api.entity.inventario;
 
-import jakarta.persistence.Column;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,27 +11,27 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "categorias")
+@SQLDelete(sql = "UPDATE categorias SET estado=0 WHERE idcategoria = ?")
+@Where(clause="estado = 1")
 public class Categorias {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_categoria")
-    private Integer id;
+    private Integer idcategoria;
     private String nombre;
     private Integer estado = 1;
     public Integer getId() {
-        return id;
+        return idcategoria;
     }
-
-    // Getters y Setters
-    public void setId(Integer id) {
-        this.id = id;
+    public Integer getIdcategoria() {
+        return idcategoria;
     }
-
+    public void setIdcategoria(Integer idcategoria) {
+        this.idcategoria = idcategoria;
+    }
     public String getNombre() {
         return nombre;
     }
-
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
@@ -39,10 +41,9 @@ public class Categorias {
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
-
     @Override
     public String toString() {
-        return "Categorias [id=" + id + ", nombre=" + nombre + ", estado=" + estado + "]";
+        return "Categorias [idcategoria=" + idcategoria + ", nombre=" + nombre + ", estado=" + estado + "]";
     }
 
 }

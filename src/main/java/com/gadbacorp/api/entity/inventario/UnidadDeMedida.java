@@ -1,6 +1,8 @@
 package com.gadbacorp.api.entity.inventario;
 
-import jakarta.persistence.Column;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,18 +11,22 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "unidad_medida")
+@SQLDelete(sql = "UPDATE unidad_medida SET estado=0 WHERE idunidadmedida = ?")
+@Where(clause="estado = 1")
 public class UnidadDeMedida {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_unidad_medida")
-    private Integer id;
+    private Integer idunidadmedida;
     private String nombre;
     private Integer estado = 1;
     public Integer getId() {
-        return id;
+        return idunidadmedida;
     }
-    public void setId(Integer id) {
-        this.id = id;
+    public Integer getIdunidadmedida() {
+        return idunidadmedida;
+    }
+    public void setIdunidadmedida(Integer idunidadmedida) {
+        this.idunidadmedida = idunidadmedida;
     }
     public String getNombre() {
         return nombre;
@@ -36,7 +42,7 @@ public class UnidadDeMedida {
     }
     @Override
     public String toString() {
-        return "UnidadDeMedida [id=" + id + ", nombre=" + nombre + ", estado=" + estado + "]";
+        return "UnidadDeMedida [idunidadmedida=" + idunidadmedida + ", nombre=" + nombre + ", estado=" + estado + "]";
     }
     
 }

@@ -18,8 +18,8 @@ import com.gadbacorp.api.service.inventario.IAlmacenesService;
 
 @RestController
 @RequestMapping("/api/minimarket")
-public class AlmacenesController {
-    @Autowired
+public class AlmacenesController {  
+    @Autowired 
      private IAlmacenesService serviceAlmacenes;
 
     @GetMapping("/almacenes")
