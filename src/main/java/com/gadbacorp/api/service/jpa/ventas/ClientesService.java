@@ -1,5 +1,6 @@
 package com.gadbacorp.api.service.jpa.ventas;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,18 +18,18 @@ public class ClientesService implements IClientesService{
     }
 
     @Override
-    public Clientes editarCliente(Clientes cliente) {
-        return clientesRepository.save(cliente);
+    public void editarCliente(Clientes cliente) {
+        clientesRepository.save(cliente);
     }
 
     @Override
-    public Clientes obtenerCliente(Integer clienteId) {
-        return clientesRepository.findById(clienteId).orElse(null);
+    public Optional obtenerCliente(Integer clienteId) {
+        return clientesRepository.findById(clienteId);
     }
 
     @Override
-    public Clientes crearCliente(Clientes cliente) {
-        return clientesRepository.save(cliente);
+    public void crearCliente(Clientes cliente) {
+        clientesRepository.save(cliente);
     }
 
     @Override
