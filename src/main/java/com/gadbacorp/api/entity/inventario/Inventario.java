@@ -37,14 +37,7 @@ public class Inventario {
 
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name = "id_producto")
-    @JsonIgnoreProperties({
-    "hibernateLazyInitializer",
-    "handler",
-    "almacenProductos",
-    "id_categoria",
-    "id_unidad_medida",
-    "id_tipo_producto"
-    })
+    @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
     private Productos id_producto;
 
     public Integer getIdinventario() {
