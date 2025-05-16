@@ -1,12 +1,17 @@
 package com.gadbacorp.api.entity.ventas;
 
+import java.util.List;
+
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -16,6 +21,7 @@ import jakarta.persistence.Table;
 public class MetodosPago {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name="id_metodo_pago")
     private Integer idMetodoPago; 
     private String nombre; 
     private Integer estado =1;
@@ -38,5 +44,8 @@ public class MetodosPago {
         this.estado = estado;
     }
 
-    
+  @OneToMany(mappedBy = "metodos_pago", cascade = CascadeType.ALL)
+    private List<Ventas> ventas;
+
+
 }

@@ -3,6 +3,9 @@ package com.gadbacorp.api.entity.ventas;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,9 +13,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 
 @Entity
+@Table(name="clientes")
+@SQLDelete(sql="UPDATE clientes SET estado = 0 WHERE id_cliente = ?")
+@Where(clause = "estado = 1")
 public class Clientes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +28,7 @@ public class Clientes {
     private String nombre; 
     private String dni;
     private String ruc;
+    private Integer estado=1;
     private String direccion;
     private String  telefono; 
     private String email;
@@ -85,6 +93,14 @@ public class Clientes {
     public void setVentas(List<Ventas> ventas) {
         this.ventas = ventas;
     } 
+
+    public Integer getEstado() {
+        return estado;
+    }
+
+    public void setEstado(Integer estado) {
+        this.estado = estado;
+    }
 
 
 
