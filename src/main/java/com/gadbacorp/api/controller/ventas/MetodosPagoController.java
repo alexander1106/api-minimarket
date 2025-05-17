@@ -27,21 +27,21 @@ public class MetodosPagoController {
     public List<MetodosPago> buscarTodos() {
         return metodosPagoService.listarMetodosPago();
     }
-    @PostMapping("/metodos-pago")
+    @PostMapping("/metodo-pago")
     public MetodosPago guardar(@RequestBody MetodosPago metodoPago) {
         metodosPagoService.guardarMetodoPago(metodoPago);
         return metodoPago;
     }
-    @PutMapping("/metodos-pago")
+    @PutMapping("/metodo-pago")
     public MetodosPago modificar(@RequestBody MetodosPago metodoPago) {
         metodosPagoService.guardarMetodoPago(metodoPago);
         return metodoPago;
     }
-    @GetMapping("/metodos-pago/{id}")
+    @GetMapping("/metodo-pago/{id}")
     public Optional<MetodosPago> buscarId(@PathVariable("id") Integer id){
         return metodosPagoService.obtenerMetodoPago(id);
     }
-    @DeleteMapping("/metodos-pago/{id}")
+    @DeleteMapping("/metodo-pago/{id}")
     public String eliminar(@PathVariable Integer id){
         metodosPagoService.eliminarMetodoPago(id);
         return "Metodo de pago eliminado";

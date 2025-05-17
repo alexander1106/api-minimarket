@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.gadbacorp.api.entity.ventas.MetodosPago;
 import com.gadbacorp.api.repository.ventas.MetodosPagoRepository;
 import com.gadbacorp.api.service.ventas.IMetodosPagoService;
 
+@Service
 public class MetodosPagoService implements  IMetodosPagoService{
 
     @Autowired

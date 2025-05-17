@@ -3,11 +3,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.gadbacorp.api.entity.ventas.Clientes;
 import com.gadbacorp.api.repository.ventas.ClientesRepository;
 import com.gadbacorp.api.service.ventas.IClientesService;
-
+@Service
 public class ClientesService implements IClientesService{
     @Autowired
     private ClientesRepository clientesRepository;

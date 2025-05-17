@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.gadbacorp.api.entity.ventas.Ventas;
 
 
-public interface  VentasRepository extends JpaRepository<Ventas, Integer>{
-    List<Ventas> findByClienteId(Integer clienteId);
+public interface VentasRepository extends JpaRepository<Ventas, Integer> {
+    List<Ventas> findByClienteIdCliente(Integer clienteId);
 }

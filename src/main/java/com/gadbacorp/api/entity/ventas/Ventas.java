@@ -47,6 +47,10 @@ public class Ventas {
     private Clientes cliente;
 
     @OneToMany(mappedBy = "ventas", cascade = CascadeType.ALL)
+    private List<DetallesVentas> detallesVentas;
+    
+
+    @OneToMany(mappedBy = "ventas", cascade = CascadeType.ALL)
     private List<Pagos> pagos;
 
    
@@ -129,5 +133,15 @@ public class Ventas {
     public void setPagos(List<Pagos> pagos) {
         this.pagos = pagos;
     }
+
+    public List<DetallesVentas> getDetallesVentas() {
+        return detallesVentas;
+    }
+
+    public void setDetallesVentas(List<DetallesVentas> detallesVentas) {
+        this.detallesVentas = detallesVentas;
+    }
+
+
 
 }

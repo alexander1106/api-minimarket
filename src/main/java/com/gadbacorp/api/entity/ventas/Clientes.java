@@ -24,7 +24,7 @@ public class Clientes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id_cliente")
-    private Integer id_cliente; 
+    private Integer idCliente; 
     private String nombre; 
     private String dni;
     private String ruc;
@@ -38,13 +38,7 @@ public class Clientes {
     private List<Ventas> ventas;
 
         
-    
-    public Integer getId_cliente() {
-        return id_cliente;
-    }
-    public void setId_cliente(Integer id_cliente) {
-        this.id_cliente = id_cliente;
-    }
+  
     public String getNombre() {
         return nombre;
     }
@@ -100,6 +94,12 @@ public class Clientes {
 
     public void setEstado(Integer estado) {
         this.estado = estado;
+    }
+    public Integer getIdCliente() {
+        return idCliente;
+    }
+    public void setIdCliente(Integer idCliente) {
+        this.idCliente = idCliente;
     }
 
 

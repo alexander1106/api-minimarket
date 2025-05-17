@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="metodos_pago")
-@SQLDelete(sql="UPDATE metodos_pago SET estado = 0 WHERE idcurso = ?")
+@SQLDelete(sql="UPDATE metodos_pago SET estado = 0 WHERE id_metodo_pago = ?")
 @Where(clause = "estado = 1")
 public class MetodosPago {
     @Id
@@ -44,8 +44,15 @@ public class MetodosPago {
         this.estado = estado;
     }
 
-  @OneToMany(mappedBy = "metodos_pago", cascade = CascadeType.ALL)
-    private List<Ventas> ventas;
+  @OneToMany(mappedBy = "metodosPago", cascade = CascadeType.ALL)
+    private List<Pagos> pagos;
+
+  public List<Pagos> getPagos() {
+    return pagos;
+  }
+  public void setPagos(List<Pagos> pagos) {
+    this.pagos = pagos;
+  }
 
 
 }
