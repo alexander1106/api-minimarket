@@ -4,17 +4,22 @@ import java.util.List;
 import java.util.Optional;
 
 import com.gadbacorp.api.entity.inventario.Productos;
+import com.gadbacorp.api.entity.inventario.ProductosDTO;
 
 public interface IProductosService {
     
-    //listar todos los Productos de la tabla
+    // Métodos para entidades
     List<Productos> buscarTodos();
-    //guarda los Productos
-    void guardar(Productos producto);
-
-    void modificar(Productos producto);
-
+    Productos guardar(Productos producto);
+    Productos modificar(Productos producto);
     Optional<Productos> buscarId(Integer id);
-
     void eliminar(Integer id);
+
+    // Métodos para DTOs
+    List<ProductosDTO> buscarTodosDTO();
+    Optional<ProductosDTO> buscarIdDTO(Integer id);
+    ProductosDTO guardarDTO(ProductosDTO dto);
+    ProductosDTO actualizarDTO(Integer id, ProductosDTO dto);
 }
+
+ 

@@ -2,145 +2,180 @@ package com.gadbacorp.api.entity.inventario;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
-import jakarta.persistence.Column;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "productos")
+@SQLDelete(sql="UPDATE productos SET estado = 0 WHERE idproducto = ?")
+@Where(clause = "estado = 1")
 public class Productos {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_producto")
-    private Integer id;
+    private Integer idproducto;
+
     private String nombre;
     private String descripcion;
-    private String imagen ;
-    @Column(name = "fecha_vencimiento")
     private LocalDate fechaVencimiento;
-    @Column(name = "tipo_impuesto")
     private String tipoImpuesto;
-    @Column(name = "costo_compra")
     private BigDecimal costoCompra;
-    @Column(name = "costo_venta")
     private BigDecimal costoVenta;
-    @Column(name = "costo_mayor")
     private BigDecimal costoMayor;
+    private Integer estado = 1;
 
-    @ManyToOne
-    @JoinColumn(name = "id_categoria")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idcategoria")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Categorias categoria;
 
-    @ManyToOne
-    @JoinColumn(name = "id_unidad_medida")
-    private UnidadDeMedida unidaddemedida;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idunidadmedida")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private UnidadDeMedida unidadMedida;
 
-    @ManyToOne
-    @JoinColumn(name = "id_tipo_producto")
-    private TipoProducto tipoproducto;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idtipoproducto")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private TipoProducto tipoProducto;
 
-    @ManyToOne
-    @JoinColumn(name = "id_almacen")
-    private Almacenes almacen;
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<AlmacenProducto> almacenProductos = new ArrayList<>();
 
-    private Integer estado = 1;
-    public Integer getId() {
-        return id;
+    public Productos() { }
+
+    public Productos(Integer id) {
+        this.idproducto = id;
     }
-    public void setId(Integer id) {
-        this.id = id;
+
+    public Integer getIdproducto() {
+        return idproducto;
     }
+
+    public void setIdproducto(Integer idproducto) {
+        this.idproducto = idproducto;
+    }
+
     public String getNombre() {
         return nombre;
     }
+
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+
     public String getDescripcion() {
         return descripcion;
     }
+
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
-    public String getImagen() {
-        return imagen;
-    }
-    public void setImagen(String imagen) {
-        this.imagen = imagen;
-    }
+
     public LocalDate getFechaVencimiento() {
         return fechaVencimiento;
     }
+
     public void setFechaVencimiento(LocalDate fechaVencimiento) {
         this.fechaVencimiento = fechaVencimiento;
     }
+
     public String getTipoImpuesto() {
         return tipoImpuesto;
     }
+
     public void setTipoImpuesto(String tipoImpuesto) {
         this.tipoImpuesto = tipoImpuesto;
     }
+
     public BigDecimal getCostoCompra() {
         return costoCompra;
     }
+
     public void setCostoCompra(BigDecimal costoCompra) {
         this.costoCompra = costoCompra;
     }
+
     public BigDecimal getCostoVenta() {
         return costoVenta;
     }
+
     public void setCostoVenta(BigDecimal costoVenta) {
         this.costoVenta = costoVenta;
     }
+
     public BigDecimal getCostoMayor() {
         return costoMayor;
     }
+
     public void setCostoMayor(BigDecimal costoMayor) {
         this.costoMayor = costoMayor;
     }
-    public Categorias getCategoria() {
-        return categoria;
-    }
-    public void setCategoria(Categorias categoria) {
-        this.categoria = categoria;
-    }
-    public UnidadDeMedida getUnidaddemedida() {
-        return unidaddemedida;
-    }
-    public void setUnidaddemedida(UnidadDeMedida unidaddemedida) {
-        this.unidaddemedida = unidaddemedida;
-    }
-    public TipoProducto getTipoproducto() {
-        return tipoproducto;
-    }
-    public void setTipoproducto(TipoProducto tipoproducto) {
-        this.tipoproducto = tipoproducto;
-    }
-    public Almacenes getAlmacen() {
-        return almacen;
-    }
-    public void setAlmacen(Almacenes almacen) {
-        this.almacen = almacen;
-    }
+
     public Integer getEstado() {
         return estado;
     }
+
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
+
+    public Categorias getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categorias categoria) {
+        this.categoria = categoria;
+    }
+
+    public UnidadDeMedida getUnidadMedida() {
+        return unidadMedida;
+    }
+
+    public void setUnidadMedida(UnidadDeMedida unidadMedida) {
+        this.unidadMedida = unidadMedida;
+    }
+
+    public TipoProducto getTipoProducto() {
+        return tipoProducto;
+    }
+
+    public void setTipoProducto(TipoProducto tipoProducto) {
+        this.tipoProducto = tipoProducto;
+    }
+
+    public List<AlmacenProducto> getAlmacenProductos() {
+        return almacenProductos;
+    }
+
+    public void setAlmacenProductos(List<AlmacenProducto> almacenProductos) {
+        this.almacenProductos = almacenProductos;
+    }
+
     @Override
     public String toString() {
-        return "Productos [id=" + id + ", nombre=" + nombre + ", descripcion=" + descripcion + ", imagen=" + imagen
-                + ", fechaVencimiento=" + fechaVencimiento + ", tipoImpuesto=" + tipoImpuesto + ", costoCompra="
-                + costoCompra + ", costoVenta=" + costoVenta + ", costoMayor=" + costoMayor + ", categoria=" + categoria
-                + ", unidaddemedida=" + unidaddemedida + ", tipoproducto=" + tipoproducto + ", almacen=" + almacen
-                + ", estado=" + estado + "]";
+        return "Productos [idproducto=" + idproducto + ", nombre=" + nombre +
+               ", descripcion=" + descripcion + ", fechaVencimiento=" + fechaVencimiento +
+               ", tipoImpuesto=" + tipoImpuesto + ", costoCompra=" + costoCompra +
+               ", costoVenta=" + costoVenta + ", costoMayor=" + costoMayor +
+               ", estado=" + estado + "]";
     }
-    
 }
+
