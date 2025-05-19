@@ -18,12 +18,12 @@ public class InventarioService implements IInventarioService{
         return repoInventario.findAll();
     }
 
-    public void guardar(Inventario inventario){
-        repoInventario.save(inventario);
+    public Inventario guardar(Inventario inventario){
+        return repoInventario.save(inventario);
     }
     
-    public void modificar(Inventario inventario){
-        repoInventario.save(inventario);
+    public Inventario modificar(Inventario inventario){
+        return repoInventario.save(inventario);
     }
 
     public Optional<Inventario> buscarId(Integer id){

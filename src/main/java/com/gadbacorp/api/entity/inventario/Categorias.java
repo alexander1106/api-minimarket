@@ -20,6 +20,13 @@ public class Categorias {
     private Integer idcategoria;
     private String nombre;
     private Integer estado = 1;
+
+    public Categorias(){}
+
+    public Categorias(Integer id){
+        this.idcategoria = id;
+    }
+
     public Integer getId() {
         return idcategoria;
     }

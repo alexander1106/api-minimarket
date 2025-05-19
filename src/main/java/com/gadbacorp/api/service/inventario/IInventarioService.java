@@ -9,9 +9,9 @@ public interface IInventarioService {
    
     List<Inventario> buscarTodos();
     //guarda los Productos
-    void guardar(Inventario inventario);
+    Inventario guardar(Inventario inventario);
 
-    void modificar(Inventario inventario);
+    Inventario modificar(Inventario inventario);
 
     Optional<Inventario> buscarId(Integer id);
 

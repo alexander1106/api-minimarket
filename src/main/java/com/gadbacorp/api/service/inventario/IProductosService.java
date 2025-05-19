@@ -10,11 +10,12 @@ public interface IProductosService {
     //listar todos los Productos de la tabla
     List<Productos> buscarTodos();
     //guarda los Productos
-    void guardar(Productos producto);
+    Productos guardar(Productos producto);
 
-    void modificar(Productos producto);
+    Productos modificar(Productos producto);
 
     Optional<Productos> buscarId(Integer id);
 
     void eliminar(Integer id);
 }
+ 

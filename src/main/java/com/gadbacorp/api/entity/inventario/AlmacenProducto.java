@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -17,7 +17,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 
-@Entity
+@Entity 
 @Table(name = "almacen_producto")
 @SQLDelete(sql = "UPDATE almacen_producto SET estado=0 WHERE idalmacenproducto = ?")
 @Where(clause="estado = 1")
@@ -25,19 +25,26 @@ public class AlmacenProducto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idalmacenproducto;
+
     private Integer stock;
-    private LocalDate fechaIngreso; 
+    private LocalDate fechaIngreso;
     private Integer estado = 1;
 
-    @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name = "id_almacen")
-    @JsonIgnoreProperties({"almacenProductos"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idproducto")
+    @JsonIgnore
+    private Productos producto;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idalmacen")
+    @JsonIgnore
     private Almacenes almacen;
 
-    @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name = "id_producto")
-    @JsonIgnoreProperties({"almacenProductos"})
-    private Productos producto;
+    public AlmacenProducto() { }
+
+    public AlmacenProducto(Integer id) {
+        this.idalmacenproducto = id;
+    }
 
     public Integer getIdalmacenproducto() {
         return idalmacenproducto;
@@ -50,7 +57,7 @@ public class AlmacenProducto {
     public Integer getStock() {
         return stock;
     }
-    
+
     public void setStock(Integer stock) {
         this.stock = stock;
     }
@@ -71,14 +78,6 @@ public class AlmacenProducto {
         this.estado = estado;
     }
 
-    public Almacenes getAlmacen() {
-        return almacen;
-    }
-
-    public void setAlmacen(Almacenes almacen) {
-        this.almacen = almacen;
-    }
-
     public Productos getProducto() {
         return producto;
     }
@@ -87,14 +86,18 @@ public class AlmacenProducto {
         this.producto = producto;
     }
 
+    public Almacenes getAlmacen() {
+        return almacen;
+    }
+
+    public void setAlmacen(Almacenes almacen) {
+        this.almacen = almacen;
+    }
+
     @Override
     public String toString() {
         return "AlmacenProducto [idalmacenproducto=" + idalmacenproducto + ", stock=" + stock + ", fechaIngreso="
-                + fechaIngreso + ", estado=" + estado + ", almacen=" + almacen + ", producto=" + producto + "]";
+                + fechaIngreso + ", estado=" + estado + "]";
     }
-    
-    
-
-    
 
 }

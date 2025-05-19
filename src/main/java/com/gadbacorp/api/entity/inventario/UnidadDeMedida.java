@@ -19,6 +19,12 @@ public class UnidadDeMedida {
     private Integer idunidadmedida;
     private String nombre;
     private Integer estado = 1;
+
+    public UnidadDeMedida(){}
+
+    public UnidadDeMedida(Integer id){
+        this.idunidadmedida = id;
+    }
     public Integer getId() {
         return idunidadmedida;
     }

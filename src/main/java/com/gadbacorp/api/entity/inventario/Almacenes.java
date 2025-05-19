@@ -1,14 +1,15 @@
 package com.gadbacorp.api.entity.inventario;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,17 +22,23 @@ import jakarta.persistence.Table;
 @Where(clause="estado = 1")
 public class Almacenes {
     
-    @Id
+     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idalmacen;
+
     private String nombre;
     private String descripcion;
-    private Integer estado = 1; 
-    
-    // ✅ Relación correcta con AlmacenProducto
-    @OneToMany(mappedBy = "almacen", fetch = FetchType.LAZY)
-    @JsonIgnoreProperties({"producto", "almacen"})
-    private List<AlmacenProducto> almacenProductos;
+    private Integer estado = 1;
+
+    @OneToMany(mappedBy = "almacen",cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonIgnore
+    private List<AlmacenProducto> almacenProductos = new ArrayList<>();
+
+    public Almacenes() { }
+
+    public Almacenes(Integer id) {
+        this.idalmacen = id;
+    }
 
     public Integer getIdalmacen() {
         return idalmacen;
@@ -65,20 +72,19 @@ public class Almacenes {
         this.estado = estado;
     }
 
-    public List<AlmacenProducto> getAlmacenProducto() {
+    public List<AlmacenProducto> getAlmacenProductos() {
         return almacenProductos;
     }
 
-    public void setAlmacenProducto(List<AlmacenProducto> almacenProducto) {
-        this.almacenProductos = almacenProducto;
+    public void setAlmacenProductos(List<AlmacenProducto> almacenProductos) {
+        this.almacenProductos = almacenProductos;
     }
-
+ 
     @Override
     public String toString() {
         return "Almacenes [idalmacen=" + idalmacen + ", nombre=" + nombre + ", descripcion=" + descripcion + ", estado="
-                + estado + ", almacenProducto=" + almacenProductos + "]";
+                + estado + "]";
     }
 
-    
-    
+
 }

@@ -12,18 +12,18 @@ import com.gadbacorp.api.service.inventario.IProductosService;
 
 @Service
 public class ProductosService implements IProductosService{
-@Autowired
+    @Autowired
     private ProductosRepository repoProductos;
     public List<Productos> buscarTodos(){
         return repoProductos.findAll();
     }
 
-    public void guardar(Productos producto){
-        repoProductos.save(producto);
+    public Productos guardar(Productos producto){
+        return repoProductos.save(producto);
     }
     
-    public void modificar(Productos producto){
-        repoProductos.save(producto);
+    public Productos modificar(Productos producto){
+        return repoProductos.save(producto);
     }
 
     public Optional<Productos> buscarId(Integer id){

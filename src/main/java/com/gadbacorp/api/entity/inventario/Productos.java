@@ -2,13 +2,16 @@ package com.gadbacorp.api.entity.inventario;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -27,6 +30,7 @@ public class Productos {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idproducto;
+
     private String nombre;
     private String descripcion;
     private LocalDate fechaVencimiento;
@@ -36,24 +40,30 @@ public class Productos {
     private BigDecimal costoMayor;
     private Integer estado = 1;
 
-    @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name = "id_categoria")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idcategoria")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private Categorias id_categoria;
+    private Categorias categoria;
 
-    @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name = "id_unidad_medida")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idunidadmedida")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private UnidadDeMedida id_unidad_medida;
+    private UnidadDeMedida unidadMedida;
 
-    @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name = "id_tipo_producto")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idtipoproducto")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private TipoProducto id_tipo_producto;
-    
-    @OneToMany(mappedBy = "producto", fetch = FetchType.LAZY)
-    @JsonIgnoreProperties({"producto", "almacen"})
-    private List<AlmacenProducto> almacenProductos;
+    private TipoProducto tipoProducto;
+
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<AlmacenProducto> almacenProductos = new ArrayList<>();
+
+    public Productos() { }
+
+    public Productos(Integer id) {
+        this.idproducto = id;
+    }
 
     public Integer getIdproducto() {
         return idproducto;
@@ -127,47 +137,45 @@ public class Productos {
         this.estado = estado;
     }
 
-    public Categorias getId_categoria() {
-        return id_categoria;
+    public Categorias getCategoria() {
+        return categoria;
     }
 
-    public void setId_categoria(Categorias id_categoria) {
-        this.id_categoria = id_categoria;
+    public void setCategoria(Categorias categoria) {
+        this.categoria = categoria;
     }
 
-    public UnidadDeMedida getId_unidad_medida() {
-        return id_unidad_medida;
+    public UnidadDeMedida getUnidadMedida() {
+        return unidadMedida;
     }
 
-    public void setId_unidad_medida(UnidadDeMedida id_unidad_medida) {
-        this.id_unidad_medida = id_unidad_medida;
+    public void setUnidadMedida(UnidadDeMedida unidadMedida) {
+        this.unidadMedida = unidadMedida;
     }
 
-    public TipoProducto getId_tipo_producto() {
-        return id_tipo_producto;
+    public TipoProducto getTipoProducto() {
+        return tipoProducto;
     }
 
-    public void setId_tipo_producto(TipoProducto id_tipo_producto) {
-        this.id_tipo_producto = id_tipo_producto;
+    public void setTipoProducto(TipoProducto tipoProducto) {
+        this.tipoProducto = tipoProducto;
     }
 
-    public List<AlmacenProducto> getAlmacenProducto() {
+    public List<AlmacenProducto> getAlmacenProductos() {
         return almacenProductos;
     }
 
-    public void setAlmacenProducto(List<AlmacenProducto> almacenProducto) {
-        this.almacenProductos = almacenProducto;
+    public void setAlmacenProductos(List<AlmacenProducto> almacenProductos) {
+        this.almacenProductos = almacenProductos;
     }
 
     @Override
     public String toString() {
-        return "Productos [idproducto=" + idproducto + ", nombre=" + nombre + ", descripcion=" + descripcion
-                + ", fechaVencimiento=" + fechaVencimiento + ", tipoImpuesto=" + tipoImpuesto + ", costoCompra="
-                + costoCompra + ", costoVenta=" + costoVenta + ", costoMayor=" + costoMayor + ", estado=" + estado
-                + ", id_categoria=" + id_categoria + ", id_unidad_medida=" + id_unidad_medida + ", id_tipo_producto="
-                + id_tipo_producto + ", almacenProducto=" + almacenProductos + "]";
+        return "Productos [idproducto=" + idproducto + ", nombre=" + nombre +
+               ", descripcion=" + descripcion + ", fechaVencimiento=" + fechaVencimiento +
+               ", tipoImpuesto=" + tipoImpuesto + ", costoCompra=" + costoCompra +
+               ", costoVenta=" + costoVenta + ", costoMayor=" + costoMayor +
+               ", estado=" + estado + "]";
     }
-
-    
-    
 }
+

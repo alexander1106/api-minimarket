@@ -19,6 +19,12 @@ public class TipoProducto {
     private Integer idtipoproducto;
     private String nombre;
     private Integer estado = 1;
+
+    public TipoProducto(){}
+
+    public TipoProducto(Integer id){
+        this.idtipoproducto = id;
+    }
     public Integer getId() {
         return idtipoproducto;
     }
