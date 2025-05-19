@@ -39,7 +39,6 @@ public class PagosController {
         pago.setMonto(dto.getMonto());
         pago.setFechaPago(dto.getFechaPago());
         pago.setEstadoPago(dto.getEstadoPago());
-
         MetodosPago metodo = metodosPagoRepository.findById(dto.getIdPago()).orElse(null);
         pago.setMetodosPago(metodo);
        return ResponseEntity.ok(pagosService.guardarPago(pago));        
