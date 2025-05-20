@@ -17,13 +17,29 @@ public class TipoProductoService implements ITipoProductoService{
     public List<TipoProducto> buscarTodos(){
         return repoTipoProducto.findAll();
     }
-    public void guardar(TipoProducto tipoproducto){
-        repoTipoProducto.save(tipoproducto);
+    @Override
+    public TipoProducto guardar(TipoProducto tipoproducto) {
+    Optional<TipoProducto> existente = repoTipoProducto.findByNombreIgnoreCase(tipoproducto.getNombre());
+
+    if (existente.isPresent()) {
+        throw new IllegalArgumentException("Ya existe un tipo de producto con ese nombre.");
+        }
+
+        return repoTipoProducto.save(tipoproducto);
     }
+
     
-    public void modificar(TipoProducto tipoproducto){
-        repoTipoProducto.save(tipoproducto);
+    @Override
+    public TipoProducto modificar(TipoProducto tipoproducto) {
+    Optional<TipoProducto> existente = repoTipoProducto.findByNombreIgnoreCase(tipoproducto.getNombre());
+
+    if (existente.isPresent() && !existente.get().getIdtipoproducto().equals(tipoproducto.getIdtipoproducto())) {
+        throw new IllegalArgumentException("Ya existe un tipo de producto con ese nombre.");
+        }
+
+        return repoTipoProducto.save(tipoproducto);
     }
+
 
     public Optional<TipoProducto> buscarId(Integer id){
         return repoTipoProducto.findById(id);
