@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.gadbacorp.api.entity.ventas.Ventas;
 import com.gadbacorp.api.repository.ventas.VentasRepository;
 import com.gadbacorp.api.service.ventas.IVentasService;
 
+@Service
 public class VentasService implements IVentasService {
 
     @Autowired
@@ -40,7 +42,7 @@ public class VentasService implements IVentasService {
 
     @Override
     public List<Ventas> obtenerVentasPorCliente(Integer clienteId) {
-        return ventasRepository.findByClienteId(clienteId);
+        return ventasRepository.findByClienteIdCliente(clienteId);
     }
 
 }
