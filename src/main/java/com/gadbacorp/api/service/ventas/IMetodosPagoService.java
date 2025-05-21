@@ -6,9 +6,10 @@ import java.util.Optional;
 import com.gadbacorp.api.entity.ventas.MetodosPago;
 
 public interface IMetodosPagoService {
-    void guardarMetodoPago(MetodosPago metodoPago);
+    MetodosPago guardarMetodoPago(MetodosPago metodoPago);
     List<MetodosPago> listarMetodosPago();
     Optional<MetodosPago> obtenerMetodoPago(Integer id);
     void eliminarMetodoPago(Integer id);
-    void editarMetodosPago (MetodosPago metodoPago);
+    MetodosPago editarMetodosPago (MetodosPago metodoPago);
+    boolean existeMetodoConNombre(String nombre);
 }
