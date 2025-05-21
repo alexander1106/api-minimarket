@@ -19,6 +19,7 @@ public class Categorias {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idcategoria;
     private String nombre;
+    private String imagen;
     private Integer estado = 1;
 
     public Categorias(){}
@@ -26,27 +27,44 @@ public class Categorias {
     public Categorias(Integer id){
         this.idcategoria = id;
     }
+
     public Integer getIdcategoria() {
         return idcategoria;
     }
+
     public void setIdcategoria(Integer idcategoria) {
         this.idcategoria = idcategoria;
     }
+
     public String getNombre() {
         return nombre;
     }
+
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
+    }
+
     public Integer getEstado() {
         return estado;
     }
+
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
+
     @Override
     public String toString() {
-        return "Categorias [idcategoria=" + idcategoria + ", nombre=" + nombre + ", estado=" + estado + "]";
+        return "Categorias [idcategoria=" + idcategoria + ", nombre=" + nombre + ", imagen=" + imagen + ", estado="
+                + estado + "]";
     }
+    
 
 }

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +22,7 @@ import com.gadbacorp.api.service.inventario.ICategoriasService;
 
 @RestController
 @RequestMapping("/api/minimarket/categorias")
+@CrossOrigin("*")
 public class CategoriasController {
 
     @Autowired
@@ -28,7 +30,7 @@ public class CategoriasController {
 
     // Conversión Entity -> DTO
     private CategoriasDTO toDTO(Categorias entity) {
-        return new CategoriasDTO(entity.getIdcategoria(), entity.getNombre());
+        return new CategoriasDTO(entity.getIdcategoria(), entity.getNombre(), entity.getImagen());
     }
 
     // Conversión DTO -> Entity
