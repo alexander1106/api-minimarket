@@ -31,7 +31,7 @@ import com.gadbacorp.api.service.inventario.ICategoriasService;
 @RequestMapping("/api/minimarket/categorias")
 @CrossOrigin("*")
 public class CategoriasController {
-
+ 
     @Autowired
     private ICategoriasService serviceCategorias;
 

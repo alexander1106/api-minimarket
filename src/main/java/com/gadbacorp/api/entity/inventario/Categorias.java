@@ -21,7 +21,6 @@ public class Categorias {
     private String nombre;
     private String imagen;
     private Integer estado = 1;
-
     public Categorias(){}
 
     public Categorias(Integer id){
@@ -36,10 +35,18 @@ public class Categorias {
         this.idcategoria = idcategoria;
     }
 
+    public Categorias(Integer id){
+        this.idcategoria = id;
+    }
+    public Integer getIdcategoria() {
+        return idcategoria;
+    }
+    public void setIdcategoria(Integer idcategoria) {
+        this.idcategoria = idcategoria;
+    }
     public String getNombre() {
         return nombre;
     }
-
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
@@ -59,11 +66,12 @@ public class Categorias {
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
-
     @Override
     public String toString() {
+
         return "Categorias [idcategoria=" + idcategoria + ", nombre=" + nombre + ", imagen=" + imagen + ", estado="
                 + estado + "]";
+
     }
     
 
