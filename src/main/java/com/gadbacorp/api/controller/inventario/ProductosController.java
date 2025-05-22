@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.gadbacorp.api.entity.inventario.ProductosDTO;
 import com.gadbacorp.api.service.inventario.IProductosService;
@@ -37,15 +38,27 @@ public class ProductosController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductosDTO> crear(@RequestBody ProductosDTO dto) {
-        ProductosDTO creado = serviceProductos.guardarDTO(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+    public ResponseEntity<?> crear(@RequestBody ProductosDTO dto) {
+        try {
+            ProductosDTO creado = serviceProductos.guardarDTO(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear producto");
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductosDTO> actualizar(@PathVariable Integer id, @RequestBody ProductosDTO dto) {
-        ProductosDTO actualizado = serviceProductos.actualizarDTO(id, dto);
-        return ResponseEntity.ok(actualizado);
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody ProductosDTO dto) {
+        try {
+            ProductosDTO actualizado = serviceProductos.actualizarDTO(id, dto);
+            return ResponseEntity.ok(actualizado);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar producto");
+        }
     }
 
     @DeleteMapping("/{id}")

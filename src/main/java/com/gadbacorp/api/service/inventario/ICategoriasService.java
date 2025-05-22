@@ -10,9 +10,9 @@ public interface ICategoriasService {
     //listar todos los clientes de la tabla
     List<Categorias> buscarTodos();
     //guarda los clientes
-    void guardar(Categorias categoria);
+    Categorias guardar(Categorias categoria);
 
-    void modificar(Categorias categoria);
+    Categorias modificar(Categorias categoria);
 
     Optional<Categorias> buscarId(Integer id);
 

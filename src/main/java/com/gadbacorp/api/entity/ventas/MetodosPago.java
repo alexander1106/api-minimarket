@@ -24,6 +24,8 @@ public class MetodosPago {
     @Column(name="id_metodo_pago")
     private Integer idMetodoPago; 
     private String nombre; 
+    private String descripcion;
+    
     private Integer estado =1;
     public Integer getIdMetodoPago() {
         return idMetodoPago;
@@ -52,6 +54,12 @@ public class MetodosPago {
   }
   public void setPagos(List<Pagos> pagos) {
     this.pagos = pagos;
+  }
+  public String getDescripcion() {
+    return descripcion;
+  }
+  public void setDescripcion(String descripcion) {
+    this.descripcion = descripcion;
   }
 
 

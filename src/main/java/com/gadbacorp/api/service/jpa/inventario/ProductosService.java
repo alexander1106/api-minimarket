@@ -82,56 +82,69 @@ public class ProductosService implements IProductosService {
     }
 
     public ProductosDTO guardarDTO(ProductosDTO dto) {
-        Productos producto = toEntity(dto);
-        Productos creado = repoProductos.save(producto);
-        creado = repoProductos.findById(creado.getIdproducto())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado tras guardar"));
-        return toDTO(creado);
+
+    Optional<Productos> existente = repoProductos.findByNombreIgnoreCase(dto.getNombre());
+    if (existente.isPresent()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya existe un producto con ese nombre.");
     }
+
+    Productos producto = toEntity(dto);
+    Productos creado = repoProductos.save(producto);
+    creado = repoProductos.findById(creado.getIdproducto())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado tras guardar"));
+    return toDTO(creado);
+}
+
 
     public ProductosDTO actualizarDTO(Integer id, ProductosDTO dto) {
-        Productos producto = repoProductos.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado id=" + id));
+    Productos producto = repoProductos.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado id=" + id));
 
-        producto.setNombre(dto.getNombre());
-        producto.setDescripcion(dto.getDescripcion());
-        producto.setFechaVencimiento(dto.getFechaVencimiento());
-        producto.setTipoImpuesto(dto.getTipoImpuesto());
-        producto.setCostoCompra(dto.getCostoCompra());
-        producto.setCostoVenta(dto.getCostoVenta());
-        producto.setCostoMayor(dto.getCostoMayor());
-
-        producto.setCategoria(repoCategorias.findById(dto.getIdcategoria())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoría no encontrada id=" + dto.getIdcategoria())));
-        producto.setUnidadMedida(repoUnidadDeMedida.findById(dto.getIdunidadmedida())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unidad no encontrada id=" + dto.getIdunidadmedida())));
-        producto.setTipoProducto(repoTipoProducto.findById(dto.getIdtipoproducto())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo no encontrado id=" + dto.getIdtipoproducto())));
-
-        // Lógica para actualizar AlmacenProducto
-        Map<Integer, AlmacenProducto> almacenActual = producto.getAlmacenProductos().stream()
-            .collect(Collectors.toMap(ap -> ap.getAlmacen().getIdalmacen(), ap -> ap));
-
-        List<AlmacenProducto> nuevos = new ArrayList<>();
-        for (AlmacenProductosDTO apDto : dto.getAlmacenes()) {
-            AlmacenProducto ap = almacenActual.remove(apDto.getIdalmacen());
-            if (ap == null) {
-                ap = new AlmacenProducto();
-                ap.setProducto(producto);
-                ap.setAlmacen(repoAlmacenes.findById(apDto.getIdalmacen())
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Almacén no encontrado id=" + apDto.getIdalmacen())));
-            }
-            ap.setStock(apDto.getStock());
-            ap.setFechaIngreso(apDto.getFechaIngreso());
-            nuevos.add(ap);
-        }
-        producto.getAlmacenProductos().clear();
-        producto.getAlmacenProductos().addAll(nuevos);
-
-        return toDTO(repoProductos.save(producto));
+    // ✅ Validar que no exista otro producto con el mismo nombre (case-insensitive)
+    Optional<Productos> existente = repoProductos.findByNombreIgnoreCase(dto.getNombre());
+    if (existente.isPresent() && !existente.get().getIdproducto().equals(id)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya existe un producto con ese nombre.");
     }
 
-    private Productos toEntity(ProductosDTO dto) {
+    // Asignar los nuevos valores al producto
+    producto.setNombre(dto.getNombre());
+    producto.setDescripcion(dto.getDescripcion());
+    producto.setFechaVencimiento(dto.getFechaVencimiento());
+    producto.setTipoImpuesto(dto.getTipoImpuesto());
+    producto.setCostoCompra(dto.getCostoCompra());
+    producto.setCostoVenta(dto.getCostoVenta());
+    producto.setCostoMayor(dto.getCostoMayor());
+
+    producto.setCategoria(repoCategorias.findById(dto.getIdcategoria())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoría no encontrada id=" + dto.getIdcategoria())));
+    producto.setUnidadMedida(repoUnidadDeMedida.findById(dto.getIdunidadmedida())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unidad no encontrada id=" + dto.getIdunidadmedida())));
+    producto.setTipoProducto(repoTipoProducto.findById(dto.getIdtipoproducto())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo no encontrado id=" + dto.getIdtipoproducto())));
+
+    // Lógica para actualizar AlmacenProducto
+    Map<Integer, AlmacenProducto> almacenActual = producto.getAlmacenProductos().stream()
+        .collect(Collectors.toMap(ap -> ap.getAlmacen().getIdalmacen(), ap -> ap));
+
+    List<AlmacenProducto> nuevos = new ArrayList<>();
+    for (AlmacenProductosDTO apDto : dto.getAlmacenes()) {
+        AlmacenProducto ap = almacenActual.remove(apDto.getIdalmacen());
+        if (ap == null) {
+            ap = new AlmacenProducto();
+            ap.setProducto(producto);
+            ap.setAlmacen(repoAlmacenes.findById(apDto.getIdalmacen())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Almacén no encontrado id=" + apDto.getIdalmacen())));
+        }
+        ap.setStock(apDto.getStock());
+        ap.setFechaIngreso(apDto.getFechaIngreso());
+        nuevos.add(ap);
+    }
+
+    producto.getAlmacenProductos().clear();
+    producto.getAlmacenProductos().addAll(nuevos);
+
+    return toDTO(repoProductos.save(producto));
+       private Productos toEntity(ProductosDTO dto) {
         Productos producto = new Productos();
         if (dto.getIdproducto() != null) {
             producto.setIdproducto(dto.getIdproducto());

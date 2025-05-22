@@ -2,8 +2,10 @@ package com.gadbacorp.api.controller.inventario;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,38 +16,85 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gadbacorp.api.entity.inventario.TipoProducto;
+import com.gadbacorp.api.entity.inventario.TipoProductoDTO;
 import com.gadbacorp.api.service.inventario.ITipoProductoService;
 
 @RestController
-@RequestMapping("/api/minimarket")
+@RequestMapping("/api/minimarket/tipoproducto")
 public class TipoProductoController {
+
     @Autowired
     private ITipoProductoService serviceTipoProducto;
-    @GetMapping("/tipoproducto")
-    public List<TipoProducto> buscartodos() {
-        return serviceTipoProducto.buscarTodos();
+
+    // Convertir Entity -> DTO
+    private TipoProductoDTO toDTO(TipoProducto entity) {
+        return new TipoProductoDTO(entity.getIdtipoproducto(), entity.getNombre());
     }
 
-    @PostMapping("tipoproducto") 
-    public TipoProducto guardar(@RequestBody TipoProducto tipoproducto) {
-        serviceTipoProducto.guardar(tipoproducto);
-        return tipoproducto;
+    // Convertir DTO -> Entity
+    private TipoProducto toEntity(TipoProductoDTO dto) {
+        TipoProducto entity = new TipoProducto();
+        entity.setIdtipoproducto(dto.getIdtipoproducto());
+        entity.setNombre(dto.getNombre());
+        return entity;
     }
 
-    @PutMapping("tipoproducto")
-    public TipoProducto modificar(@RequestBody TipoProducto tipoproducto) {
-        serviceTipoProducto.modificar(tipoproducto);
-        return tipoproducto;
+    // Listar todos los tipos de producto
+    @GetMapping
+    public List<TipoProductoDTO> listarTodos() {
+        return serviceTipoProducto.buscarTodos()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
-    @GetMapping("/tipoproducto/{id}") 
-    public Optional<TipoProducto> buscarId(@PathVariable("id") Integer id) {
-        return serviceTipoProducto.buscarId(id);
+    // Buscar por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<TipoProductoDTO> buscarPorId(@PathVariable Integer id) {
+        Optional<TipoProducto> tipo = serviceTipoProducto.buscarId(id);
+        return tipo.map(value -> ResponseEntity.ok(toDTO(value)))
+                   .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/tipoproducto/{id}")
-    public String eliminar(@PathVariable Integer id) {
-        serviceTipoProducto.eliminar(id);
-        return "Tipo Producto eliminado";
+    // Guardar nuevo tipo de producto
+    @PostMapping
+    public ResponseEntity<?> guardar(@RequestBody TipoProductoDTO dto) {
+    try {
+        TipoProducto guardado = serviceTipoProducto.guardar(toEntity(dto));
+        return ResponseEntity.ok(toDTO(guardado));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+    // Modificar tipo de producto
+    @PutMapping
+    public ResponseEntity<?> modificar(@RequestBody TipoProductoDTO dto) {
+    try {
+        Optional<TipoProducto> existente = serviceTipoProducto.buscarId(dto.getIdtipoproducto());
+
+        if (existente.isPresent()) {
+            TipoProducto actualizado = serviceTipoProducto.modificar(toEntity(dto));
+            return ResponseEntity.ok(toDTO(actualizado));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+    // Eliminar tipo de producto
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> eliminar(@PathVariable Integer id) {
+        Optional<TipoProducto> tipo = serviceTipoProducto.buscarId(id);
+        if (tipo.isPresent()) {
+            serviceTipoProducto.eliminar(id);
+            return ResponseEntity.ok("Tipo de producto eliminado correctamente");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

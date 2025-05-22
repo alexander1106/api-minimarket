@@ -9,9 +9,9 @@ public interface ITipoProductoService {
     //listar todos los tipos de producto de la tabla
     List<TipoProducto> buscarTodos();
     //guarda los tipos de productos
-    void guardar(TipoProducto tipoproducto);
+    TipoProducto guardar(TipoProducto tipoproducto);
 
-    void modificar(TipoProducto tipoproducto);
+    TipoProducto modificar(TipoProducto tipoproducto);
 
     Optional<TipoProducto> buscarId(Integer id);
 

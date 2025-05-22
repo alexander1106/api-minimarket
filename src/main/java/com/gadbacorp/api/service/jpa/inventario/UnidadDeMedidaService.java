@@ -17,13 +17,28 @@ public class UnidadDeMedidaService implements IUnidadDeMedidaService{
     public List<UnidadDeMedida> buscarTodos(){
         return repoUnidadDeMedida.findAll();
     }
-    public void guardar(UnidadDeMedida unidaddemedida){
-        repoUnidadDeMedida.save(unidaddemedida);
+    @Override
+    public UnidadDeMedida guardar(UnidadDeMedida unidad) {
+    Optional<UnidadDeMedida> existente = repoUnidadDeMedida.findByNombreIgnoreCase(unidad.getNombre());
+
+    if (existente.isPresent()) {
+        throw new IllegalArgumentException("Ya existe una unidad de medida con ese nombre.");
+    }
+
+    return repoUnidadDeMedida.save(unidad);
     }
     
-    public void modificar(UnidadDeMedida unidaddemedida){
-        repoUnidadDeMedida.save(unidaddemedida);
+    @Override
+    public UnidadDeMedida modificar(UnidadDeMedida unidad) {
+    Optional<UnidadDeMedida> existente = repoUnidadDeMedida.findByNombreIgnoreCase(unidad.getNombre());
+
+    // Validar si ya existe otra unidad con ese nombre y es diferente al que estamos modificando
+    if (existente.isPresent() && !existente.get().getIdunidadmedida().equals(unidad.getIdunidadmedida())) {
+        throw new IllegalArgumentException("Ya existe una unidad de medida con ese nombre.");
     }
+
+    return repoUnidadDeMedida.save(unidad);
+}
 
     public Optional<UnidadDeMedida> buscarId(Integer id){
         return repoUnidadDeMedida.findById(id);
