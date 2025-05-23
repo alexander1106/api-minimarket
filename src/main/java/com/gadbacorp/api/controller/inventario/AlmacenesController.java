@@ -1,9 +1,11 @@
 package com.gadbacorp.api.controller.inventario;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,42 +13,109 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.inventario.Almacenes;
+import com.gadbacorp.api.entity.inventario.AlmacenesDTO;
+import com.gadbacorp.api.service.administrable.ISucursalesService;
 import com.gadbacorp.api.service.inventario.IAlmacenesService;
 
 @RestController
-@RequestMapping("/api/minimarket")
-public class AlmacenesController {  
+@RequestMapping("/api/minimarket/almacenes")
+public class AlmacenesController {
+
     @Autowired 
-     private IAlmacenesService serviceAlmacenes;
+    private IAlmacenesService serviceAlmacenes;
 
-    @GetMapping("/almacenes")
-    public List<Almacenes> buscartodos() {
-        return serviceAlmacenes.buscarTodos();
+    @Autowired
+    private ISucursalesService serviceSucursales;
+
+    @GetMapping
+    public List<AlmacenesDTO> buscartodos() {
+        return serviceAlmacenes.buscarTodos().stream()
+            .map(this::toDTO)
+            .collect(Collectors.toList());
     }
 
-    @PostMapping("almacenes") 
-    public Almacenes guardar(@RequestBody Almacenes almacen) {
-        serviceAlmacenes.guardar(almacen);
-        return almacen;
+    @GetMapping("/{id}")
+    public AlmacenesDTO buscarId(@PathVariable Integer id) {
+        Almacenes entidad = serviceAlmacenes.buscarId(id)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, 
+                "Almacén no encontrado id=" + id
+            ));
+        return toDTO(entidad);
     }
 
-    @PutMapping("almacenes")
-    public Almacenes modificar(@RequestBody Almacenes almacen) {
-        serviceAlmacenes.modificar(almacen);
-        return almacen;
+    @PostMapping
+@ResponseStatus(HttpStatus.CREATED)
+public AlmacenesDTO guardar(@RequestBody AlmacenesDTO dto) {
+    // 4.1 Comprueba duplicado
+    serviceAlmacenes.buscarPorNombre(dto.getNombre())
+        .ifPresent(a -> {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Ya existe un almacén con nombre: " + dto.getNombre()
+            );
+        });
+
+    // 4.2 Valida sucursal
+    Sucursales suc = serviceSucursales.buscarId(dto.getIdSucursal())
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Sucursal no encontrada id=" + dto.getIdSucursal()
+        ));
+
+    // 4.3 Mapear DTO→Entidad y guardar
+    Almacenes ent = new Almacenes();
+    ent.setNombre(dto.getNombre());
+    ent.setDescripcion(dto.getDescripcion());
+    ent.setEstado(dto.getEstado());
+    ent.setSucursal(suc);
+
+    serviceAlmacenes.guardar(ent);
+    return toDTO(ent);
+}
+
+    @PutMapping
+    public AlmacenesDTO modificar(@RequestBody AlmacenesDTO dto) {
+        // validar existencia de sucursal
+        Sucursales suc = serviceSucursales.buscarId(dto.getIdSucursal())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, 
+                "Sucursal no encontrada id=" + dto.getIdSucursal()
+            ));
+
+        // mapear DTO → entidad (incluyendo el id para update)
+        Almacenes ent = new Almacenes();
+        ent.setIdalmacen(dto.getIdalmacen());
+        ent.setNombre(dto.getNombre());
+        ent.setDescripcion(dto.getDescripcion());
+        ent.setEstado(dto.getEstado());
+        ent.setSucursal(suc);
+
+        serviceAlmacenes.modificar(ent);
+        return toDTO(ent);
     }
 
-    @GetMapping("/almacenes/{id}") 
-    public Optional<Almacenes> buscarId(@PathVariable("id") Integer id) {
-        return serviceAlmacenes.buscarId(id);
-    }
-
-    @DeleteMapping("/almacenes/{id}")
-    public String eliminar(@PathVariable Integer id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         serviceAlmacenes.eliminar(id);
-        return "Almacen eliminado";
+        return ResponseEntity
+            .ok("Almacén eliminado correctamente");
+    }
+
+    // --- métodos privados de mapeo ---
+    private AlmacenesDTO toDTO(Almacenes e) {
+        AlmacenesDTO dto = new AlmacenesDTO();
+        dto.setIdalmacen(e.getIdalmacen());
+        dto.setNombre(e.getNombre());
+        dto.setDescripcion(e.getDescripcion());
+        dto.setEstado(e.getEstado());
+        dto.setIdSucursal(e.getSucursal().getIdSucursal());
+        return dto;
     }
 }

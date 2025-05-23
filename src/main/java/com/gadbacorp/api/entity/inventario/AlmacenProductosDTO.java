@@ -2,33 +2,32 @@ package com.gadbacorp.api.entity.inventario;
 
 import java.time.LocalDate;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-
-
 public class AlmacenProductosDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idalmacen;
+    private Integer idalmacenproducto;
     private Integer stock;
     private LocalDate fechaIngreso;
+    private Integer estado;
+    private Integer idproducto;
+    private Integer idalmacen;
 
     public AlmacenProductosDTO() { }
 
-    public AlmacenProductosDTO(Integer idalmacen, Integer stock, LocalDate fechaIngreso) {
-        this.idalmacen = idalmacen;
+    public AlmacenProductosDTO(Integer idalmacenproducto, Integer stock, LocalDate fechaIngreso, Integer estado,
+                              Integer idProducto, Integer idAlmacen) {
+        this.idalmacenproducto = idalmacenproducto;
         this.stock = stock;
         this.fechaIngreso = fechaIngreso;
+        this.estado = estado;
+        this.idproducto = idProducto;
+        this.idalmacen = idAlmacen;
     }
 
-    public Integer getIdalmacen() {
-        return idalmacen;
+    public Integer getIdalmacenproducto() {
+        return idalmacenproducto;
     }
 
-    public void setIdalmacen(Integer idalmacen) {
-        this.idalmacen = idalmacen;
+    public void setIdalmacenproducto(Integer idalmacenproducto) {
+        this.idalmacenproducto = idalmacenproducto;
     }
 
     public Integer getStock() {
@@ -47,10 +46,39 @@ public class AlmacenProductosDTO {
         this.fechaIngreso = fechaIngreso;
     }
 
+    public Integer getEstado() {
+        return estado;
+    }
+
+    public void setEstado(Integer estado) {
+        this.estado = estado;
+    }
+
+    public Integer getIdProducto() {
+        return idproducto;
+    }
+
+    public void setIdProducto(Integer idProducto) {
+        this.idproducto = idProducto;
+    }
+
+    public Integer getIdAlmacen() {
+        return idalmacen;
+    }
+
+    public void setIdAlmacen(Integer idAlmacen) {
+        this.idalmacen = idAlmacen;
+    }
+
     @Override
     public String toString() {
-        return "AlmacenProductosDTO [idalmacen=" + idalmacen + ", stock=" + stock + ", fechaIngreso=" + fechaIngreso
-                + "]";
+        return "AlmacenProductoDTO{" +
+               "idalmacenproducto=" + idalmacenproducto +
+               ", stock=" + stock +
+               ", fechaIngreso=" + fechaIngreso +
+               ", estado=" + estado +
+               ", idProducto=" + idproducto +
+               ", idAlmacen=" + idalmacen +
+               '}';
     }
-    
 }

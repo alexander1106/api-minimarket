@@ -100,13 +100,11 @@ public class ProductosService implements IProductosService {
     Productos producto = repoProductos.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado id=" + id));
 
-    // ✅ Validar que no exista otro producto con el mismo nombre (case-insensitive)
     Optional<Productos> existente = repoProductos.findByNombreIgnoreCase(dto.getNombre());
     if (existente.isPresent() && !existente.get().getIdproducto().equals(id)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya existe un producto con ese nombre.");
     }
 
-    // Asignar los nuevos valores al producto
     producto.setNombre(dto.getNombre());
     producto.setDescripcion(dto.getDescripcion());
     producto.setFechaVencimiento(dto.getFechaVencimiento());
@@ -128,12 +126,12 @@ public class ProductosService implements IProductosService {
 
     List<AlmacenProducto> nuevos = new ArrayList<>();
     for (AlmacenProductosDTO apDto : dto.getAlmacenes()) {
-        AlmacenProducto ap = almacenActual.remove(apDto.getIdalmacen());
+        AlmacenProducto ap = almacenActual.remove(apDto.getIdAlmacen());
         if (ap == null) {
             ap = new AlmacenProducto();
             ap.setProducto(producto);
-            ap.setAlmacen(repoAlmacenes.findById(apDto.getIdalmacen())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Almacén no encontrado id=" + apDto.getIdalmacen())));
+            ap.setAlmacen(repoAlmacenes.findById(apDto.getIdAlmacen())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Almacén no encontrado id=" + apDto.getIdAlmacen())));
         }
         ap.setStock(apDto.getStock());
         ap.setFechaIngreso(apDto.getFechaIngreso());
@@ -144,6 +142,7 @@ public class ProductosService implements IProductosService {
     producto.getAlmacenProductos().addAll(nuevos);
 
     return toDTO(repoProductos.save(producto));
+}
        private Productos toEntity(ProductosDTO dto) {
         Productos producto = new Productos();
         if (dto.getIdproducto() != null) {
@@ -170,8 +169,8 @@ public class ProductosService implements IProductosService {
                 ap.setProducto(producto);
                 ap.setStock(apDto.getStock());
                 ap.setFechaIngreso(apDto.getFechaIngreso());
-                ap.setAlmacen(repoAlmacenes.findById(apDto.getIdalmacen())
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Almacén no encontrado con id=" + apDto.getIdalmacen())));
+                ap.setAlmacen(repoAlmacenes.findById(apDto.getIdAlmacen())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Almacén no encontrado con id=" + apDto.getIdAlmacen())));
                 producto.getAlmacenProductos().add(ap);
             }
         }
@@ -193,13 +192,20 @@ public class ProductosService implements IProductosService {
         dto.setIdunidadmedida(p.getUnidadMedida().getIdunidadmedida());
         dto.setIdtipoproducto(p.getTipoProducto().getIdtipoproducto());
 
-        dto.setAlmacenes(p.getAlmacenProductos().stream()
+        dto.setAlmacenes(
+        p.getAlmacenProductos().stream()
             .map(ap -> new AlmacenProductosDTO(
-                ap.getAlmacen().getIdalmacen(),
+
+                ap.getIdalmacenproducto(),
                 ap.getStock(),
-                ap.getFechaIngreso()
-            )).collect(Collectors.toList()));
+                ap.getFechaIngreso(),
+                ap.getEstado(),
+                ap.getProducto().getIdproducto(),
+                ap.getAlmacen().getIdalmacen()
+            ))
+            .collect(Collectors.toList())
+            );
 
         return dto;
     }
-}
+ }

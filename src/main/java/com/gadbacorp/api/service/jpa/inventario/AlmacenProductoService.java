@@ -14,16 +14,21 @@ import com.gadbacorp.api.service.inventario.IAlmacenProductoService;
 public class AlmacenProductoService implements IAlmacenProductoService{
     @Autowired
     private AlmacenProductoRepository repoAlmacenProducto;
+
+    @Override
+    public Optional<AlmacenProducto> buscarPorProductoYAlmacen(Integer idProd, Integer idAlm) {
+        return repoAlmacenProducto.findByProducto_IdproductoAndAlmacen_Idalmacen(idProd, idAlm);
+    }
     public List<AlmacenProducto> buscarTodos(){
         return repoAlmacenProducto.findAll();
     }
 
-    public void guardar(AlmacenProducto almacenproducto){
-        repoAlmacenProducto.save(almacenproducto);
+    public AlmacenProducto guardar(AlmacenProducto almacenproducto){
+        return repoAlmacenProducto.save(almacenproducto);
     }
     
-    public void modificar(AlmacenProducto almacenproducto){
-        repoAlmacenProducto.save(almacenproducto);
+    public AlmacenProducto modificar(AlmacenProducto almacenproducto){
+        return repoAlmacenProducto.save(almacenproducto);
     }
 
     public Optional<AlmacenProducto> buscarId(Integer id){

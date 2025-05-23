@@ -28,11 +28,7 @@ public class Inventario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idinventario;
-
-    /** Stock actual de este producto en este almacén */
     private Integer stock = 0;
-
-    /** Soft delete flag */
     private Integer estado = 1;
 
     /** A qué producto corresponde este inventario */

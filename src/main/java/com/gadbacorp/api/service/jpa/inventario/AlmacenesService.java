@@ -14,15 +14,20 @@ import com.gadbacorp.api.service.inventario.IAlmacenesService;
 public class AlmacenesService implements IAlmacenesService{
     @Autowired
     private AlmacenesRepository repoAlmacenes;
+
+    @Override
+    public Optional<Almacenes> buscarPorNombre(String nombre) {
+        return repoAlmacenes.findByNombreIgnoreCase(nombre);
+    }
     public List<Almacenes> buscarTodos(){
         return repoAlmacenes.findAll();
     }
-    public void guardar(Almacenes almacen){
-        repoAlmacenes.save(almacen);
+    public Almacenes guardar(Almacenes almacen){
+        return repoAlmacenes.save(almacen);
     }
     
-    public void modificar(Almacenes almacen){
-        repoAlmacenes.save(almacen);
+    public Almacenes modificar(Almacenes almacen){
+        return repoAlmacenes.save(almacen);
     }
 
     public Optional<Almacenes> buscarId(Integer id){
@@ -32,4 +37,5 @@ public class AlmacenesService implements IAlmacenesService{
     public void eliminar(Integer id){
         repoAlmacenes.deleteById(id);
     }
+
 }
