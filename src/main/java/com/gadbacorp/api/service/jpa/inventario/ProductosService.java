@@ -82,6 +82,7 @@ public class ProductosService implements IProductosService {
     }
 
     public ProductosDTO guardarDTO(ProductosDTO dto) {
+
     Optional<Productos> existente = repoProductos.findByNombreIgnoreCase(dto.getNombre());
     if (existente.isPresent()) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya existe un producto con ese nombre.");
@@ -143,10 +144,7 @@ public class ProductosService implements IProductosService {
     producto.getAlmacenProductos().addAll(nuevos);
 
     return toDTO(repoProductos.save(producto));
-    }
-
-
-    private Productos toEntity(ProductosDTO dto) {
+       private Productos toEntity(ProductosDTO dto) {
         Productos producto = new Productos();
         if (dto.getIdproducto() != null) {
             producto.setIdproducto(dto.getIdproducto());
