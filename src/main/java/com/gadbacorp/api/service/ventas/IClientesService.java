@@ -7,8 +7,8 @@ import com.gadbacorp.api.entity.ventas.Clientes;
 
 public interface IClientesService {
     List<Clientes> obetenrTodosClientes();
-    void editarCliente(Clientes clientes); 
+    Clientes editarCliente(Clientes clientes); 
     Optional<Clientes> obtenerCliente(Integer clienteId);
-    void crearCliente(Clientes cliente);
+    Clientes crearCliente(Clientes cliente);
     void eliminarCliente(Integer idCliente);
 }
