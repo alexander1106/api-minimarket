@@ -6,8 +6,8 @@ import java.util.Optional;
 import com.gadbacorp.api.entity.ventas.Ventas;
 
 public interface IVentasService {
-    void guardarVenta(Ventas venta); 
-    void editarVenta(Ventas venta); 
+    Ventas guardarVenta(Ventas venta); 
+    Ventas editarVenta(Ventas venta); 
     void eliminarVenta(Integer idVenta);
     Optional<Ventas> buscarVenta(Integer idVenta);
     List<Ventas> listarVentaas();

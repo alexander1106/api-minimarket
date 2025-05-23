@@ -19,8 +19,8 @@ public class ClientesService implements IClientesService{
     }
 
     @Override
-    public void editarCliente(Clientes cliente) {
-        clientesRepository.save(cliente);
+    public Clientes editarCliente(Clientes cliente) {
+        return clientesRepository.save(cliente);
     }
 
     @Override
@@ -29,8 +29,8 @@ public class ClientesService implements IClientesService{
     }
 
     @Override
-    public void crearCliente(Clientes cliente) {
-        clientesRepository.save(cliente);
+    public Clientes crearCliente(Clientes cliente) {
+        return clientesRepository.save(cliente);
     }
 
     @Override

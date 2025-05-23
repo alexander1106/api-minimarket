@@ -10,6 +10,8 @@ import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.gadbacorp.api.entity.ventas.DetallesVentas;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -58,6 +60,13 @@ public class Productos {
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<AlmacenProducto> almacenProductos = new ArrayList<>();
+
+
+    @OneToMany(mappedBy = "productos", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<DetallesVentas> detallesVentas;
+    
+
 
     public Productos() { }
 
@@ -169,13 +178,13 @@ public class Productos {
         this.almacenProductos = almacenProductos;
     }
 
-    @Override
-    public String toString() {
-        return "Productos [idproducto=" + idproducto + ", nombre=" + nombre +
-               ", descripcion=" + descripcion + ", fechaVencimiento=" + fechaVencimiento +
-               ", tipoImpuesto=" + tipoImpuesto + ", costoCompra=" + costoCompra +
-               ", costoVenta=" + costoVenta + ", costoMayor=" + costoMayor +
-               ", estado=" + estado + "]";
+    public List<DetallesVentas> getDetallesVentas() {
+        return detallesVentas;
     }
-}
 
+    public void setDetallesVentas(List<DetallesVentas> detallesVentas) {
+        this.detallesVentas = detallesVentas;
+    }
+
+    
+}

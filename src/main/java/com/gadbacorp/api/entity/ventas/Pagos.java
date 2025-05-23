@@ -30,7 +30,7 @@ public class Pagos {
     private String comprobante;
 
     @ManyToOne
-    @JoinColumn(name = "id_venta", referencedColumnName = "id_venta")
+    @JoinColumn(name = "idVenta", referencedColumnName = "idVenta")
     @JsonIgnore // evita ciclos infinitos si usas JSON
     private Ventas ventas;
 

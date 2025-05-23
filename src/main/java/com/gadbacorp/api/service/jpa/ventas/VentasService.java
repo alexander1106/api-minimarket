@@ -16,13 +16,13 @@ public class VentasService implements IVentasService {
     @Autowired
     private VentasRepository ventasRepository;
     @Override
-    public void guardarVenta(Ventas venta) {
-        ventasRepository.save(venta);
+    public Ventas guardarVenta(Ventas venta) {
+        return ventasRepository.save(venta);
     }
 
     @Override
-    public void editarVenta(Ventas venta) {
-        ventasRepository.save(venta);
+    public Ventas editarVenta(Ventas venta) {
+        return ventasRepository.save(venta);
     }
 
     @Override
