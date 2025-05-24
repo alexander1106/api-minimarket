@@ -10,7 +10,6 @@ import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.gadbacorp.api.entity.ventas.DetallesVentas;
 
 import jakarta.persistence.CascadeType;
@@ -40,6 +39,7 @@ public class Productos {
     private BigDecimal costoCompra;
     private BigDecimal costoVenta;
     private BigDecimal costoMayor;
+    private String imagen;
     private Integer estado = 1;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -136,6 +136,13 @@ public class Productos {
 
     public void setCostoMayor(BigDecimal costoMayor) {
         this.costoMayor = costoMayor;
+    }
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 
     public Integer getEstado() {
