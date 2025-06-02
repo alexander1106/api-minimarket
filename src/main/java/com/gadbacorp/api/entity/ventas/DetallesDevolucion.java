@@ -1,5 +1,7 @@
 package com.gadbacorp.api.entity.ventas;
 
+import java.util.Date;
+
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -16,44 +18,43 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="detalles_ventas")
-@SQLDelete(sql="UPDATE detalles_ventas SET estado = 0 WHERE id_detalles_venta = ?")
+@Table(name="detalles_devoluciones")
+@SQLDelete(sql="UPDATE detalles_devoluciones SET estado = 0 WHERE id_detalles_devoluciones = ?")
 @Where(clause = "estado = 1")
-public class DetallesVentas {
-
+public class DetallesDevolucion {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private Integer idDetallesVenta;
+    private Integer idDetallesDevoluciones; 
     private double pecioUnitario;
-    private String fechaVenta;
     private Integer cantidad;
     private double subTotal;  
     private Integer estado=1;
 
-    @ManyToOne
-    @JoinColumn(name = "idVenta")
-    @JsonIgnore
-    private Ventas ventas;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idproducto")
     private Productos productos;
+    
+    @ManyToOne
+    @JoinColumn(name = "idDevolucion")
+    @JsonIgnore
+    private Devoluciones devoluciones;
 
-    public Integer getIdDetallesVenta() {
-        return idDetallesVenta;
-    }
-
-    public void setIdDetallesVenta(Integer idDetallesVenta) {
-        this.idDetallesVenta = idDetallesVenta;
-    }
-  
-    public String getFechaVenta() {
-        return fechaVenta;
+    public Integer getIdDetallesDevoluciones() {
+        return idDetallesDevoluciones;
     }
 
-    public void setFechaVenta(String fechaVenta) {
-        this.fechaVenta = fechaVenta;
+    public void setIdDetallesDevoluciones(Integer idDetallesDevoluciones) {
+        this.idDetallesDevoluciones = idDetallesDevoluciones;
     }
+
+    public double getPecioUnitario() {
+        return pecioUnitario;
+    }
+
+    public void setPecioUnitario(double pecioUnitario) {
+        this.pecioUnitario = pecioUnitario;
+    }
+
 
     public Integer getCantidad() {
         return cantidad;
@@ -79,14 +80,6 @@ public class DetallesVentas {
         this.estado = estado;
     }
 
-    public Ventas getVentas() {
-        return ventas;
-    }
-
-    public void setVentas(Ventas ventas) {
-        this.ventas = ventas;
-    }
-
     public Productos getProductos() {
         return productos;
     }
@@ -95,12 +88,11 @@ public class DetallesVentas {
         this.productos = productos;
     }
 
-    public double getPecioUnitario() {
-        return pecioUnitario;
+    public Devoluciones getDevoluciones() {
+        return devoluciones;
     }
 
-    public void setPecioUnitario(double pecioUnitario) {
-        this.pecioUnitario = pecioUnitario;
+    public void setDevoluciones(Devoluciones devoluciones) {
+        this.devoluciones = devoluciones;
     }
-    
 }

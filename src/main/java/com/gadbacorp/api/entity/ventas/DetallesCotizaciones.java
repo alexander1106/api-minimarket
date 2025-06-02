@@ -15,44 +15,43 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-@Entity
-@Table(name="detalles_ventas")
-@SQLDelete(sql="UPDATE detalles_ventas SET estado = 0 WHERE id_detalles_venta = ?")
-@Where(clause = "estado = 1")
-public class DetallesVentas {
 
+@Entity
+@Table(name="detalles_cotizaciones")
+@SQLDelete(sql="UPDATE detalles_cotizaciones SET estado = 0 WHERE id_detalles_cotizaciones = ?")
+@Where(clause = "estado = 1")
+public class DetallesCotizaciones {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private Integer idDetallesVenta;
-    private double pecioUnitario;
-    private String fechaVenta;
+    private Integer idDetallesCotizaciones;
+    private Integer precioUnitario;
+    private String fechaCotizacion;
     private Integer cantidad;
     private double subTotal;  
     private Integer estado=1;
 
     @ManyToOne
-    @JoinColumn(name = "idVenta")
+    @JoinColumn(name = "idCotizaciones")
     @JsonIgnore
-    private Ventas ventas;
+    private Cotizaciones cotizaciones;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idproducto")
     private Productos productos;
 
-    public Integer getIdDetallesVenta() {
-        return idDetallesVenta;
+    public DetallesCotizaciones(Integer idDetallesCotizaciones) {
+        this.idDetallesCotizaciones = idDetallesCotizaciones;
     }
 
-    public void setIdDetallesVenta(Integer idDetallesVenta) {
-        this.idDetallesVenta = idDetallesVenta;
-    }
-  
-    public String getFechaVenta() {
-        return fechaVenta;
+    public DetallesCotizaciones() {
     }
 
-    public void setFechaVenta(String fechaVenta) {
-        this.fechaVenta = fechaVenta;
+    public Integer getIdDetallesCotizaciones() {
+        return idDetallesCotizaciones;
+    }
+
+    public void setIdDetallesCotizaciones(Integer idDetallesCotizaciones) {
+        this.idDetallesCotizaciones = idDetallesCotizaciones;
     }
 
     public Integer getCantidad() {
@@ -79,12 +78,12 @@ public class DetallesVentas {
         this.estado = estado;
     }
 
-    public Ventas getVentas() {
-        return ventas;
+    public Cotizaciones getCotizaciones() {
+        return cotizaciones;
     }
 
-    public void setVentas(Ventas ventas) {
-        this.ventas = ventas;
+    public void setCotizaciones(Cotizaciones cotizaciones) {
+        this.cotizaciones = cotizaciones;
     }
 
     public Productos getProductos() {
@@ -95,12 +94,19 @@ public class DetallesVentas {
         this.productos = productos;
     }
 
-    public double getPecioUnitario() {
-        return pecioUnitario;
+    public String getFechaCotizacion() {
+        return fechaCotizacion;
     }
 
-    public void setPecioUnitario(double pecioUnitario) {
-        this.pecioUnitario = pecioUnitario;
+    public void setFechaCotizacion(String fechaCotizacion) {
+        this.fechaCotizacion = fechaCotizacion;
     }
-    
+
+    public Integer getPrecioUnitario() {
+        return precioUnitario;
+    }
+
+    public void setPrecioUnitario(Integer precioUnitario) {
+        this.precioUnitario = precioUnitario;
+    }
 }

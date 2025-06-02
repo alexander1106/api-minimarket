@@ -19,6 +19,7 @@ import com.gadbacorp.api.entity.ventas.Clientes;
 import com.gadbacorp.api.entity.ventas.Ventas;
 import com.gadbacorp.api.entity.ventas.VentasDTO;
 import com.gadbacorp.api.repository.ventas.ClientesRepository;
+import com.gadbacorp.api.repository.ventas.VentasRepository;
 import com.gadbacorp.api.service.ventas.IVentasService;
 
 
@@ -30,17 +31,26 @@ public class VentasController {
     @Autowired
     private IVentasService ventasService;
 
+    @Autowired
+    private VentasRepository ventasRepository;
 
     @Autowired
     private ClientesRepository clientesRepository;
-     @GetMapping("/ventas")
+    
+    @GetMapping("/ventas")
     public List<Ventas> buscarTodos() {
         return ventasService.listarVentaas();
     }
+
+    @GetMapping("/venta/{id}")
+    public Optional<Ventas> buscarVenta(@PathVariable Integer id) {
+        return ventasService.buscarVenta(id);
+    }
+   
     @PostMapping("/venta")
     public ResponseEntity<?> guardarVenta(@RequestBody VentasDTO dto) {
-        Clientes cliente = clientesRepository.findById(dto.getId_cliente()).orElse(null);
 
+        Clientes cliente = clientesRepository.findById(dto.getId_cliente()).orElse(null);
         if (cliente == null) {
             return ResponseEntity.badRequest().body("Cliente no encontrado con ID: " + dto.getId_cliente());
         }
@@ -48,6 +58,7 @@ public class VentasController {
         venta.setTotal_venta(dto.getTotal_venta());
         venta.setTipo_comprobante(dto.getTipo_comprobante());
         venta.setNro_comrprobante(dto.getNro_comrprobante());
+        venta.setEstado_venta(dto.getEstado_venta());
         venta.setFecha_venta(dto.getFecha_venta());    
         venta.setCliente(cliente); // Primero asigna el cliente
         return ResponseEntity.ok(ventasService.guardarVenta(venta));
@@ -61,10 +72,11 @@ public class VentasController {
         Ventas venta = new Ventas();
         venta.setIdVenta(dto.getIdVenta());
 
-                venta.setTotal_venta(dto.getTotal_venta());
+        venta.setTotal_venta(dto.getTotal_venta());
         venta.setTipo_comprobante(dto.getTipo_comprobante());
         venta.setNro_comrprobante(dto.getNro_comrprobante());
         venta.setFecha_venta(dto.getFecha_venta());    
+        venta.setEstado_venta(dto.getEstado_venta());
         venta.setCliente(new Clientes(dto.getId_cliente())); // Primero asigna el cliente
         return ResponseEntity.ok(ventasService.editarVenta(venta));    
     }
@@ -78,11 +90,18 @@ public class VentasController {
         return "La venta a sido eliminada con exito";
     }
 
-    // Buscar venta por ID
-    @GetMapping("/venta/{id}")
-    public Optional<Ventas> buscarVenta(@PathVariable Integer id) {
-        return ventasService.buscarVenta(id);
+
+    @PutMapping("/anular-venta/{id}")
+    public ResponseEntity<String> anularVenta(@PathVariable Integer id) {
+        Optional<Ventas> ventaOpt = ventasRepository.findById(id);
+        if (!ventaOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Ventas venta = ventaOpt.get();
+        venta.setEstado_venta("anulada");
+        ventasRepository.save(venta);
+        return ResponseEntity.ok("Venta anulada correctamente.");
     }
-   
-    
+
 }

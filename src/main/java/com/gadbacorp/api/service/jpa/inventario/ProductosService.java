@@ -144,7 +144,8 @@ public class ProductosService implements IProductosService {
     producto.getAlmacenProductos().addAll(nuevos);
 
     return toDTO(repoProductos.save(producto));
-       private Productos toEntity(ProductosDTO dto) {
+}
+    private Productos toEntity(ProductosDTO dto) {
         Productos producto = new Productos();
         if (dto.getIdproducto() != null) {
             producto.setIdproducto(dto.getIdproducto());

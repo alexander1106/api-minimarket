@@ -1,4 +1,6 @@
 package com.gadbacorp.api.entity.ventas;
+import java.util.Date;
+
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -22,12 +24,12 @@ public class Pagos {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="id_pago")
     private Integer idPago;
-    private double monto;
-    private String descripcion;
-    private String fechaPago; 
+    private String observaciones;
+    private Date fechaPago; 
+    private Double montoPagado;
+    private String referenciaPago;
+    private String estadoPago;
     private Integer estado=1;
-    private String estadoPago; 
-    private String comprobante;
 
     @ManyToOne
     @JoinColumn(name = "idVenta", referencedColumnName = "idVenta")
@@ -47,36 +49,36 @@ public class Pagos {
          this.idPago = idPago;
      }
 
-     public double getMonto() {
-         return monto;
+     public String getObservaciones() {
+         return observaciones;
      }
 
-     public void setMonto(double monto) {
-         this.monto = monto;
+     public void setObservaciones(String observaciones) {
+         this.observaciones = observaciones;
      }
 
-     public String getDescripcion() {
-         return descripcion;
-     }
-
-     public void setDescripcion(String descripcion) {
-         this.descripcion = descripcion;
-     }
-
-     public String getFechaPago() {
+     public Date getFechaPago() {
          return fechaPago;
      }
 
-     public void setFechaPago(String fechaPago) {
+     public void setFechaPago(Date fechaPago) {
          this.fechaPago = fechaPago;
      }
 
-     public Integer getEstado() {
-         return estado;
+     public Double getMontoPagado() {
+         return montoPagado;
      }
 
-     public void setEstado(Integer estado) {
-         this.estado = estado;
+     public void setMontoPagado(Double montoPagado) {
+         this.montoPagado = montoPagado;
+     }
+
+     public String getReferenciaPago() {
+         return referenciaPago;
+     }
+
+     public void setReferenciaPago(String referenciaPago) {
+         this.referenciaPago = referenciaPago;
      }
 
      public String getEstadoPago() {
@@ -87,12 +89,12 @@ public class Pagos {
          this.estadoPago = estadoPago;
      }
 
-     public String getComprobante() {
-         return comprobante;
+     public Integer getEstado() {
+         return estado;
      }
 
-     public void setComprobante(String comprobante) {
-         this.comprobante = comprobante;
+     public void setEstado(Integer estado) {
+         this.estado = estado;
      }
 
      public Ventas getVentas() {
@@ -110,4 +112,7 @@ public class Pagos {
      public void setMetodosPago(MetodosPago metodosPago) {
          this.metodosPago = metodosPago;
      }
+
+  
+
 }

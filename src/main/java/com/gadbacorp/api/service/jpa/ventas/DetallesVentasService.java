@@ -29,10 +29,6 @@ public class DetallesVentasService implements IDetallesVentasService {
     public void eliminarDetallesVentas(Integer idDetallesVenta) {
         detallesVentasRepository.deleteById(idDetallesVenta);
     }
-    @Override
-    public void eliminarPorVentas(Integer idVenta) {
-        throw new UnsupportedOperationException("Unimplemented method 'eliminarPorVentas'");
-    }
 
     @Override
     public List<DetallesVentas> listDetallesVentas() {
@@ -43,5 +39,4 @@ public class DetallesVentasService implements IDetallesVentasService {
     public Optional<DetallesVentas> buscarDetallesVentas(Integer IdVenta) {
         return detallesVentasRepository.findById(IdVenta);
     }
-
 }

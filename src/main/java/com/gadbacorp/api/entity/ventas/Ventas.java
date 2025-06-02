@@ -1,5 +1,6 @@
 package com.gadbacorp.api.entity.ventas;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.hibernate.annotations.SQLDelete;
@@ -28,8 +29,10 @@ public class Ventas {
     private double total_venta; 
     private String tipo_comprobante; 
     private String nro_comrprobante; 
-    private String fecha_venta;
+    private LocalDate  fecha_venta;
     private Integer estado=1;
+    private String estado_venta;
+
 
     // RELACIÓN CON CLIENTES
     @ManyToOne
@@ -37,113 +40,124 @@ public class Ventas {
     @JsonIgnore // evita ciclos infinitos si usas JSON
     private Clientes cliente;
 
+    @ManyToOne
+    @JoinColumn(name = "idCotizaciones", referencedColumnName = "idCotizaciones")
+    @JsonIgnore // evita ciclos infinitos si usas JSON
+    private Cotizaciones cotizaciones;
+
     @OneToMany(mappedBy = "ventas", cascade = CascadeType.ALL)
     private List<DetallesVentas> detallesVentas;
     
-
     @OneToMany(mappedBy = "ventas", cascade = CascadeType.ALL)
     private List<Pagos> pagos;
+
+    @OneToMany(mappedBy = "ventas", cascade = CascadeType.ALL)
+    private List<Devoluciones> devoluciones;
 
 
     public Integer getIdVenta() {
         return idVenta;
     }
 
-
     public void setIdVenta(Integer idVenta) {
         this.idVenta = idVenta;
     }
-
 
     public double getTotal_venta() {
         return total_venta;
     }
 
-
     public void setTotal_venta(double total_venta) {
         this.total_venta = total_venta;
     }
-
 
     public String getTipo_comprobante() {
         return tipo_comprobante;
     }
 
-
     public void setTipo_comprobante(String tipo_comprobante) {
         this.tipo_comprobante = tipo_comprobante;
     }
-
 
     public String getNro_comrprobante() {
         return nro_comrprobante;
     }
 
-
     public void setNro_comrprobante(String nro_comrprobante) {
         this.nro_comrprobante = nro_comrprobante;
     }
 
-    public String getFecha_venta() {
+    public LocalDate getFecha_venta() {
         return fecha_venta;
     }
 
-
-    public void setFecha_venta(String fecha_venta) {
+    public void setFecha_venta(LocalDate fecha_venta) {
         this.fecha_venta = fecha_venta;
     }
-
 
     public Integer getEstado() {
         return estado;
     }
 
-
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
 
+    public String getEstado_venta() {
+        return estado_venta;
+    }
+
+    public void setEstado_venta(String estado_venta) {
+        this.estado_venta = estado_venta;
+    }
 
     public Clientes getCliente() {
         return cliente;
     }
 
-
     public void setCliente(Clientes cliente) {
         this.cliente = cliente;
     }
 
+    public Cotizaciones getCotizaciones() {
+        return cotizaciones;
+    }
+
+    public void setCotizaciones(Cotizaciones cotizaciones) {
+        this.cotizaciones = cotizaciones;
+    }
 
     public List<DetallesVentas> getDetallesVentas() {
         return detallesVentas;
     }
 
-
     public void setDetallesVentas(List<DetallesVentas> detallesVentas) {
         this.detallesVentas = detallesVentas;
     }
-
 
     public List<Pagos> getPagos() {
         return pagos;
     }
 
-
     public void setPagos(List<Pagos> pagos) {
         this.pagos = pagos;
     }
 
-
-    public Ventas() {
+    public List<Devoluciones> getDevoluciones() {
+        return devoluciones;
     }
 
+    public void setDevoluciones(List<Devoluciones> devoluciones) {
+        this.devoluciones = devoluciones;
+    }
 
     public Ventas(Integer idVenta) {
         this.idVenta = idVenta;
     }
 
-
-
+    public Ventas() {
+    }
 
     
+
 }

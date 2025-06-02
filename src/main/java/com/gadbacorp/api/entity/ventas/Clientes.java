@@ -33,7 +33,6 @@ public class Clientes {
     private Integer estado=1;
 
 
-    
     public Clientes(Integer idCliente) {
         this.idCliente = idCliente;
     }
@@ -43,6 +42,9 @@ public class Clientes {
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private List<Ventas> ventas;
+
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
+    private List<Cotizaciones> cotizaciones;
 
     public Integer getIdCliente() {
         return idCliente;
@@ -130,5 +132,13 @@ public class Clientes {
 
     public void setTipoContribuyente(String tipoContribuyente) {
         this.tipoContribuyente = tipoContribuyente;
+    }
+
+    public List<Cotizaciones> getCotizaciones() {
+        return cotizaciones;
+    }
+
+    public void setCotizaciones(List<Cotizaciones> cotizaciones) {
+        this.cotizaciones = cotizaciones;
     }
 }

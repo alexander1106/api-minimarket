@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,28 +26,42 @@ public class ClientesController {
     private IClientesService clientesService;
 
     @GetMapping("/clientes")
-    public List<Clientes> buscarTodos() {
+    public List<Clientes> listarClientes() {
         return clientesService.obetenrTodosClientes();
     }
 
-   @PostMapping("/cliente")
-    public Clientes guadarCliente(@RequestBody Clientes cliente) {
-        return clientesService.crearCliente(cliente);
+    @PostMapping("/cliente")
+    public ResponseEntity<?> guardarCliente(@RequestBody Clientes cliente) {
+        List<Clientes> existentes = clientesService.buscarPorDocumento(cliente.getDocumento());
+
+        if (!existentes.isEmpty()) {
+            return ResponseEntity
+                .badRequest()
+                .body("El cliente no puede ser registrado, este documento ya está registrado.");
+        }
+
+        Clientes nuevoCliente = clientesService.crearCliente(cliente);
+        return ResponseEntity.ok(nuevoCliente);
     }
 
     @PutMapping("/cliente")
-    public Clientes modificar(@RequestBody Clientes metodoPago) {
-        clientesService.crearCliente(metodoPago);
-        return metodoPago;
+    public Clientes modificar(@RequestBody Clientes cliente) {
+         return clientesService.crearCliente(cliente);
     }
 
     @GetMapping("/cliente/{id}")
     public Optional<Clientes> buscarId(@PathVariable("id") Integer id){
         return clientesService.obtenerCliente(id);
     }
-    @DeleteMapping("/cliente/{id}")
-    public String eliminar(@PathVariable Integer id){
-        clientesService.eliminarCliente(id);
-        return "El cliente fue eliminado";
+     @DeleteMapping("/cliente/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        try {
+            clientesService.eliminarCliente(id);
+            return ResponseEntity.ok("El cliente fue eliminado");
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                .badRequest()
+                .body(e.getMessage()); // Devuelve el mensaje personalizado
+        }
     }
 }

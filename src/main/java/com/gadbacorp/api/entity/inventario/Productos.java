@@ -10,7 +10,8 @@ import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.gadbacorp.api.entity.ventas.DetallesCotizaciones;
+import com.gadbacorp.api.entity.ventas.DetallesDevolucion;
 import com.gadbacorp.api.entity.ventas.DetallesVentas;
 
 import jakarta.persistence.CascadeType;
@@ -65,6 +66,15 @@ public class Productos {
     @OneToMany(mappedBy = "productos", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<DetallesVentas> detallesVentas;
+
+    @OneToMany(mappedBy = "productos", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<DetallesCotizaciones> detallesCotizacioneses;
+    
+    @OneToMany(mappedBy = "productos", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<DetallesDevolucion> detallesDevoluciones;
+    
     
 
 
@@ -184,6 +194,22 @@ public class Productos {
 
     public void setDetallesVentas(List<DetallesVentas> detallesVentas) {
         this.detallesVentas = detallesVentas;
+    }
+
+    public List<DetallesCotizaciones> getDetallesCotizacioneses() {
+        return detallesCotizacioneses;
+    }
+
+    public void setDetallesCotizacioneses(List<DetallesCotizaciones> detallesCotizacioneses) {
+        this.detallesCotizacioneses = detallesCotizacioneses;
+    }
+
+    public List<DetallesDevolucion> getDetallesDevoluciones() {
+        return detallesDevoluciones;
+    }
+
+    public void setDetallesDevoluciones(List<DetallesDevolucion> detallesDevoluciones) {
+        this.detallesDevoluciones = detallesDevoluciones;
     }
 
     

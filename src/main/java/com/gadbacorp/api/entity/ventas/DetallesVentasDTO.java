@@ -8,12 +8,11 @@ public class DetallesVentasDTO {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idDetallesVenta;
-    private String tipoComprobante;
-    private String numeroComprobante;
 
+    private double pecioUnitario;
     private String fechaVenta;
     private Integer cantidad;
-    private double subTotal;  
+    private double subTotal;      
     private Integer estado=1;
     private Integer id_producto;
     private Integer id_venta;
@@ -29,18 +28,7 @@ public class DetallesVentasDTO {
     public void setIdDetallesVenta(Integer idDetallesVenta) {
         this.idDetallesVenta = idDetallesVenta;
     }
-    public String getTipoComprobante() {
-        return tipoComprobante;
-    }
-    public void setTipoComprobante(String tipoComprobante) {
-        this.tipoComprobante = tipoComprobante;
-    }
-    public String getNumeroComprobante() {
-        return numeroComprobante;
-    }
-    public void setNumeroComprobante(String numeroComprobante) {
-        this.numeroComprobante = numeroComprobante;
-    }
+
     public String getFechaVenta() {
         return fechaVenta;
     }
@@ -78,8 +66,11 @@ public class DetallesVentasDTO {
     public void setId_venta(Integer id_venta) {
         this.id_venta = id_venta;
     }
-
-
-    
-
+ 
+    public double getPecioUnitario() {
+        return pecioUnitario;
+    }
+    public void setPecioUnitario(double pecioUnitario) {
+        this.pecioUnitario = pecioUnitario;
+    }
 }

@@ -6,4 +6,6 @@ import com.gadbacorp.api.entity.ventas.Pagos;
 
 public interface  PagosRepository extends JpaRepository<Pagos, Integer> {
 
+boolean existsByMetodosPagoIdMetodoPago(Integer idMetodoPago);
+
 }

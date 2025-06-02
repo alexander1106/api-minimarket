@@ -1,5 +1,7 @@
 package com.gadbacorp.api.entity.ventas;
 
+import java.time.LocalDate;
+
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -21,8 +23,9 @@ public class VentasDTO {
     private double total_venta; 
     private String tipo_comprobante; 
     private String nro_comrprobante; 
-    private String fecha_venta;
+    private LocalDate  fecha_venta;
     private Integer estado=1;
+    private String estado_venta;
     private Integer id_cliente;
 
     public Integer getIdVenta() {
@@ -50,10 +53,10 @@ public class VentasDTO {
         this.nro_comrprobante = nro_comrprobante;
     }
    
-    public String getFecha_venta() {
+    public LocalDate  getFecha_venta() {
         return fecha_venta;
     }
-    public void setFecha_venta(String fecha_venta) {
+    public void setFecha_venta(LocalDate  fecha_venta) {
         this.fecha_venta = fecha_venta;
     }
     public Integer getEstado() {
@@ -68,6 +71,10 @@ public class VentasDTO {
     public void setId_cliente(Integer id_cliente) {
         this.id_cliente = id_cliente;
     }
-
-    
+    public String getEstado_venta() {
+        return estado_venta;
+    }
+    public void setEstado_venta(String estado_venta) {
+        this.estado_venta = estado_venta;
+    }
 }

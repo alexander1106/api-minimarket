@@ -9,8 +9,6 @@ public interface IDetallesVentasService {
   DetallesVentas guardarDetallesVentas(DetallesVentas detallesVentas);
     DetallesVentas editarDetallesVentas(DetallesVentas detallesVentas);
     void eliminarDetallesVentas(Integer idDetallesVenta);
-    void eliminarPorVentas(Integer idVenta);
     List<DetallesVentas> listDetallesVentas();
     Optional<DetallesVentas> buscarDetallesVentas(Integer IdVenta);
-
 }

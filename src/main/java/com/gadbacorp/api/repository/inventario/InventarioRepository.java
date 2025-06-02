@@ -10,5 +10,6 @@ import com.gadbacorp.api.entity.inventario.Productos;
 
 public interface InventarioRepository extends JpaRepository<Inventario, Integer> {
    Optional<Inventario> findByProductoAndAlmacen(Productos producto, Almacenes almacen);
-}
  
+   Optional<Inventario> findByProductoIdproducto(Integer idproducto);
+}

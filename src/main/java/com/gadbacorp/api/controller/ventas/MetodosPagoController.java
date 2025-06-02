@@ -37,19 +37,32 @@ public class MetodosPagoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
     }
 
-    @PutMapping("/metodo-pago")
-    public MetodosPago modificar(@RequestBody MetodosPago metodoPago) {
-        metodosPagoService.guardarMetodoPago(metodoPago);
-        return metodoPago;
-    }
+   
     @GetMapping("/metodo-pago/{id}")
     public Optional<MetodosPago> buscarId(@PathVariable("id") Integer id){
         return metodosPagoService.obtenerMetodoPago(id);
     }
-    @DeleteMapping("/metodo-pago/{id}")
-    public String eliminar(@PathVariable Integer id){
-        metodosPagoService.eliminarMetodoPago(id);
-        return "Metodo de pago eliminado";
+
+    @PutMapping("/metodo-pago")
+    public ResponseEntity<?> modificar(@RequestBody MetodosPago metodoPago) {
+        if (metodosPagoService.tieneRelaciones(metodoPago.getIdMetodoPago())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("No se puede modificar: el método de pago tiene registros relacionados.");
+        }
+
+        MetodosPago actualizado = metodosPagoService.guardarMetodoPago(metodoPago);
+        return ResponseEntity.ok(actualizado);
     }
 
+    @DeleteMapping("/metodo-pago/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Integer id){
+        if (metodosPagoService.tieneRelaciones(id)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("No se puede eliminar: el método de pago tiene registros relacionados.");
+        }
+
+        metodosPagoService.eliminarMetodoPago(id);
+        return ResponseEntity.ok("Método de pago eliminado");
+    }
+    
 }
