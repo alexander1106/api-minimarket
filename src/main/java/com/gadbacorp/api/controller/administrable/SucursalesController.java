@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gadbacorp.api.entity.administrable.Sucursales;
+import com.gadbacorp.api.entity.dto.administrable.SucursalDTO;
 import com.gadbacorp.api.service.administrable.ISucursalesService;
 
 @RestController
@@ -23,9 +24,10 @@ public class SucursalesController {
     private ISucursalesService serviceSucursales;
  
     @GetMapping("/sucursales")
-    public List<Sucursales> buscarTodos() {
-        return serviceSucursales.buscarTodos();
-    }
+    public List<SucursalDTO> buscarTodos() {
+    return serviceSucursales.buscarTodosDTO();
+}
+
     @PostMapping("/sucursales")
     public Sucursales guardar(@RequestBody Sucursales sucursal) {
         serviceSucursales.guardar(sucursal);        

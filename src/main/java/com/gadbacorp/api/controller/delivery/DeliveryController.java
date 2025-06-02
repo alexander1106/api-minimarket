@@ -1,9 +1,12 @@
 package com.gadbacorp.api.controller.delivery;
 
+import com.gadbacorp.api.entity.dto.delivery.DeliveryMapper;
 import com.gadbacorp.api.entity.delivery.Delivery;
+import com.gadbacorp.api.entity.dto.delivery.DeliveryDTO;
 import com.gadbacorp.api.service.delivery.IDeliveryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,10 +32,12 @@ public class DeliveryController {
     }
 
     @PostMapping("/delivery")
-    public ResponseEntity<Delivery> createDelivery(@RequestBody Delivery delivery) {
-        Delivery created = deliveryService.save(delivery);
-        return ResponseEntity.ok(created);
-    }
+    public ResponseEntity<DeliveryDTO> createDelivery(@Validated @RequestBody DeliveryDTO deliveryDTO) {
+    Delivery delivery = DeliveryMapper.toEntity(deliveryDTO);
+    Delivery saved = deliveryService.save(delivery);
+    return ResponseEntity.ok(DeliveryMapper.toDTO(saved));
+}
+
 
     @PutMapping("/delivery/{id}")
     public ResponseEntity<Delivery> updateDelivery(@PathVariable Long id, @RequestBody Delivery deliveryDetails) {
