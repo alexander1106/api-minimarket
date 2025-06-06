@@ -5,10 +5,15 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.gadbacorp.api.entity.ventas.MetodosPago;
 
 @Entity
 @Table(name = "Compras")
+@SQLDelete(sql = "UPDATE Compras SET estado=0 WHERE Id_compra = ?")
+@Where(clause = "estado=1")
 public class Compras {
 
     @Id
@@ -31,9 +36,10 @@ public class Compras {
     @Column(name = "fecha_compra")
     private LocalDateTime fechaCompra;
 
-    private Integer estado;
+    private Integer estado =1;
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
+    
     private List<DetallesCompras> detalles;
 
     public Integer getIdCompra() {
