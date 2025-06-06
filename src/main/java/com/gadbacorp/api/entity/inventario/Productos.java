@@ -59,14 +59,13 @@ public class Productos {
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<AlmacenProducto> almacenProductos = new ArrayList<>();
+    private List<InventarioProducto> inventarioProductos = new ArrayList<>();
 
 
     @OneToMany(mappedBy = "productos", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<DetallesVentas> detallesVentas;
     
-
 
     public Productos() { }
 
@@ -137,6 +136,7 @@ public class Productos {
     public void setCostoMayor(BigDecimal costoMayor) {
         this.costoMayor = costoMayor;
     }
+
     public String getImagen() {
         return imagen;
     }
@@ -177,12 +177,12 @@ public class Productos {
         this.tipoProducto = tipoProducto;
     }
 
-    public List<AlmacenProducto> getAlmacenProductos() {
-        return almacenProductos;
+    public List<InventarioProducto> getInventarioProductos() {
+        return inventarioProductos;
     }
 
-    public void setAlmacenProductos(List<AlmacenProducto> almacenProductos) {
-        this.almacenProductos = almacenProductos;
+    public void setInventarioProductos(List<InventarioProducto> inventarioProductos) {
+        this.inventarioProductos = inventarioProductos;
     }
 
     public List<DetallesVentas> getDetallesVentas() {
@@ -193,5 +193,14 @@ public class Productos {
         this.detallesVentas = detallesVentas;
     }
 
-    
+    @Override
+    public String toString() {
+        return "Productos [idproducto=" + idproducto + ", nombre=" + nombre + ", descripcion=" + descripcion
+                + ", fechaVencimiento=" + fechaVencimiento + ", tipoImpuesto=" + tipoImpuesto + ", costoCompra="
+                + costoCompra + ", costoVenta=" + costoVenta + ", costoMayor=" + costoMayor + ", imagen=" + imagen
+                + ", estado=" + estado + ", categoria=" + categoria + ", unidadMedida=" + unidadMedida
+                + ", tipoProducto=" + tipoProducto + "]";
+    }
+
+
 }

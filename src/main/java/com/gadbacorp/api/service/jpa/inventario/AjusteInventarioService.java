@@ -5,15 +5,15 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.gadbacorp.api.entity.inventario.AjusteInventario;
 import com.gadbacorp.api.entity.inventario.AjusteInventarioDTO;
-import com.gadbacorp.api.entity.inventario.AlmacenProducto;
-import com.gadbacorp.api.entity.inventario.Inventario;
+import com.gadbacorp.api.entity.inventario.InventarioProducto;
 import com.gadbacorp.api.repository.inventario.AjusteInventarioRepository;
-import com.gadbacorp.api.repository.inventario.AlmacenProductoRepository;
-import com.gadbacorp.api.repository.inventario.InventarioRepository;
+import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
 import com.gadbacorp.api.service.inventario.IAjusteInventarioService;
 
 import jakarta.transaction.Transactional;
@@ -25,10 +25,7 @@ public class AjusteInventarioService implements IAjusteInventarioService {
     private AjusteInventarioRepository repoAjuste;
 
     @Autowired
-    private InventarioRepository repoInventario;
-
-    @Autowired
-    private AlmacenProductoRepository repoAlmProd;
+    private InventarioProductoRepository repoInventarioProducto;
 
     @Override
     public List<AjusteInventario> buscarTodos() {
@@ -54,66 +51,74 @@ public class AjusteInventarioService implements IAjusteInventarioService {
 
     @Override
     public void eliminar(Integer id) {
+        if (!repoAjuste.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "AjusteInventario no encontrado id=" + id);
+        }
         repoAjuste.deleteById(id);
     }
 
+    @Override
     @Transactional
     public AjusteInventario ajustarStock(AjusteInventarioDTO dto) {
-        Inventario inv = repoInventario.findById(dto.getIdinventario())
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Inventario no encontrado id=" + dto.getIdinventario()));
+        // 1. Buscar InventarioProducto
+        InventarioProducto invProd = repoInventarioProducto.findById(dto.getIdinventarioproducto())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "InventarioProducto no encontrado id=" + dto.getIdinventarioproducto()));
 
+        // 2. Calcular nuevo stock y validar
         int cantidad = dto.getCantidad();
-        int nuevoStock = inv.getStock() + cantidad;
+        int nuevoStock = invProd.getStockactual() + cantidad;
         if (nuevoStock < 0) {
-            throw new IllegalArgumentException(
-                "No hay stock suficiente: stock actual=" + inv.getStock() + ", ajuste=" + cantidad);
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No hay stock suficiente: stock actual=" + invProd.getStockactual() + ", ajuste=" + cantidad);
         }
 
-        inv.setStock(nuevoStock);
-        repoInventario.save(inv);
+        // 3. Actualizar stock en InventarioProducto
+        invProd.setStockactual(nuevoStock);
+        repoInventarioProducto.save(invProd);
 
-        AlmacenProducto ap = repoAlmProd.findByProductoAndAlmacen(inv.getProducto(), inv.getAlmacen())
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Registro almacen_producto no encontrado"));
-        ap.setStock(nuevoStock);
-        repoAlmProd.save(ap);
-
+        // 4. Crear y guardar el ajuste
         AjusteInventario aj = new AjusteInventario();
         aj.setCantidad(cantidad);
         aj.setDescripcion(dto.getDescripcion());
         aj.setFechaAjuste(dto.getFechaAjuste() != null ? dto.getFechaAjuste() : LocalDateTime.now());
-        aj.setInventario(inv);
+        aj.setInventarioProducto(invProd);
+
         return repoAjuste.save(aj);
     }
 
+    @Override
     @Transactional
     public AjusteInventario modificarAjuste(AjusteInventarioDTO dto) {
+        // 1. Buscar Ajuste existente
         AjusteInventario existing = repoAjuste.findById(dto.getIdajusteinventario())
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Ajuste no encontrado id=" + dto.getIdajusteinventario()));
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "AjusteInventario no encontrado id=" + dto.getIdajusteinventario()));
 
-        Inventario inv = existing.getInventario();
-        AlmacenProducto ap = repoAlmProd.findByProductoAndAlmacen(inv.getProducto(), inv.getAlmacen())
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Registro almacen_producto no encontrado"));
+        // 2. Obtener InventarioProducto asociado
+        InventarioProducto invProd = existing.getInventarioProducto();
 
-        // Revertir el ajuste anterior
-        int stockSinAjuste = inv.getStock() - existing.getCantidad();
+        // 3. Revertir el ajuste anterior
+        int stockSinAjuste = invProd.getStockactual() - existing.getCantidad();
 
-        // Aplicar el nuevo ajuste
+        // 4. Calcular nuevo stock con el ajuste modificado
         int nuevoStock = stockSinAjuste + dto.getCantidad();
         if (nuevoStock < 0) {
-            throw new IllegalArgumentException(
-                "No hay stock suficiente: stock actual=" + inv.getStock() + ", ajuste corregido resultaría en negativo");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No hay stock suficiente: stock actual=" + invProd.getStockactual()
+                    + ", ajuste corregido resultaría en negativo");
         }
 
-        inv.setStock(nuevoStock);
-        repoInventario.save(inv);
+        // 5. Actualizar stock en InventarioProducto
+        invProd.setStockactual(nuevoStock);
+        repoInventarioProducto.save(invProd);
 
-        ap.setStock(nuevoStock);
-        repoAlmProd.save(ap);
-
+        // 6. Actualizar campos del ajuste existente
         existing.setCantidad(dto.getCantidad());
         existing.setDescripcion(dto.getDescripcion());
         existing.setFechaAjuste(dto.getFechaAjuste() != null ? dto.getFechaAjuste() : existing.getFechaAjuste());
@@ -121,5 +126,3 @@ public class AjusteInventarioService implements IAjusteInventarioService {
         return repoAjuste.save(existing);
     }
 }
-
-

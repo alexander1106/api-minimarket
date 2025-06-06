@@ -11,12 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.gadbacorp.api.entity.inventario.AlmacenProducto;
-import com.gadbacorp.api.entity.inventario.AlmacenProductosDTO;
+import com.gadbacorp.api.entity.inventario.Inventario;
+import com.gadbacorp.api.entity.inventario.InventarioProducto;
+import com.gadbacorp.api.entity.inventario.InventarioProductosDTO;
 import com.gadbacorp.api.entity.inventario.Productos;
 import com.gadbacorp.api.entity.inventario.ProductosDTO;
-import com.gadbacorp.api.repository.inventario.AlmacenesRepository;
 import com.gadbacorp.api.repository.inventario.CategoriasRepository;
+import com.gadbacorp.api.repository.inventario.InventarioRepository;
 import com.gadbacorp.api.repository.inventario.ProductosRepository;
 import com.gadbacorp.api.repository.inventario.TipoProductoRepository;
 import com.gadbacorp.api.repository.inventario.UnidadDeMedidaRepository;
@@ -38,7 +39,7 @@ public class ProductosService implements IProductosService {
     private TipoProductoRepository repoTipoProducto;
 
     @Autowired
-    private AlmacenesRepository repoAlmacenes;
+    private InventarioRepository repoInventario;
 
     @Override
     public List<Productos> buscarTodos() {
@@ -111,7 +112,7 @@ public class ProductosService implements IProductosService {
             producto.setImagen(dto.getImagen());
         }
 
-        // Asignar relaciones
+        // Asignar relaciones a Categoría, UnidadDeMedida y TipoProducto
         producto.setCategoria(repoCategorias.findById(dto.getIdcategoria())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Categoría no encontrada id=" + dto.getIdcategoria())));
@@ -122,27 +123,46 @@ public class ProductosService implements IProductosService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Tipo no encontrado id=" + dto.getIdtipoproducto())));
 
-        // Sincronizar stocks solo si la lista se envía con elementos
-        if (dto.getAlmacenes() != null && !dto.getAlmacenes().isEmpty()) {
-            Map<Integer, AlmacenProducto> actual = producto.getAlmacenProductos().stream()
-                .collect(Collectors.toMap(ap -> ap.getAlmacen().getIdalmacen(), ap -> ap));
+        // Sincronizar InventarioProducto si el DTO trae lista
+        if (dto.getInventarioProducto() != null && !dto.getInventarioProducto().isEmpty()) {
+            // 1. Mapear las líneas actuales por idInventario
+            Map<Integer, InventarioProducto> actual = producto.getInventarioProductos().stream()
+                .collect(Collectors.toMap(
+                    ip -> ip.getInventario().getIdinventario(),  // clave = idInventario
+                    ip -> ip                                    // valor = la propia entidad
+                ));
 
-            List<AlmacenProducto> nuevos = new ArrayList<>();
-            for (AlmacenProductosDTO apDto : dto.getAlmacenes()) {
-                AlmacenProducto ap = actual.remove(apDto.getIdAlmacen());
-                if (ap == null) {
-                    ap = new AlmacenProducto();
-                    ap.setProducto(producto);
-                    ap.setAlmacen(repoAlmacenes.findById(apDto.getIdAlmacen())
+            List<InventarioProducto> nuevos = new ArrayList<>();
+            for (InventarioProductosDTO ipDto : dto.getInventarioProducto()) {
+                // Obtener el ID de Inventario desde el DTO
+                Integer idInv = ipDto.getIdinventario();
+
+                // Verificar si ya existe una línea para este idInventario
+                InventarioProducto ip = actual.remove(idInv);
+                if (ip == null) {
+                    // No existía → crear nueva línea
+                    ip = new InventarioProducto();
+                    ip.setProducto(producto);
+
+                    Inventario inv = repoInventario.findById(idInv)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                             "Almacén no encontrado id=" + apDto.getIdAlmacen())));
+                             "Inventario no encontrado id=" + idInv));
+                    ip.setInventario(inv);
                 }
-                ap.setStock(apDto.getStock());
-                ap.setFechaIngreso(apDto.getFechaIngreso());
-                nuevos.add(ap);
+
+                // Actualizar campos de stock y fecha
+                ip.setStockactual(ipDto.getStockactual());
+                if (ipDto.getFechaingreso() != null) {
+                    ip.setFechaingreso(ipDto.getFechaingreso());
+                }
+
+                nuevos.add(ip);
             }
-            producto.getAlmacenProductos().clear();
-            producto.getAlmacenProductos().addAll(nuevos);
+
+            // 2. Reemplazar la lista actual de InventarioProducto
+            producto.getInventarioProductos().clear();
+            producto.getInventarioProductos().addAll(nuevos);
+            // Con orphanRemoval = true, las líneas que quedaron en 'actual' se eliminarán
         }
 
         Productos guardado = repoProductos.save(producto);
@@ -173,16 +193,20 @@ public class ProductosService implements IProductosService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Tipo no encontrado id=" + dto.getIdtipoproducto())));
 
-        if (dto.getAlmacenes() != null && !dto.getAlmacenes().isEmpty()) {
-            for (AlmacenProductosDTO apDto : dto.getAlmacenes()) {
-                AlmacenProducto ap = new AlmacenProducto();
-                ap.setProducto(producto);
-                ap.setStock(apDto.getStock());
-                ap.setFechaIngreso(apDto.getFechaIngreso());
-                ap.setAlmacen(repoAlmacenes.findById(apDto.getIdAlmacen())
+        if (dto.getInventarioProducto() != null && !dto.getInventarioProducto().isEmpty()) {
+            for (InventarioProductosDTO ipDto : dto.getInventarioProducto()) {
+                InventarioProducto ip = new InventarioProducto();
+                ip.setProducto(producto);
+                ip.setStockactual(ipDto.getStockactual());
+                if (ipDto.getFechaingreso() != null) {
+                    ip.setFechaingreso(ipDto.getFechaingreso());
+                }
+                Inventario inv = repoInventario.findById(ipDto.getIdinventario())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                         "Almacén no encontrado id=" + apDto.getIdAlmacen())));
-                producto.getAlmacenProductos().add(ap);
+                         "Inventario no encontrado id=" + ipDto.getIdinventario()));
+                ip.setInventario(inv);
+
+                producto.getInventarioProductos().add(ip);
             }
         }
         return producto;
@@ -203,16 +227,19 @@ public class ProductosService implements IProductosService {
         dto.setIdunidadmedida(p.getUnidadMedida().getIdunidadmedida());
         dto.setIdtipoproducto(p.getTipoProducto().getIdtipoproducto());
 
-        dto.setAlmacenes(p.getAlmacenProductos().stream()
-            .map(ap -> new AlmacenProductosDTO(
-                ap.getIdalmacenproducto(),
-                ap.getStock(),
-                ap.getFechaIngreso(),
-                ap.getEstado(),
-                ap.getProducto().getIdproducto(),
-                ap.getAlmacen().getIdalmacen()
-            ))
-            .collect(Collectors.toList()));
+        dto.setInventarioProducto(
+            p.getInventarioProductos()
+             .stream()
+             .map(ip -> new InventarioProductosDTO(
+                 ip.getIdinventarioproducto(),
+                 ip.getStockactual(),
+                 ip.getFechaingreso(),
+                 ip.getProducto().getIdproducto(),
+                 ip.getInventario().getIdinventario()
+             ))
+             .collect(Collectors.toList())
+        );
+
         return dto;
     }
 }

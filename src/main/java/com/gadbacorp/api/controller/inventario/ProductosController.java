@@ -31,7 +31,6 @@ public class ProductosController {
     @Autowired
     private IProductosService serviceProductos;
 
-    // Evita que WebDataBinder intente mapear directamente 'imagen' al DTO
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.setDisallowedFields("imagen");
@@ -39,7 +38,8 @@ public class ProductosController {
 
     @GetMapping
     public ResponseEntity<List<ProductosDTO>> listar() {
-        return ResponseEntity.ok(serviceProductos.buscarTodosDTO());
+        List<ProductosDTO> lista = serviceProductos.buscarTodosDTO();
+        return ResponseEntity.ok(lista);
     }
 
     @GetMapping("/{id}")
@@ -49,7 +49,6 @@ public class ProductosController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // POST JSON
     @PostMapping(
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -66,7 +65,6 @@ public class ProductosController {
         }
     }
 
-    // POST form-data plano: campos + archivo bajo 'imagen'
     @PostMapping(
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -77,6 +75,7 @@ public class ProductosController {
     ) {
         try {
             if (imagenFile != null && !imagenFile.isEmpty()) {
+                // Solo guardamos el nombre del archivo en DTO; el almacenamiento real queda a tu lógica
                 dto.setImagen(imagenFile.getOriginalFilename());
             }
             ProductosDTO creado = serviceProductos.guardarDTO(dto);
@@ -89,7 +88,6 @@ public class ProductosController {
         }
     }
 
-    // PUT JSON (id en body)
     @PutMapping(
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -98,7 +96,8 @@ public class ProductosController {
         try {
             Integer id = dto.getIdproducto();
             if (id == null) {
-                return ResponseEntity.badRequest().body("El campo 'idproducto' es requerido en el body");
+                return ResponseEntity.badRequest()
+                    .body("El campo 'idproducto' es requerido en el body");
             }
             ProductosDTO actualizado = serviceProductos.actualizarDTO(id, dto);
             return ResponseEntity.ok(actualizado);
@@ -110,7 +109,6 @@ public class ProductosController {
         }
     }
 
-    // PUT form-data plano: campos + archivo bajo 'imagen'
     @PutMapping(
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -122,7 +120,8 @@ public class ProductosController {
         try {
             Integer id = dto.getIdproducto();
             if (id == null) {
-                return ResponseEntity.badRequest().body("El campo 'idproducto' es requerido en el body");
+                return ResponseEntity.badRequest()
+                    .body("El campo 'idproducto' es requerido en el body");
             }
             if (imagenFile != null && !imagenFile.isEmpty()) {
                 dto.setImagen(imagenFile.getOriginalFilename());
@@ -138,8 +137,8 @@ public class ProductosController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
+        public ResponseEntity<String> eliminar(@PathVariable Integer id) {  
         serviceProductos.eliminar(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Producto eliminado correctamente");
     }
 }
