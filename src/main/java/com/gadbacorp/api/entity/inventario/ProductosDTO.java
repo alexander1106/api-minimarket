@@ -24,7 +24,7 @@ public class ProductosDTO {
     private Integer idunidadmedida;
     private Integer idtipoproducto;
     
-    private List<AlmacenProductosDTO> almacenes;
+    private List<InventarioProductosDTO> inventarioProducto;
 
     public ProductosDTO() { }
 
@@ -92,6 +92,7 @@ public class ProductosDTO {
         this.costoMayor = costoMayor;
     }
 
+
     public Integer getIdcategoria() {
         return idcategoria;
     }
@@ -116,21 +117,21 @@ public class ProductosDTO {
         this.idtipoproducto = idtipoproducto;
     }
 
-    public List<AlmacenProductosDTO> getAlmacenes() {
-        return almacenes;
+    public List<InventarioProductosDTO> getInventarioProducto() {
+        return inventarioProducto;
     }
 
-    public void setAlmacenes(List<AlmacenProductosDTO> almacenes) {
-        this.almacenes = almacenes;
+    public void setInventarioProducto(List<InventarioProductosDTO> inventarioProducto) {
+        this.inventarioProducto = inventarioProducto;
     }
 
     @Override
     public String toString() {
         return "ProductosDTO [idproducto=" + idproducto + ", nombre=" + nombre + ", descripcion=" + descripcion
                 + ", fechaVencimiento=" + fechaVencimiento + ", tipoImpuesto=" + tipoImpuesto + ", costoCompra="
-                + costoCompra + ", costoVenta=" + costoVenta + ", costoMayor=" + costoMayor + ", imagen=" + imagen + ", idcategoria="
-                + idcategoria + ", idunidadmedida=" + idunidadmedida + ", idtipoproducto=" + idtipoproducto
-                + ", almacenes=" + almacenes + "]";
+                + costoCompra + ", costoVenta=" + costoVenta + ", costoMayor=" + costoMayor + ", imagen=" + imagen
+                + ", idcategoria=" + idcategoria + ", idunidadmedida=" + idunidadmedida + ", idtipoproducto="
+                + idtipoproducto + ", inventarioProducto=" + inventarioProducto + "]";
     }
 
     public String getImagen() {

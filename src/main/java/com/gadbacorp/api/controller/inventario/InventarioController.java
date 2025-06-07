@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.gadbacorp.api.entity.inventario.AjusteInventarioDTO;
+import com.gadbacorp.api.entity.inventario.Almacenes;
 import com.gadbacorp.api.entity.inventario.Inventario;
 import com.gadbacorp.api.entity.inventario.InventarioDTO;
 import com.gadbacorp.api.service.inventario.IInventarioService;
@@ -29,66 +29,85 @@ public class InventarioController {
     @Autowired
     private IInventarioService serviceInventario;
 
-    private InventarioDTO toDTO(Inventario inv) {
+    private InventarioDTO toDTO(Inventario inventario) {
         InventarioDTO dto = new InventarioDTO();
-        dto.setIdinventario(inv.getIdinventario());
-        dto.setIdproducto(inv.getProducto().getIdproducto());
-        dto.setIdalmacen(inv.getAlmacen().getIdalmacen());
-        dto.setStock(inv.getStock());
-        dto.setAjustes(inv.getAjustes().stream().map(aj -> {
-            AjusteInventarioDTO ajdto = new AjusteInventarioDTO();
-            ajdto.setIdajusteinventario(aj.getIdajusteinventario());
-            ajdto.setIdinventario(inv.getIdinventario());
-            ajdto.setCantidad(aj.getCantidad());
-            ajdto.setDescripcion(aj.getDescripcion());
-            ajdto.setFechaAjuste(aj.getFechaAjuste());
-            return ajdto;
-        }).collect(Collectors.toList()));
+        dto.setIdinventario(inventario.getIdinventario());
+        dto.setIdalmacen(inventario.getAlmacen().getIdalmacen());
+        dto.setNombre(inventario.getNombre());
+        dto.setDescripcion(inventario.getDescripcion());
         return dto;
+    }
+
+    private Inventario toEntity(InventarioDTO dto) {
+        Inventario inventario = new Inventario();
+        if (dto.getIdinventario() != null) {
+            inventario.setIdinventario(dto.getIdinventario());
+        }
+        inventario.setNombre(dto.getNombre());
+        inventario.setDescripcion(dto.getDescripcion());
+            Almacenes almacen =
+            new Almacenes();
+        almacen.setIdalmacen(dto.getIdalmacen());
+        inventario.setAlmacen(almacen);
+        return inventario;
     }
 
     @GetMapping
     public ResponseEntity<List<InventarioDTO>> listarTodos() {
-        List<InventarioDTO> list = serviceInventario.buscarTodos().stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(list);
+        List<InventarioDTO> lista = serviceInventario.buscarTodos().stream()
+            .map(this::toDTO)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(lista);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<InventarioDTO> obtenerPorId(@PathVariable Integer id) {
         Optional<Inventario> opt = serviceInventario.buscarId(id);
-        return opt.map(this::toDTO).map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return opt.map(this::toDTO)
+                  .map(ResponseEntity::ok)
+                  .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<InventarioDTO> consultaStock(@RequestBody InventarioDTO dto) {
+    public ResponseEntity<?> crear(@RequestBody InventarioDTO dto) {
         try {
-            Inventario inventario = serviceInventario.sincronizarStock(dto.getIdproducto(), dto.getIdalmacen());
-            return ResponseEntity.ok(toDTO(inventario));
+            Inventario entidad = toEntity(dto);
+            Inventario creado = serviceInventario.guardar(entidad);
+            return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(creado));
         } catch (ResponseStatusException e) {
-            throw e;
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al consultar stock", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Error al crear inventario");
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<InventarioDTO> actualizar(@PathVariable Integer id, @RequestBody InventarioDTO dto) {
+    @PutMapping
+    public ResponseEntity<?> actualizar(@RequestBody InventarioDTO dto) {
         try {
-            Inventario actualizado = serviceInventario.actualizarStock(id, dto.getStock(), dto.getIdproducto(), dto.getIdalmacen());
-            return ResponseEntity.ok(toDTO(actualizado));
+            // Aquí el id ya viene en el dto
+            Inventario entidad = toEntity(dto);
+            Inventario modificado = serviceInventario.modificar(entidad);
+            return ResponseEntity.ok(toDTO(modificado));
         } catch (ResponseStatusException e) {
-            throw e;
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al actualizar inventario", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Error al actualizar inventario");
         }
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
-        serviceInventario.eliminar(id);
-        return ResponseEntity.ok("Movimiento de inventario eliminado");
+        try {
+            serviceInventario.eliminar(id);
+            return ResponseEntity.ok("Inventario eliminado correctamente");
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Error al eliminar inventario");
+        }
     }
 }

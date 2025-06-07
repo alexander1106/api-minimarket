@@ -8,43 +8,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.gadbacorp.api.entity.inventario.AlmacenProducto;
 import com.gadbacorp.api.entity.inventario.Almacenes;
 import com.gadbacorp.api.entity.inventario.Inventario;
-import com.gadbacorp.api.entity.inventario.Productos;
-import com.gadbacorp.api.repository.inventario.AlmacenProductoRepository;
 import com.gadbacorp.api.repository.inventario.AlmacenesRepository;
 import com.gadbacorp.api.repository.inventario.InventarioRepository;
-import com.gadbacorp.api.repository.inventario.ProductosRepository;
 import com.gadbacorp.api.service.inventario.IInventarioService;
 
 @Service
-public class InventarioService implements IInventarioService{
+public class InventarioService implements IInventarioService {
+
     @Autowired
     private InventarioRepository repoInventario;
 
     @Autowired
-    private ProductosRepository repoProductos;
-
-    @Autowired
     private AlmacenesRepository repoAlmacenes;
-
-    @Autowired
-    private AlmacenProductoRepository repoAlmacenProducto;
 
     @Override
     public List<Inventario> buscarTodos() {
         return repoInventario.findAll();
-    }
-
-    @Override
-    public Inventario guardar(Inventario inventario) {
-        return repoInventario.save(inventario);
-    }
-
-    @Override
-    public Inventario modificar(Inventario inventario) {
-        return repoInventario.save(inventario);
     }
 
     @Override
@@ -53,48 +34,86 @@ public class InventarioService implements IInventarioService{
     }
 
     @Override
-    public void eliminar(Integer id) {
-        repoInventario.deleteById(id);
+    public Inventario guardar(Inventario inventario) {
+        // 1) Verificar que exista el almacén antes de guardar
+        Integer idAlmacen = inventario.getAlmacen().getIdalmacen();
+        Almacenes almacen = repoAlmacenes.findById(idAlmacen)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Almacén no encontrado id=" + idAlmacen
+            ));
+        inventario.setAlmacen(almacen);
+
+        // 2) Verificar que NO exista otro inventario con el mismo almacen + nombre
+        String nombre = inventario.getNombre().trim();
+        Optional<Inventario> existente = repoInventario
+            .findByAlmacenIdalmacenAndNombreIgnoreCase(idAlmacen, nombre);
+        if (existente.isPresent()) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Ya existe un inventario con nombre '" + nombre +
+                "' en el almacén id=" + idAlmacen
+            );
+        }
+        // 3) Si no existe duplicado, guardar normalmente
+        return repoInventario.save(inventario);
     }
+
 
     @Override
-    public Inventario sincronizarStock(Integer idproducto, Integer idalmacen) {
-        Productos producto = repoProductos.findById(idproducto)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado id=" + idproducto));
+    public Inventario modificar(Inventario inventario) {
+        // 1) Verificar que el inventario exista
+        Integer idInv = inventario.getIdinventario();
+        Inventario existente = repoInventario.findById(idInv)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Inventario no encontrado id=" + idInv
+            ));
 
-        Almacenes almacen = repoAlmacenes.findById(idalmacen)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Almacén no encontrado id=" + idalmacen));
+        // 2) Verificar/actualizar almacén si cambió
+        Integer idAlmacenNuevo = inventario.getAlmacen().getIdalmacen();
+        Almacenes almacenNuevo = repoAlmacenes.findById(idAlmacenNuevo)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Almacén no encontrado id=" + idAlmacenNuevo
+            ));
 
-        AlmacenProducto ap = repoAlmacenProducto.findByProductoAndAlmacen(producto, almacen)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "No hay stock para producto " + idproducto + " en almacén " + idalmacen));
+        // 3) Validar duplicados nombre + almacén si cambió alguno
+        String nuevoNombre = inventario.getNombre().trim();
+        boolean cambióNombre = !existente.getNombre().equalsIgnoreCase(nuevoNombre);
+        boolean cambióAlmacen = !existente.getAlmacen().getIdalmacen().equals(idAlmacenNuevo);
 
-        Optional<Inventario> optInv = repoInventario.findByProductoAndAlmacen(producto, almacen);
+        if (cambióNombre || cambióAlmacen) {
+            Optional<Inventario> otro = repoInventario
+                .findByAlmacenIdalmacenAndNombreIgnoreCase(idAlmacenNuevo, nuevoNombre);
+            if (otro.isPresent() && !otro.get().getIdinventario().equals(idInv)) {
+                throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Ya existe un inventario con nombre '" + nuevoNombre +
+                    "' en el almacén id=" + idAlmacenNuevo
+                );
+            }
+        }
 
-        Inventario inv = optInv.map(i -> {
-            i.setStock(ap.getStock());
-            return i;
-        }).orElseGet(() -> new Inventario(producto, almacen, ap.getStock()));
+        // 4) Asignar valores nuevos
+        existente.setAlmacen(almacenNuevo);
+        existente.setNombre(nuevoNombre);
+        existente.setDescripcion(inventario.getDescripcion());
+        // El campo estado se maneja vía soft-delete; no lo tocamos aquí
 
-        return repoInventario.save(inv);
+        return repoInventario.save(existente);
     }
 
 
-    public Inventario actualizarStock(Integer idinventario, Integer stock, Integer idproducto, Integer idalmacen) {
-    Productos producto = repoProductos.findById(idproducto)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado id=" + idproducto));
-    Almacenes almacen = repoAlmacenes.findById(idalmacen)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Almacén no encontrado id=" + idalmacen));
-    AlmacenProducto ap = repoAlmacenProducto.findByProductoAndAlmacen(producto, almacen)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "No hay stock para producto " + idproducto + " en almacén " + idalmacen));
-
-    Inventario inventario = repoInventario.findById(idinventario)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventario no encontrado id=" + idinventario));
-
-    inventario.setProducto(producto);
-    inventario.setAlmacen(almacen);
-    inventario.setStock(ap.getStock());
-    return repoInventario.save(inventario);
+    @Override
+    public void eliminar(Integer id) {
+        // Soft-delete: actualizará estado = 0 gracias a @SQLDelete en la entidad
+        if (!repoInventario.existsById(id)) {
+            throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Inventario no encontrado id=" + id
+            );
+        }
+        repoInventario.deleteById(id);
     }
 }

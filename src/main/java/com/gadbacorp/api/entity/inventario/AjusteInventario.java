@@ -16,10 +16,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-/**
- * Representa un ajuste de stock en un registro de Inventario.
- * Cada ajuste puede ser positivo (aumento) o negativo (disminución).
- */
 @Entity
 @Table(name = "ajuste_inventario")
 @SQLDelete(sql = "UPDATE ajuste_inventario SET estado = 0 WHERE idajusteinventario = ?")
@@ -35,11 +31,10 @@ public class AjusteInventario {
     private String descripcion;
     private Integer estado = 1;
 
-    /** Relación ManyToOne: a qué Inventario pertenece este ajuste */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idinventario", nullable = false)
+    @JoinColumn(name = "idinventarioproducto", nullable = false)
     @JsonIgnore
-    private Inventario inventario;
+    private InventarioProducto inventarioProducto;
 
     public AjusteInventario() { }
 
@@ -54,13 +49,15 @@ public class AjusteInventario {
     public Integer getIdajusteinventario() {
         return idajusteinventario;
     }
-    public void setIdajusteinventario(Integer id) {
-        this.idajusteinventario = id;
+
+    public void setIdajusteinventario(Integer idajusteinventario) {
+        this.idajusteinventario = idajusteinventario;
     }
 
     public Integer getCantidad() {
         return cantidad;
     }
+
     public void setCantidad(Integer cantidad) {
         this.cantidad = cantidad;
     }
@@ -68,6 +65,7 @@ public class AjusteInventario {
     public LocalDateTime getFechaAjuste() {
         return fechaAjuste;
     }
+
     public void setFechaAjuste(LocalDateTime fechaAjuste) {
         this.fechaAjuste = fechaAjuste;
     }
@@ -75,6 +73,7 @@ public class AjusteInventario {
     public String getDescripcion() {
         return descripcion;
     }
+
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
@@ -82,15 +81,17 @@ public class AjusteInventario {
     public Integer getEstado() {
         return estado;
     }
+
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
 
-    public Inventario getInventario() {
-        return inventario;
+    public InventarioProducto getInventarioProducto() {
+        return inventarioProducto;
     }
-    public void setInventario(Inventario inventario) {
-        this.inventario = inventario;
+
+    public void setInventarioProducto(InventarioProducto inventarioProducto) {
+        this.inventarioProducto = inventarioProducto;
     }
 
     @Override

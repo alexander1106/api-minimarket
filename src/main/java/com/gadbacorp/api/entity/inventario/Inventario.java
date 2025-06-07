@@ -28,37 +28,28 @@ public class Inventario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idinventario;
-    private Integer stock = 0;
+    private String nombre;
+    private String descripcion;
+    private Integer stock;
     private Integer estado = 1;
 
-    /** A qué producto corresponde este inventario */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idproducto", nullable = false)
-    private Productos producto;
-
-    /** En qué almacén está este stock */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idalmacen", nullable = false)
     private Almacenes almacen;
 
-    /**
-     * Historial de ajustes de stock (aumentos/disminuciones).
-     * Se ignora en el toString/json para no recargar la respuesta.
-     */
-    @OneToMany(mappedBy = "inventario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "inventario",
+        cascade = CascadeType.ALL,orphanRemoval = true,
+        fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<AjusteInventario> ajustes = new ArrayList<>();
+    private List<InventarioProducto> inventarioProductos = new ArrayList<>();
 
     public Inventario() { }
 
-    /** Crea un inventario nuevo con stock inicial */
-    public Inventario(Productos producto, Almacenes almacen, Integer stockInicial) {
-        this.producto = producto;
+    public Inventario(Almacenes almacen, String nombre, String descripcion) {
         this.almacen = almacen;
-        this.stock    = stockInicial;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
     }
-
-    // —— Getters & Setters —— //
 
     public Integer getIdinventario() {
         return idinventario;
@@ -68,13 +59,20 @@ public class Inventario {
         this.idinventario = idinventario;
     }
 
-    public Integer getStock() {
-        return stock;
+    public String getNombre() {
+        return nombre;
     }
 
-    /** Reemplaza el stock por el valor dado */
-    public void setStock(Integer stock) {
-        this.stock = stock;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
     public Integer getEstado() {
@@ -85,14 +83,6 @@ public class Inventario {
         this.estado = estado;
     }
 
-    public Productos getProducto() {
-        return producto;
-    }
-
-    public void setProducto(Productos producto) {
-        this.producto = producto;
-    }
-
     public Almacenes getAlmacen() {
         return almacen;
     }
@@ -101,20 +91,27 @@ public class Inventario {
         this.almacen = almacen;
     }
 
-    public List<AjusteInventario> getAjustes() {
-        return ajustes;
+    public List<InventarioProducto> getInventarioProductos() {
+        return inventarioProductos;
     }
 
-    public void setAjustes(List<AjusteInventario> ajustes) {
-        this.ajustes = ajustes;
+    public void setInventarioProductos(List<InventarioProducto> inventarioProductos) {
+        this.inventarioProductos = inventarioProductos;
     }
+
 
     @Override
     public String toString() {
-        return "Inventario [idinventario=" + idinventario +
-               ", stock=" + stock +
-               ", productoId=" + (producto != null ? producto.getIdproducto() : null) +
-               ", almacenId="  + (almacen  != null ? almacen.getIdalmacen()   : null) +
-               "]";
+        return "Inventario [idinventario=" + idinventario + ", nombre=" + nombre + ", descripcion=" + descripcion
+                + ", estado=" + estado + ", almacen=" + almacen + "]";
     }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
+
 }

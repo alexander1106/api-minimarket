@@ -29,11 +29,10 @@ public class AjusteInventarioController {
     @Autowired
     private IAjusteInventarioService serviceAjusteInventario;
 
-    // Mapper: Entity -> DTO
     private AjusteInventarioDTO toDTO(AjusteInventario aj) {
         AjusteInventarioDTO dto = new AjusteInventarioDTO();
         dto.setIdajusteinventario(aj.getIdajusteinventario());
-        dto.setIdinventario(aj.getInventario().getIdinventario());
+        dto.setIdinventarioproducto(aj.getInventarioProducto().getIdinventarioproducto());
         dto.setCantidad(aj.getCantidad());
         dto.setDescripcion(aj.getDescripcion());
         dto.setFechaAjuste(aj.getFechaAjuste());
@@ -45,8 +44,12 @@ public class AjusteInventarioController {
         try {
             AjusteInventario creado = serviceAjusteInventario.ajustarStock(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(creado));
-        } catch (IllegalArgumentException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Error al crear ajuste de inventario", e);
         }
     }
 
@@ -66,21 +69,36 @@ public class AjusteInventarioController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<AjusteInventarioDTO> actualizar(@PathVariable Integer id,
-                                                           @RequestBody AjusteInventarioDTO dto) {
+    @PutMapping
+    public ResponseEntity<AjusteInventarioDTO> actualizar(
+        @RequestBody AjusteInventarioDTO dto
+    ) {
         try {
-            dto.setIdajusteinventario(id);
+            // Aquí el id debe estar incluido dentro del DTO
             AjusteInventario actualizado = serviceAjusteInventario.modificarAjuste(dto);
             return ResponseEntity.ok(toDTO(actualizado));
-        } catch (IllegalArgumentException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Error al actualizar ajuste de inventario", e
+            );
         }
     }
 
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
-        serviceAjusteInventario.eliminar(id);
-        return ResponseEntity.ok("Ajuste de inventario eliminado");
+        try {
+            serviceAjusteInventario.eliminar(id);
+            return ResponseEntity.ok("Ajuste de inventario eliminado");
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Error al eliminar ajuste de inventario", e);
+        }
     }
 }
