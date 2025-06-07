@@ -1,15 +1,24 @@
 package com.gadbacorp.api.entity.administrable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.gadbacorp.api.entity.inventario.Almacenes;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name="sucursales")
@@ -33,6 +42,21 @@ public class Sucursales {
     @ManyToOne
     @JoinColumn(name = "idempresa")
     private Empresas empresa;
+
+    // ← NUEVO: lista de almacenes de esta sucursal
+    @OneToMany(mappedBy = "sucursal",cascade= CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Almacenes> almacenes = new ArrayList<>();
+
+    // getters y setters existentes…
+
+    public List<Almacenes> getAlmacenes() {
+        return almacenes;
+    }
+
+    public void setAlmacenes(List<Almacenes> almacenes) {
+        this.almacenes = almacenes;
+    }
 
     public Integer getIdSucursal() {
         return idSucursal;

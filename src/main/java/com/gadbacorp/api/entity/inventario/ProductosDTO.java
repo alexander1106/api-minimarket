@@ -19,6 +19,7 @@ public class ProductosDTO {
     private BigDecimal costoCompra;
     private BigDecimal costoVenta;
     private BigDecimal costoMayor;
+    private String imagen;
     private Integer idcategoria;
     private Integer idunidadmedida;
     private Integer idtipoproducto;
@@ -127,9 +128,17 @@ public class ProductosDTO {
     public String toString() {
         return "ProductosDTO [idproducto=" + idproducto + ", nombre=" + nombre + ", descripcion=" + descripcion
                 + ", fechaVencimiento=" + fechaVencimiento + ", tipoImpuesto=" + tipoImpuesto + ", costoCompra="
-                + costoCompra + ", costoVenta=" + costoVenta + ", costoMayor=" + costoMayor + ", idcategoria="
+                + costoCompra + ", costoVenta=" + costoVenta + ", costoMayor=" + costoMayor + ", imagen=" + imagen + ", idcategoria="
                 + idcategoria + ", idunidadmedida=" + idunidadmedida + ", idtipoproducto=" + idtipoproducto
                 + ", almacenes=" + almacenes + "]";
+    }
+
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 
     

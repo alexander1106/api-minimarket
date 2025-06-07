@@ -9,12 +9,13 @@ public interface IAlmacenProductoService {
 
     List<AlmacenProducto> buscarTodos();
     //guarda los Productos
-    void guardar(AlmacenProducto almacenproducto);
+    AlmacenProducto guardar(AlmacenProducto almacenproducto);
 
-    void modificar(AlmacenProducto almacenproducto);
+    AlmacenProducto modificar(AlmacenProducto almacenproducto);
 
     Optional<AlmacenProducto> buscarId(Integer id);
 
     void eliminar(Integer id);
+     Optional<AlmacenProducto> buscarPorProductoYAlmacen(Integer idProd, Integer idAlm);
 
 }

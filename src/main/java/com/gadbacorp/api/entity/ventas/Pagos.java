@@ -27,7 +27,7 @@ public class Pagos {
     private String observaciones;
     private Date fechaPago; 
     private Double montoPagado;
-    private String referenciaPago;
+    private String referenciaPago; //hace referencia al numero de tarjeta si es el caso
     private String estadoPago;
     private Integer estado=1;
 
@@ -36,7 +36,7 @@ public class Pagos {
     @JsonIgnore // evita ciclos infinitos si usas JSON
     private Ventas ventas;
 
-     @ManyToOne
+    @ManyToOne
     @JoinColumn(name = "id_metodo_pago", referencedColumnName = "id_metodo_pago")
     @JsonIgnore // evita ciclos infinitos si usas JSON
     private MetodosPago metodosPago;
@@ -44,6 +44,9 @@ public class Pagos {
      public Integer getIdPago() {
          return idPago;
      }
+
+     public Pagos() {
+    }
 
      public void setIdPago(Integer idPago) {
          this.idPago = idPago;
@@ -113,6 +116,12 @@ public class Pagos {
          this.metodosPago = metodosPago;
      }
 
-  
+     @Override
+     public String toString() {
+        return "Pagos [idPago=" + idPago + ", observaciones=" + observaciones + ", fechaPago=" + fechaPago
+                + ", montoPagado=" + montoPagado + ", referenciaPago=" + referenciaPago + ", estadoPago=" + estadoPago
+                + ", estado=" + estado + ", ventas=" + ventas + ", metodosPago=" + metodosPago + "]";
+     }
+     
 
 }

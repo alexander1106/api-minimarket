@@ -20,9 +20,7 @@ import com.gadbacorp.api.entity.ventas.Ventas;
 import com.gadbacorp.api.entity.ventas.VentasDTO;
 import com.gadbacorp.api.repository.ventas.ClientesRepository;
 import com.gadbacorp.api.repository.ventas.VentasRepository;
-import com.gadbacorp.api.service.ventas.IVentasService;
-
-
+import com.gadbacorp.api.service.ventas.IVentasService; 
 @RestController
 @RequestMapping("/api/minimarket")
 @CrossOrigin("*")
@@ -60,6 +58,7 @@ public class VentasController {
         venta.setNro_comrprobante(dto.getNro_comrprobante());
         venta.setEstado_venta(dto.getEstado_venta());
         venta.setFecha_venta(dto.getFecha_venta());    
+        venta.setEstado(dto.getEstado());
         venta.setCliente(cliente); // Primero asigna el cliente
         return ResponseEntity.ok(ventasService.guardarVenta(venta));
     }
@@ -71,25 +70,21 @@ public class VentasController {
         }
         Ventas venta = new Ventas();
         venta.setIdVenta(dto.getIdVenta());
-
+        venta.setEstado(dto.getEstado());
         venta.setTotal_venta(dto.getTotal_venta());
         venta.setTipo_comprobante(dto.getTipo_comprobante());
         venta.setNro_comrprobante(dto.getNro_comrprobante());
         venta.setFecha_venta(dto.getFecha_venta());    
         venta.setEstado_venta(dto.getEstado_venta());
-        venta.setCliente(new Clientes(dto.getId_cliente())); // Primero asigna el cliente
+        venta.setCliente(new Clientes(dto.getId_cliente())); 
         return ResponseEntity.ok(ventasService.editarVenta(venta));    
     }
     
-   
-
-    // Eliminar venta
     @DeleteMapping("/venta/{id}")
     public String eliminarVenta(@PathVariable Integer id) {
         ventasService.eliminarVenta(id);
         return "La venta a sido eliminada con exito";
     }
-
 
     @PutMapping("/anular-venta/{id}")
     public ResponseEntity<String> anularVenta(@PathVariable Integer id) {
@@ -103,5 +98,4 @@ public class VentasController {
         ventasRepository.save(venta);
         return ResponseEntity.ok("Venta anulada correctamente.");
     }
-
 }

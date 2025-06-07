@@ -141,4 +141,13 @@ public class Clientes {
     public void setCotizaciones(List<Cotizaciones> cotizaciones) {
         this.cotizaciones = cotizaciones;
     }
+
+    @Override
+    public String toString() {
+        return "Clientes [idCliente=" + idCliente + ", tipoDocumento=" + tipoDocumento + ", tipoContribuyente="
+                + tipoContribuyente + ", documento=" + documento + ", nombre=" + nombre + ", telefono=" + telefono
+                + ", email=" + email + ", direccion=" + direccion + ", fecha_registro=" + fecha_registro + ", estado="
+                + estado + ", ventas=" + ventas + ", cotizaciones=" + cotizaciones + "]";
+    }
+    
 }

@@ -12,6 +12,5 @@ public interface IMetodosPagoService {
     void eliminarMetodoPago(Integer id);
     MetodosPago editarMetodosPago (MetodosPago metodoPago);
     boolean existeMetodoConNombre(String nombre);
-    boolean tieneRelaciones(Integer idMetodoPago);
 
 }

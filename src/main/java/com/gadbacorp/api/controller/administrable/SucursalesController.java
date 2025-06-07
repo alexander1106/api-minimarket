@@ -21,7 +21,7 @@ import com.gadbacorp.api.service.administrable.ISucursalesService;
 public class SucursalesController {
     @Autowired
     private ISucursalesService serviceSucursales;
-
+ 
     @GetMapping("/sucursales")
     public List<Sucursales> buscarTodos() {
         return serviceSucursales.buscarTodos();

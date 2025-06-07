@@ -8,7 +8,6 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.gadbacorp.api.entity.ventas.MetodosPago;
-import com.gadbacorp.api.expeciones.MetodoPagoDuplicadoException;
 import com.gadbacorp.api.repository.ventas.MetodosPagoRepository;
 import com.gadbacorp.api.repository.ventas.PagosRepository;
 import com.gadbacorp.api.service.ventas.IMetodosPagoService;
@@ -25,10 +24,11 @@ public class MetodosPagoService implements  IMetodosPagoService{
     @Override
     public MetodosPago guardarMetodoPago(MetodosPago metodoPago) {
         if (existeMetodoConNombre(metodoPago.getNombre())) {
-            throw new MetodoPagoDuplicadoException("Ya existe un método de pago con ese nombre.");
+            return null; // O puedes devolver un MetodosPago vacío, o manejar en el controlador
         }
         return metodosPagoRepository.save(metodoPago);
     }
+
 
     @Override
     public List<MetodosPago> listarMetodosPago() {
@@ -50,19 +50,13 @@ public class MetodosPagoService implements  IMetodosPagoService{
         return metodosPagoRepository.save(metodoPago);
     }
 
-   @Override
+    @Override
     public boolean existeMetodoConNombre(String nombre) {
-    try {
-        return metodosPagoRepository.findByNombre(nombre).isPresent();
-    } catch (IncorrectResultSizeDataAccessException ex) {
-        throw new MetodoPagoDuplicadoException("Ya existe más de un método de pago con ese nombre.");
-    }
+        try {
+            return metodosPagoRepository.findByNombre(nombre).isPresent();
+        } catch (IncorrectResultSizeDataAccessException ex) {
+            return true;
+        }
+    
 }
-
-   @Override
-   public boolean tieneRelaciones(Integer idMetodoPago) {
-    return pagosRepository.existsByMetodosPagoIdMetodoPago(idMetodoPago);
-   }
-
-
 }

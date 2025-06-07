@@ -17,7 +17,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 @Entity
 @Table(name="ventas")
 @SQLDelete(sql="UPDATE ventas SET estado = 0 WHERE id_venta = ?")
@@ -33,8 +32,6 @@ public class Ventas {
     private Integer estado=1;
     private String estado_venta;
 
-
-    // RELACIÓN CON CLIENTES
     @ManyToOne
     @JoinColumn(name = "id_cliente", referencedColumnName = "id_cliente")
     @JsonIgnore // evita ciclos infinitos si usas JSON
@@ -54,6 +51,12 @@ public class Ventas {
     @OneToMany(mappedBy = "ventas", cascade = CascadeType.ALL)
     private List<Devoluciones> devoluciones;
 
+     public Ventas(Integer idVenta) {
+        this.idVenta = idVenta;
+    }
+
+    public Ventas() {
+    }
 
     public Integer getIdVenta() {
         return idVenta;
@@ -151,13 +154,11 @@ public class Ventas {
         this.devoluciones = devoluciones;
     }
 
-    public Ventas(Integer idVenta) {
-        this.idVenta = idVenta;
+    @Override
+    public String toString() {
+        return "Ventas [idVenta=" + idVenta + ", total_venta=" + total_venta + ", tipo_comprobante=" + tipo_comprobante
+                + ", nro_comrprobante=" + nro_comrprobante + ", fecha_venta=" + fecha_venta + ", estado=" + estado
+                + ", estado_venta=" + estado_venta + ", cliente=" + cliente + ", cotizaciones=" + cotizaciones
+                + ", detallesVentas=" + detallesVentas + ", pagos=" + pagos + ", devoluciones=" + devoluciones + "]";
     }
-
-    public Ventas() {
-    }
-
-    
-
 }

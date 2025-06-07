@@ -21,7 +21,13 @@ public class Categorias {
     private String nombre;
     private String imagen;
     private Integer estado = 1;
+
     public Categorias(){}
+
+    public Categorias(Integer id){
+        this.idcategoria = id;
+    }
+
     public Integer getIdcategoria() {
         return idcategoria;
     }

@@ -1,15 +1,8 @@
 package com.gadbacorp.api.entity.ventas;
 
-import java.util.Date;
-
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
-import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
 
 public class DetallesDevolucionDTO {
@@ -65,6 +58,4 @@ public class DetallesDevolucionDTO {
     public void setId_devolucion(Integer id_devolucion) {
         this.id_devolucion = id_devolucion;
     } 
-    
-    
 }

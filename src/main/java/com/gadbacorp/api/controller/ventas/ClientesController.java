@@ -37,7 +37,7 @@ public class ClientesController {
         if (!existentes.isEmpty()) {
             return ResponseEntity
                 .badRequest()
-                .body("El cliente no puede ser registrado, este documento ya está registrado.");
+                .body("El cliente no puede ser registrado porque este documento ya está registrado.");
         }
 
         Clientes nuevoCliente = clientesService.crearCliente(cliente);
@@ -45,7 +45,7 @@ public class ClientesController {
     }
 
     @PutMapping("/cliente")
-    public Clientes modificar(@RequestBody Clientes cliente) {
+    public Clientes modificar(@RequestBody Clientes cliente) {  
          return clientesService.crearCliente(cliente);
     }
 
@@ -53,15 +53,10 @@ public class ClientesController {
     public Optional<Clientes> buscarId(@PathVariable("id") Integer id){
         return clientesService.obtenerCliente(id);
     }
-     @DeleteMapping("/cliente/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
-        try {
-            clientesService.eliminarCliente(id);
-            return ResponseEntity.ok("El cliente fue eliminado");
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                .badRequest()
-                .body(e.getMessage()); // Devuelve el mensaje personalizado
-        }
+    
+    @DeleteMapping("/cliente/{id}")
+    public String eliminar(@PathVariable Integer id) {
+        clientesService.eliminarCliente(id);
+        return "El cliente fue eliminado";
     }
 }

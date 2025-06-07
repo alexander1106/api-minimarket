@@ -2,19 +2,10 @@ package com.gadbacorp.api.entity.ventas;
 
 import java.time.LocalDate;
 
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
-import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
-@Entity
-@Table(name="ventas")
-@SQLDelete(sql="UPDATE ventas SET estado = 0 WHERE id_venta = ?")
-@Where(clause = "estado = 1")
 public class VentasDTO {
 
     @Id
