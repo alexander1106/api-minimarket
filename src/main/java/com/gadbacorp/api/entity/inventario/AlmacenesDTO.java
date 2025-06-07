@@ -1,23 +1,29 @@
 package com.gadbacorp.api.entity.inventario;
 
 public class AlmacenesDTO {
-private Integer idalmacen;
+    private Integer idalmacen;
     private String nombre;
     private String descripcion;
-    private String  direccion;
-    private String encargado;
+    private String direccion;
+    private Integer idEmpleado;
     private Integer estado = 1;
     private Integer idSucursal;
     
     public AlmacenesDTO() { }
 
-    public AlmacenesDTO(Integer idalmacen,String nombre, String descripcion, String direccion, String encargado, Integer idSucursal) {
-            this.idalmacen   = idalmacen;
-            this.nombre      = nombre;
-            this.descripcion = descripcion;
-            this.direccion   = direccion;
-            this.encargado   = encargado;
-            this.idSucursal  = idSucursal;
+    // constructor incluyendo idEmpleado
+    public AlmacenesDTO(Integer idalmacen,
+                        String nombre,
+                        String descripcion,
+                        String direccion,
+                        Integer idEmpleado,
+                        Integer idSucursal) {
+        this.idalmacen   = idalmacen;
+        this.nombre      = nombre;
+        this.descripcion = descripcion;
+        this.direccion   = direccion;
+        this.idEmpleado  = idEmpleado;
+        this.idSucursal  = idSucursal;
     }
 
     public Integer getIdalmacen() {
@@ -52,12 +58,12 @@ private Integer idalmacen;
         this.direccion = direccion;
     }
 
-    public String getEncargado() {
-        return encargado;
+    public Integer getIdEmpleado() {
+        return idEmpleado;
     }
 
-    public void setEncargado(String encargado) {
-        this.encargado = encargado;
+    public void setIdEmpleado(Integer idEmpleado) {
+        this.idEmpleado = idEmpleado;
     }
 
     public Integer getEstado() {
@@ -76,14 +82,12 @@ private Integer idalmacen;
         this.idSucursal = idSucursal;
     }
 
-
     @Override
     public String toString() {
         return "AlmacenesDTO [idalmacen=" + idalmacen + ", nombre=" + nombre + ", descripcion=" + descripcion
-                + ", direccion=" + direccion + ", encargado=" + encargado + ", estado=" + estado + ", idSucursal="
+                + ", direccion=" + direccion + ", idEmpleado=" + idEmpleado + ", estado=" + estado + ", idSucursal="
                 + idSucursal + "]";
     }
-
     
     
 }
