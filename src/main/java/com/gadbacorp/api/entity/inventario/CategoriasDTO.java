@@ -1,5 +1,8 @@
 package com.gadbacorp.api.entity.inventario;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder({ "idcategoria", "nombre", "imagen", "productos" })
 public class CategoriasDTO {
     private Integer idcategoria;
     private String nombre;
@@ -9,8 +12,8 @@ public class CategoriasDTO {
 
     public CategoriasDTO(Integer idcategoria, String nombre, String imagen) {
         this.idcategoria = idcategoria;
-        this.nombre = nombre;
-        this.imagen = imagen;
+        this.nombre      = nombre;
+        this.imagen      = imagen;
     }
 
     public Integer getIdcategoria() {
@@ -44,4 +47,3 @@ public class CategoriasDTO {
 
     
 }
-

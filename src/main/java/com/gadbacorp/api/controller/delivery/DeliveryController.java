@@ -1,10 +1,15 @@
 package com.gadbacorp.api.controller.delivery;
 
+import com.gadbacorp.api.entity.Vehiculo.Vehiculo;
 import com.gadbacorp.api.entity.delivery.Delivery;
 import com.gadbacorp.api.entity.dto.delivery.DeliveryDTO;
+import com.gadbacorp.api.entity.empleados.Empleado;
+import com.gadbacorp.api.enums.Estado.EstadoDelivery;
 import com.gadbacorp.api.entity.ventas.Ventas;
+import com.gadbacorp.api.service.Vehiculo.VehiculoService;
 import com.gadbacorp.api.service.delivery.IDeliveryService;
 import com.gadbacorp.api.service.ventas.IVentasService;
+import com.gadbacorp.api.service.empleados.IEmpleadoServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,145 +23,184 @@ import java.util.Optional;
 @RequestMapping("/api/minimarket/delivery")
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class DeliveryController {
-
     @Autowired
-    private IDeliveryService deliveryService;
-    
-    @Autowired
-    private IVentasService ventasService;
+private IDeliveryService deliveryService;
 
-    @GetMapping
-    public ResponseEntity<?> listarTodosDelivery() {
-        try {
-            List<Delivery> deliveries = deliveryService.findAll();
-            return new ResponseEntity<>(deliveries, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al listar deliveries: " + e.getMessage());
-        }
+@Autowired
+private IVentasService ventasService;
+
+@Autowired
+private VehiculoService vehiculoService;
+
+@Autowired
+private IEmpleadoServices empleadoService;
+
+@GetMapping
+public ResponseEntity<?> listarTodosDelivery() {
+    try {
+        List<Delivery> deliveries = deliveryService.findAll();
+        return new ResponseEntity<>(deliveries, HttpStatus.OK);
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError()
+                .body("Error al listar deliveries: " + e.getMessage());
     }
+}
 
-    @PostMapping
-    public ResponseEntity<?> crearDelivery(@RequestBody DeliveryDTO deliveryDTO) {
-        try {
-            // Validar campos obligatorios
-            if(deliveryDTO.getIdVenta() == null) {
-                return ResponseEntity.badRequest().body("El ID de venta es obligatorio");
+@PostMapping
+public ResponseEntity<?> crearDelivery(@RequestBody DeliveryDTO deliveryDTO) {
+    try {
+        if (deliveryDTO.getIdVenta() == null) {
+            return ResponseEntity.badRequest().body("El ID de venta es obligatorio");
+        }
+
+        Optional<Ventas> ventaOpt = ventasService.buscarVenta(deliveryDTO.getIdVenta().intValue());
+        if (ventaOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Venta no encontrada con ID: " + deliveryDTO.getIdVenta());
+        }
+
+        Vehiculo vehiculo = null;
+        if (deliveryDTO.getIdVehiculo() != null) {
+            Optional<Vehiculo> vehiculoOpt = vehiculoService.getVehiculoById(deliveryDTO.getIdVehiculo());
+            if (vehiculoOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Vehículo no encontrado con ID: " + deliveryDTO.getIdVehiculo());
             }
-            
-            // Validar que existe la venta
-            Optional<Ventas> venta = ventasService.buscarVenta(deliveryDTO.getIdVenta().intValue());
-            if(venta.isEmpty()) {
+            vehiculo = vehiculoOpt.get();
+        } else {
+            List<Vehiculo> todosVehiculos = vehiculoService.getAllVehiculos();
+            if (!todosVehiculos.isEmpty()) {
+                vehiculo = todosVehiculos.get(0);
+            }
+        }
+
+        Empleado empleado = null;
+        if (deliveryDTO.getIdEmpleado() != null) {
+            Optional<Empleado> empleadoOpt = empleadoService.buscarId(deliveryDTO.getIdEmpleado());
+            if (empleadoOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Empleado no encontrado con ID: " + deliveryDTO.getIdEmpleado());
+            }
+            empleado = empleadoOpt.get();
+        }
+
+        Integer codigoEstado = deliveryDTO.getEstado();
+        if (codigoEstado == null) {
+            codigoEstado = EstadoDelivery.PENDIENTE.getCodigo();
+        }
+
+        EstadoDelivery estadoEnum;
+        try {
+            estadoEnum = EstadoDelivery.fromCodigo(codigoEstado);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body("Estado inválido: " + codigoEstado);
+        }
+
+        BigDecimal costoEnvio = deliveryDTO.getCostoEnvio() != null ? deliveryDTO.getCostoEnvio() : BigDecimal.ZERO;
+
+        Delivery delivery = new Delivery();
+        delivery.setVenta(ventaOpt.get());
+        delivery.setDireccion(deliveryDTO.getDireccion());
+        delivery.setEstado(estadoEnum);
+        delivery.setFechaEntrega(deliveryDTO.getFechaEntrega());
+        delivery.setFechaEnvio(deliveryDTO.getFechaEnvio());
+        delivery.setCostoEnvio(costoEnvio);
+        delivery.setObservaciones(deliveryDTO.getObservaciones());
+        delivery.setVehiculo(vehiculo);
+        delivery.setEmpleado(empleado);
+
+        Delivery deliveryGuardado = deliveryService.save(delivery);
+        return ResponseEntity.status(HttpStatus.CREATED).body(deliveryGuardado);
+
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError()
+                .body("Error al crear delivery: " + e.getMessage());
+    }
+}
+
+@PutMapping("/{id}")
+public ResponseEntity<?> actualizarDelivery(@PathVariable Long id, @RequestBody DeliveryDTO deliveryDTO) {
+    try {
+        Optional<Delivery> deliveryExistenteOpt = deliveryService.findById(id);
+        if (deliveryExistenteOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Delivery delivery = deliveryExistenteOpt.get();
+
+        if (deliveryDTO.getIdVenta() != null) {
+            Optional<Ventas> ventaOpt = ventasService.buscarVenta(deliveryDTO.getIdVenta().intValue());
+            if (ventaOpt.isEmpty()) {
                 return ResponseEntity.badRequest().body("Venta no encontrada con ID: " + deliveryDTO.getIdVenta());
             }
-            
-            // Valores por defecto
-            if(deliveryDTO.getEstado() == null) {
-                deliveryDTO.setEstado(1); // 1 = Pendiente
+            delivery.setVenta(ventaOpt.get());
+        }
+
+        if (deliveryDTO.getIdVehiculo() != null) {
+            Optional<Vehiculo> vehiculoOpt = vehiculoService.getVehiculoById(deliveryDTO.getIdVehiculo());
+            if (vehiculoOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Vehículo no encontrado con ID: " + deliveryDTO.getIdVehiculo());
             }
-            if(deliveryDTO.getCostoEnvio() == null) {
-                deliveryDTO.setCostoEnvio(BigDecimal.ZERO);
+            delivery.setVehiculo(vehiculoOpt.get());
+        }
+
+        if (deliveryDTO.getIdEmpleado() != null) {
+            Optional<Empleado> empleadoOpt = empleadoService.buscarId(deliveryDTO.getIdEmpleado());
+            if (empleadoOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Empleado no encontrado con ID: " + deliveryDTO.getIdEmpleado());
             }
-            
-            // Mapeo a entidad
-            Delivery delivery = new Delivery();
-            delivery.setVenta(venta.get());
+            delivery.setEmpleado(empleadoOpt.get());
+        }
+
+        if (deliveryDTO.getDireccion() != null) {
             delivery.setDireccion(deliveryDTO.getDireccion());
-            delivery.setEstado(deliveryDTO.getEstado());
+        }
+
+        if (deliveryDTO.getEstado() != null) {
+            try {
+                EstadoDelivery estadoEnum = EstadoDelivery.fromCodigo(deliveryDTO.getEstado());
+                delivery.setEstado(estadoEnum);
+            } catch (IllegalArgumentException ex) {
+                return ResponseEntity.badRequest().body("Estado inválido: " + deliveryDTO.getEstado());
+            }
+        }
+
+        if (deliveryDTO.getFechaEntrega() != null) {
             delivery.setFechaEntrega(deliveryDTO.getFechaEntrega());
+        }
+
+        if (deliveryDTO.getFechaEnvio() != null) {
             delivery.setFechaEnvio(deliveryDTO.getFechaEnvio());
+        }
+
+        if (deliveryDTO.getCostoEnvio() != null) {
             delivery.setCostoEnvio(deliveryDTO.getCostoEnvio());
+        }
+
+        if (deliveryDTO.getObservaciones() != null) {
             delivery.setObservaciones(deliveryDTO.getObservaciones());
-            
-            // Guardar
-            Delivery deliveryGuardado = deliveryService.save(delivery);
-            return ResponseEntity.status(HttpStatus.CREATED).body(deliveryGuardado);
-            
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al crear delivery: " + e.getMessage());
         }
-    }
 
-    @PutMapping
-    public ResponseEntity<?> actualizarDelivery(@RequestBody DeliveryDTO deliveryDTO) {
-        try {
-            // Validación de ID
-            if(deliveryDTO.getId() == null) {
-                return ResponseEntity.badRequest().body("El ID del delivery es requerido");
-            }
-            
-            // Verificar existencia
-            Optional<Delivery> deliveryExistente = deliveryService.findById(deliveryDTO.getId());
-            if(deliveryExistente.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-            
-            // Validar venta si viene en el DTO
-            if(deliveryDTO.getIdVenta() != null) {
-                Optional<Ventas> venta = ventasService.buscarVenta(deliveryDTO.getIdVenta().intValue());
-                if(venta.isEmpty()) {
-                    return ResponseEntity.badRequest().body("Venta no encontrada con ID: " + deliveryDTO.getIdVenta());
-                }
-                deliveryExistente.get().setVenta(venta.get());
-            }
-            
-            // Actualizar campos
-            Delivery delivery = deliveryExistente.get();
-            if(deliveryDTO.getDireccion() != null) {
-                delivery.setDireccion(deliveryDTO.getDireccion());
-            }
-            if(deliveryDTO.getEstado() != null) {
-                delivery.setEstado(deliveryDTO.getEstado());
-            }
-            if(deliveryDTO.getFechaEntrega() != null) {
-                delivery.setFechaEntrega(deliveryDTO.getFechaEntrega());
-            }
-            if(deliveryDTO.getFechaEnvio() != null) {
-                delivery.setFechaEnvio(deliveryDTO.getFechaEnvio());
-            }
-            if(deliveryDTO.getCostoEnvio() != null) {
-                delivery.setCostoEnvio(deliveryDTO.getCostoEnvio());
-            }
-            if(deliveryDTO.getObservaciones() != null) {
-                delivery.setObservaciones(deliveryDTO.getObservaciones());
-            }
-            
-            // Guardar cambios
-            Delivery deliveryActualizado = deliveryService.save(delivery);
-            return ResponseEntity.ok(deliveryActualizado);
-            
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al actualizar delivery: " + e.getMessage());
-        }
-    }
+        Delivery deliveryActualizado = deliveryService.save(delivery);
+        return ResponseEntity.ok(deliveryActualizado);
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarDelivery(@PathVariable Long id) {
-        try {
-            if(!deliveryService.findById(id).isPresent()) {
-                return ResponseEntity.notFound().build();
-            }
-            
-            deliveryService.deleteById(id);
-            return ResponseEntity.ok("Delivery con ID " + id + " eliminado correctamente");
-            
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al eliminar delivery: " + e.getMessage());
-        }
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError()
+                .body("Error al actualizar delivery: " + e.getMessage());
     }
+}
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> obtenerDeliveryPorId(@PathVariable Long id) {
-        try {
-            Optional<Delivery> delivery = deliveryService.findById(id);
-            return delivery.map(ResponseEntity::ok)
-                          .orElseGet(() -> ResponseEntity.notFound().build());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al obtener delivery: " + e.getMessage());
+@DeleteMapping("/{id}")
+public ResponseEntity<?> eliminarDelivery(@PathVariable Long id) {
+    try {
+        Optional<Delivery> deliveryExistente = deliveryService.findById(id);
+        if (deliveryExistente.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
+
+        deliveryService.deleteById(id);
+        return ResponseEntity.ok("Delivery eliminado exitosamente");
+
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError()
+                .body("Error al eliminar delivery: " + e.getMessage());
     }
+}
 }
