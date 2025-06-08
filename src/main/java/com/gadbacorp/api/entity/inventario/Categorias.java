@@ -1,17 +1,12 @@
 package com.gadbacorp.api.entity.inventario;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -26,11 +21,6 @@ public class Categorias {
     private String nombre;
     private String imagen;
     private Integer estado = 1;
-
-    @OneToMany(
-        mappedBy = "categoria",
-        fetch = FetchType.LAZY)
-    private List<Productos> productos = new ArrayList<>();
 
     public Categorias(){}
 
@@ -70,19 +60,12 @@ public class Categorias {
         this.estado = estado;
     }
 
-    public List<Productos> getProductos() {
-        return productos;
-    }
-
-    public void setProductos(List<Productos> productos) {
-        this.productos = productos;
-    }
-
     @Override
     public String toString() {
         return "Categorias [idcategoria=" + idcategoria + ", nombre=" + nombre + ", imagen=" + imagen + ", estado="
-                + estado + ", productos=" + productos + "]";
+                + estado + "]";
     }
 
+    
 
 }
