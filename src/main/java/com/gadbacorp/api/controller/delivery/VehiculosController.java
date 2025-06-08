@@ -1,7 +1,8 @@
-package com.gadbacorp.api.controller.Vehiculo;
+package  com.gadbacorp.api.controller.delivery;
 
-import com.gadbacorp.api.entity.Vehiculo.Vehiculo;
-import com.gadbacorp.api.service.Vehiculo.VehiculoService;
+import com.gadbacorp.api.entity.delivery.Vehiculo;
+import com.gadbacorp.api.service.delivery.VehiculoService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

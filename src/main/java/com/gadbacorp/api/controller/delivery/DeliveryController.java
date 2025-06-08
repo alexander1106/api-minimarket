@@ -1,13 +1,13 @@
 package com.gadbacorp.api.controller.delivery;
 
-import com.gadbacorp.api.entity.Vehiculo.Vehiculo;
 import com.gadbacorp.api.entity.delivery.Delivery;
+import com.gadbacorp.api.entity.delivery.EstadoDelivery;
+import com.gadbacorp.api.entity.delivery.Vehiculo;
 import com.gadbacorp.api.entity.dto.delivery.DeliveryDTO;
 import com.gadbacorp.api.entity.empleados.Empleado;
-import com.gadbacorp.api.enums.Estado.EstadoDelivery;
 import com.gadbacorp.api.entity.ventas.Ventas;
-import com.gadbacorp.api.service.Vehiculo.VehiculoService;
 import com.gadbacorp.api.service.delivery.IDeliveryService;
+import com.gadbacorp.api.service.delivery.VehiculoService;
 import com.gadbacorp.api.service.ventas.IVentasService;
 import com.gadbacorp.api.service.empleados.IEmpleadoServices;
 import org.springframework.beans.factory.annotation.Autowired;

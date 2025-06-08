@@ -1,6 +1,6 @@
-package com.gadbacorp.api.entity.dto.Vehiculo;
+package com.gadbacorp.api.entity.dto.delivery;
 
-import com.gadbacorp.api.entity.Vehiculo.Vehiculo;
+import com.gadbacorp.api.entity.delivery.Vehiculo;
 
 public class VehiculoMapper {
 

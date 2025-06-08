@@ -1,4 +1,4 @@
-package com.gadbacorp.api.enums.Estado;
+package com.gadbacorp.api.entity.delivery;
 
 public enum EstadoDelivery {
     PENDIENTE(0),

@@ -1,4 +1,4 @@
-package com.gadbacorp.api.entity.dto.Vehiculo;
+package com.gadbacorp.api.entity.dto.delivery;
 
 public class VehiculoDTO {
      private Long id;

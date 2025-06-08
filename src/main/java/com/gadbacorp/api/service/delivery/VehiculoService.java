@@ -1,6 +1,6 @@
 package com.gadbacorp.api.service.Vehiculo;
 
-import com.gadbacorp.api.entity.Vehiculo.Vehiculo;
+import com.gadbacorp.api.entity.delivery.Vehiculo;
 import com.gadbacorp.api.repository.Vehiculo.VehiculoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
