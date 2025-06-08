@@ -92,13 +92,6 @@ public class ProductosDTO {
         this.costoMayor = costoMayor;
     }
 
-    public String getImagen() {
-        return imagen;
-    }
-
-    public void setImagen(String imagen) {
-        this.imagen = imagen;
-    }
 
     public Integer getIdcategoria() {
         return idcategoria;
@@ -139,6 +132,14 @@ public class ProductosDTO {
                 + costoCompra + ", costoVenta=" + costoVenta + ", costoMayor=" + costoMayor + ", imagen=" + imagen
                 + ", idcategoria=" + idcategoria + ", idunidadmedida=" + idunidadmedida + ", idtipoproducto="
                 + idtipoproducto + ", inventarioProducto=" + inventarioProducto + "]";
+    }
+
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 
     

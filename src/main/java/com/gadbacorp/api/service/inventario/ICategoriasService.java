@@ -4,11 +4,14 @@ import java.util.List;
 import java.util.Optional;
 
 import com.gadbacorp.api.entity.inventario.Categorias;
+import com.gadbacorp.api.entity.inventario.CategoriasDTO;
+
 
 public interface ICategoriasService {
 
     //listar todos los clientes de la tabla
     List<Categorias> buscarTodos();
+
     //guarda los clientes
     Categorias guardar(Categorias categoria);
 
@@ -17,4 +20,6 @@ public interface ICategoriasService {
     Optional<Categorias> buscarId(Integer id);
 
     void eliminar(Integer id);
+
+    List<CategoriasDTO> listarConProductos();
 }   

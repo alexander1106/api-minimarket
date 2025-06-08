@@ -18,7 +18,7 @@ public class PagosService implements  IPagosService{
     @Override
     public Pagos guardarPago(Pagos pago) {
         return pagosRepository.save(pago);
-        }
+    }
 
     @Override
     public Pagos editarPago(Pagos pago) {
@@ -39,5 +39,4 @@ public class PagosService implements  IPagosService{
     public Optional<Pagos> buscarPago(Integer id) {
         return pagosRepository.findById(id);
     }
-
 }
