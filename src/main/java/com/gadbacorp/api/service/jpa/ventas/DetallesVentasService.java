@@ -39,4 +39,10 @@ public class DetallesVentasService implements IDetallesVentasService {
     public Optional<DetallesVentas> buscarDetallesVentas(Integer IdVenta) {
         return detallesVentasRepository.findById(IdVenta);
     }
+
+    @Override
+public List<DetallesVentas> buscarPorIdVenta(Integer idVenta) {
+    return detallesVentasRepository.findByVentas_IdVenta(idVenta);
+}
+
 }

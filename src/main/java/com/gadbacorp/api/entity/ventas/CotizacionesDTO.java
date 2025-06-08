@@ -1,5 +1,6 @@
 package com.gadbacorp.api.entity.ventas;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import jakarta.persistence.GeneratedValue;
@@ -12,7 +13,7 @@ public class CotizacionesDTO {
     private Integer idCotizaciones;
     private String numeroCotizacion;
     private String estadoCotizacion;
-    private Date fechaCotizacion;
+    private LocalDate fechaCotizacion;
     private Integer estado=1;
     private Integer id_cliente;
     private double totalCotizacion;
@@ -47,10 +48,10 @@ public class CotizacionesDTO {
     public void setId_cliente(Integer id_cliente) {
         this.id_cliente = id_cliente;
     }
-    public Date getFechaCotizacion() {
+    public LocalDate getFechaCotizacion() {
         return fechaCotizacion;
     }
-    public void setFechaCotizacion(Date fechaCotizacion) {
+    public void setFechaCotizacion(LocalDate fechaCotizacion) {
         this.fechaCotizacion = fechaCotizacion;
     }
     public CotizacionesDTO(Integer idCotizaciones) {

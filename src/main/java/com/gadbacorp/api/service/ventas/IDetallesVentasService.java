@@ -11,4 +11,5 @@ public interface IDetallesVentasService {
     void eliminarDetallesVentas(Integer idDetallesVenta);
     List<DetallesVentas> listDetallesVentas();
     Optional<DetallesVentas> buscarDetallesVentas(Integer IdVenta);
+    List<DetallesVentas> buscarPorIdVenta(Integer idVenta);
 }

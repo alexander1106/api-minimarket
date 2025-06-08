@@ -1,4 +1,5 @@
 package com.gadbacorp.api.entity.ventas;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class Clientes {
     private String  telefono; 
     private String email;
     private String direccion;
-    private Date fecha_registro;
+    private LocalDate fecha_registro;
     private Integer estado=1;
 
 
@@ -102,11 +103,11 @@ public class Clientes {
         this.direccion = direccion;
     }
 
-    public Date getFecha_registro() {
+    public LocalDate getFecha_registro() {
         return fecha_registro;
     }
 
-    public void setFecha_registro(Date fecha_registro) {
+    public void setFecha_registro(LocalDate fecha_registro) {
         this.fecha_registro = fecha_registro;
     }
 

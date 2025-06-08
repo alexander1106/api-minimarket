@@ -1,5 +1,6 @@
 package com.gadbacorp.api.entity.ventas;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import org.hibernate.annotations.SQLDelete;
@@ -22,11 +23,10 @@ import jakarta.persistence.Table;
 public class Devoluciones {
 @   Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private Integer id_devolucion;
-    private Date fechaDevolucion;
+    private Integer idDevolucion;
+    private LocalDate fechaDevolucion;
     private String motivoDevolucion;
     private Double montoDevuelto ;
-    private String estadoDevolucion ;
     private String observaciones ;
     private Integer estado=1;
 
@@ -36,19 +36,13 @@ public class Devoluciones {
     @JsonIgnore
     private Ventas ventas;
 
-    public Integer getId_devolucion() {
-        return id_devolucion;
-    }
+   
 
-    public void setId_devolucion(Integer id_devolucion) {
-        this.id_devolucion = id_devolucion;
-    }
-
-    public Date getFechaDevolucion() {
+    public LocalDate getFechaDevolucion() {
         return fechaDevolucion;
     }
 
-    public void setFechaDevolucion(Date fechaDevolucion) {
+    public void setFechaDevolucion(LocalDate fechaDevolucion) {
         this.fechaDevolucion = fechaDevolucion;
     }
 
@@ -66,14 +60,6 @@ public class Devoluciones {
 
     public void setMontoDevuelto(Double montoDevuelto) {
         this.montoDevuelto = montoDevuelto;
-    }
-
-    public String getEstadoDevolucion() {
-        return estadoDevolucion;
-    }
-
-    public void setEstadoDevolucion(String estadoDevolucion) {
-        this.estadoDevolucion = estadoDevolucion;
     }
 
     public String getObservaciones() {
@@ -98,5 +84,13 @@ public class Devoluciones {
 
     public void setVentas(Ventas ventas) {
         this.ventas = ventas;
+    }
+
+    public Integer getIdDevolucion() {
+        return idDevolucion;
+    }
+
+    public void setIdDevolucion(Integer idDevolucion) {
+        this.idDevolucion = idDevolucion;
     }
 }

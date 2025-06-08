@@ -29,11 +29,11 @@ import jakarta.persistence.Table;
 @Table(name = "productos")
 @SQLDelete(sql="UPDATE productos SET estado = 0 WHERE idproducto = ?")
 @Where(clause = "estado = 1")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Productos {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idproducto;
-
     private String nombre;
     private String descripcion;
     private LocalDate fechaVencimiento;

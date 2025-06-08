@@ -10,3 +10,4 @@ public interface DetallesCotizacionesRepository extends JpaRepository<DetallesCo
         List<DetallesCotizaciones> findByCotizaciones_IdCotizaciones(Integer idCotizaciones);
 
 }
+

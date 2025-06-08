@@ -1,13 +1,11 @@
 package com.gadbacorp.api.entity.ventas;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import java.time.LocalDate;
 import jakarta.persistence.Id;
-
 public class DetallesCotizacionesDTO {
     @Id
     private Integer idDetallesCotizaciones;
-    private String fechaCotizaciones;
+    private LocalDate fechaCotizaciones;
     private Integer cantidad;
     private double subTotal;  
     private Integer estado=1;
@@ -51,10 +49,10 @@ public class DetallesCotizacionesDTO {
     public void setId_cotizacion(Integer id_cotizacion) {
         this.id_cotizacion = id_cotizacion;
     }
-    public String getFechaCotizaciones() {
+    public LocalDate getFechaCotizaciones() {
         return fechaCotizaciones;
     }
-    public void setFechaCotizaciones(String fechaCotizaciones) {
+    public void setFechaCotizaciones(LocalDate fechaCotizaciones) {
         this.fechaCotizaciones = fechaCotizaciones;
     }
     public Integer getPrecioUnitario() {

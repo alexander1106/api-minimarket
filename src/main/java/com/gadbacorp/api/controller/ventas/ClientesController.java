@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gadbacorp.api.entity.ventas.Clientes;
 import com.gadbacorp.api.service.ventas.IClientesService;
+
 @RestController
 @RequestMapping("/api/minimarket")
 @CrossOrigin("*")
@@ -46,7 +47,7 @@ public class ClientesController {
 
     @PutMapping("/cliente")
     public Clientes modificar(@RequestBody Clientes cliente) {  
-         return clientesService.crearCliente(cliente);
+        return clientesService.crearCliente(cliente);
     }
 
     @GetMapping("/cliente/{id}")

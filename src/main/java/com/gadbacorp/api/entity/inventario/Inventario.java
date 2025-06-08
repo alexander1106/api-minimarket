@@ -30,7 +30,6 @@ public class Inventario {
     private Integer idinventario;
     private String nombre;
     private String descripcion;
-    private Integer stock;
     private Integer estado = 1;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -104,14 +103,6 @@ public class Inventario {
     public String toString() {
         return "Inventario [idinventario=" + idinventario + ", nombre=" + nombre + ", descripcion=" + descripcion
                 + ", estado=" + estado + ", almacen=" + almacen + "]";
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
     }
 
 }

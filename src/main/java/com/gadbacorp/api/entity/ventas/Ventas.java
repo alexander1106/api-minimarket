@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -16,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 @Entity
 @Table(name="ventas")
@@ -37,9 +39,9 @@ public class Ventas {
     @JsonIgnore // evita ciclos infinitos si usas JSON
     private Clientes cliente;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "idCotizaciones", referencedColumnName = "idCotizaciones")
-    @JsonIgnore // evita ciclos infinitos si usas JSON
+    @JsonIgnoreProperties("ventas") // ignora solo el campo "ventas" en Cotizaciones para evitar ciclo
     private Cotizaciones cotizaciones;
 
     @OneToMany(mappedBy = "ventas", cascade = CascadeType.ALL)

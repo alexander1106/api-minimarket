@@ -1,5 +1,7 @@
 package com.gadbacorp.api.entity.ventas;
 
+import java.time.LocalDate;
+
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -25,7 +27,7 @@ public class DetallesCotizaciones {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idDetallesCotizaciones;
     private Integer precioUnitario;
-    private String fechaCotizacion;
+    private LocalDate fechaCotizacion;
     private Integer cantidad;
     private double subTotal;  
     private Integer estado=1;
@@ -94,11 +96,11 @@ public class DetallesCotizaciones {
         this.productos = productos;
     }
 
-    public String getFechaCotizacion() {
+    public LocalDate getFechaCotizacion() {
         return fechaCotizacion;
     }
 
-    public void setFechaCotizacion(String fechaCotizacion) {
+    public void setFechaCotizacion(LocalDate fechaCotizacion) {
         this.fechaCotizacion = fechaCotizacion;
     }
 

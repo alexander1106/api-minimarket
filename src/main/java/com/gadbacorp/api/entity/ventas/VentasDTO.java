@@ -18,6 +18,8 @@ public class VentasDTO {
     private Integer estado=1;
     private String estado_venta;
     private Integer id_cliente;
+    private Integer id_cotizacion;
+
 
     public Integer getIdVenta() {
         return idVenta;
@@ -68,4 +70,11 @@ public class VentasDTO {
     public void setEstado_venta(String estado_venta) {
         this.estado_venta = estado_venta;
     }
+    public Integer getId_cotizacion() {
+        return id_cotizacion;
+    }
+    public void setId_cotizacion(Integer id_cotizacion) {
+        this.id_cotizacion = id_cotizacion;
+    }
+    
 }

@@ -1,5 +1,7 @@
 package com.gadbacorp.api.entity.ventas;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -10,7 +12,7 @@ public class DetallesVentasDTO {
     private Integer idDetallesVenta;
 
     private double pecioUnitario;
-    private String fechaVenta;
+    private LocalDate fechaVenta;
     private Integer cantidad;
     private double subTotal;      
     private Integer estado=1;
@@ -29,10 +31,10 @@ public class DetallesVentasDTO {
         this.idDetallesVenta = idDetallesVenta;
     }
 
-    public String getFechaVenta() {
+    public LocalDate getFechaVenta() {
         return fechaVenta;
     }
-    public void setFechaVenta(String fechaVenta) {
+    public void setFechaVenta(LocalDate fechaVenta) {
         this.fechaVenta = fechaVenta;
     }
     public Integer getCantidad() {

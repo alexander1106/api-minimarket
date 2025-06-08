@@ -1,5 +1,6 @@
 package com.gadbacorp.api.entity.ventas;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class Cotizaciones {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idCotizaciones;
-    private Date fechaCotizacion;
+    private LocalDate fechaCotizacion;
     private String numeroCotizacion;
     private String estadoCotizacion;
     private double totalCotizacion;
@@ -38,7 +39,7 @@ public class Cotizaciones {
     @JsonIgnore // evita ciclos infinitos si usas JSON
     private Clientes cliente;
 
-   @OneToMany(mappedBy = "cotizaciones", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cotizaciones", cascade = CascadeType.ALL)
     private List<Ventas> ventas;
     
     @OneToMany(mappedBy = "cotizaciones", cascade = CascadeType.ALL)
@@ -84,11 +85,11 @@ public class Cotizaciones {
         this.cliente = cliente;
     }
 
-    public Date getFechaCotizacion() {
+    public LocalDate getFechaCotizacion() {
         return fechaCotizacion;
     }
 
-    public void setFechaCotizacion(Date fechaCotizacion) {
+    public void setFechaCotizacion(LocalDate fechaCotizacion) {
         this.fechaCotizacion = fechaCotizacion;
     }
 

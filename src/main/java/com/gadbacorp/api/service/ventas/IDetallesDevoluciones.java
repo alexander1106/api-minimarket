@@ -11,5 +11,6 @@ public interface  IDetallesDevoluciones {
     List<DetallesDevolucion> listarDetallesDevoluciones();
     Optional<DetallesDevolucion> buscarDetalleDevolucion(Integer id);
     void eliminarDetallesCotizaciones(Integer id);
+    List<DetallesDevolucion> buscarPorIdDevolucion(Integer id);
     
 }

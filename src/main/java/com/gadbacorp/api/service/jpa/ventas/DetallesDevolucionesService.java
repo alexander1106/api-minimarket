@@ -39,4 +39,10 @@ public class DetallesDevolucionesService implements IDetallesDevoluciones{
     public void eliminarDetallesCotizaciones(Integer id) {
         detallesDevolucionesRepository.deleteById(id);;    
     }
+
+@Override
+public List<DetallesDevolucion> buscarPorIdDevolucion(Integer id) {
+    return detallesDevolucionesRepository.findByDevolucionesIdDevolucion(id);
+}
+
 }

@@ -6,6 +6,8 @@ import java.util.List;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -30,6 +32,7 @@ public class Categorias {
     @OneToMany(
         mappedBy = "categoria",
         fetch = FetchType.LAZY)
+        @JsonIgnore
     private List<Productos> productos = new ArrayList<>();
 
     public Categorias(){}
@@ -80,7 +83,4 @@ public class Categorias {
         return "Categorias [idcategoria=" + idcategoria + ", nombre=" + nombre + ", imagen=" + imagen + ", estado="
                 + estado + ", productos=" + productos + "]";
     }
-
-
-
 }

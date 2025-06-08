@@ -1,6 +1,6 @@
 package com.gadbacorp.api.controller.ventas;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,13 +15,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gadbacorp.api.entity.inventario.Inventario;
+import com.gadbacorp.api.entity.inventario.AjusteInventario;
+import com.gadbacorp.api.entity.inventario.InventarioProducto;
 import com.gadbacorp.api.entity.inventario.Productos;
 import com.gadbacorp.api.entity.ventas.Cotizaciones;
 import com.gadbacorp.api.entity.ventas.DetallesCotizaciones;
 import com.gadbacorp.api.entity.ventas.DetallesCotizacionesDTO;
-import com.gadbacorp.api.entity.ventas.DetallesVentas;
-import com.gadbacorp.api.entity.ventas.Ventas;
+import com.gadbacorp.api.repository.inventario.AjusteInventarioRepository;
+import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
 import com.gadbacorp.api.repository.inventario.InventarioRepository;
 import com.gadbacorp.api.repository.inventario.ProductosRepository;
 import com.gadbacorp.api.repository.ventas.CotizacionesRepository;
@@ -32,176 +33,180 @@ import com.gadbacorp.api.service.ventas.IDetallesCotizacionesService;
 @RestController
 @RequestMapping("/api/minimarket")
 public class DetallesCotizacionesController {
-    @Autowired
-    private IDetallesCotizacionesService detallesCotizacionesService;
-    
-    @Autowired
-    private ProductosRepository productosRepository;
+	@Autowired
+	private IDetallesCotizacionesService detallesCotizacionesService;
 
-    @Autowired
-    private CotizacionesRepository cotizacionesRepository;
-    
-    @Autowired
-    private InventarioRepository inventarioRepository;
+	@Autowired
+	private ProductosRepository productosRepository;
 
-    @Autowired
-    private VentasRepository ventasRepository;
+	@Autowired
+	private CotizacionesRepository cotizacionesRepository;
 
-    @Autowired
-    private DetallesVentasRepository detallesVentasRepository;
-    
-    @GetMapping("/detalles-cotizaciones")
-    public List<DetallesCotizaciones> listarCotizacioneses() {
-        return detallesCotizacionesService.listarDetallesCotizacioneses();
+	@Autowired
+	private InventarioRepository inventarioRepository;
+
+	@Autowired
+	private VentasRepository ventasRepository;
+
+	@Autowired
+	private DetallesVentasRepository detallesVentasRepository;
+
+	@Autowired
+	private InventarioProductoRepository inventarioProductoRepository;
+
+	@Autowired
+	private AjusteInventarioRepository ajusteInventarioRepository;
+
+	@GetMapping("/detalles-cotizaciones")
+	public List<DetallesCotizaciones> listarCotizacioneses() {
+		return detallesCotizacionesService.listarDetallesCotizacioneses();
+	}
+
+	@GetMapping("/detalles-cotizacion/{id}")
+	public Optional<DetallesCotizaciones> buscarDeetallesCotizaciones(@PathVariable Integer id) {
+		return detallesCotizacionesService.buscarDetallesCotizaciones(id);
+	}
+
+	@PostMapping("/detalles-cotizacion")
+	public ResponseEntity<?> guardarDetalleCotizacion(@RequestBody DetallesCotizacionesDTO dto) {
+		Productos producto = productosRepository.findById(dto.getId_producto()).orElse(null);
+		if (producto == null) {
+			return ResponseEntity.badRequest().body("Producto no encontrado con ID: " + dto.getId_producto());
+		}
+
+		var cotizacion = cotizacionesRepository.findById(dto.getId_cotizacion()).orElse(null);
+		if (cotizacion == null) {
+			return ResponseEntity.badRequest().body("Cotización no encontrada con ID: " + dto.getId_cotizacion());
+		}
+
+		Optional<InventarioProducto> inventarioOpt = inventarioProductoRepository.findFirstByProducto_Idproducto(dto.getId_producto());
+		if (inventarioOpt.isEmpty()) {
+			return ResponseEntity.badRequest().body("InventarioProducto no encontrado para el producto ID: " + dto.getId_producto());
+		}
+
+		InventarioProducto inventario = inventarioOpt.get();
+		if (inventario.getStockactual() < dto.getCantidad()) {
+			return ResponseEntity.badRequest().body("Stock insuficiente. Disponible: " + inventario.getStockactual());
+		}
+
+		// Actualizar stock
+		inventario.setStockactual(inventario.getStockactual() - dto.getCantidad());
+		inventarioProductoRepository.save(inventario);
+
+		// Registrar ajuste de inventario
+		AjusteInventario ajuste = new AjusteInventario();
+		ajuste.setCantidad(dto.getCantidad());
+		ajuste.setDescripcion("COTIZACIÓN");
+		ajuste.setFechaAjuste(LocalDateTime.now());
+		ajuste.setInventarioProducto(inventario);
+		ajusteInventarioRepository.save(ajuste);
+
+		// Registrar detalle de cotización
+		DetallesCotizaciones detalle = new DetallesCotizaciones();
+		detalle.setProductos(producto);
+		detalle.setCotizaciones(cotizacion);
+		detalle.setCantidad(dto.getCantidad());
+		detalle.setSubTotal(dto.getSubTotal());
+		detalle.setPrecioUnitario(dto.getPrecioUnitario());
+		detalle.setFechaCotizacion(dto.getFechaCotizaciones());
+
+		return ResponseEntity.ok(detallesCotizacionesService.guardarDetallesCotizaciones(detalle));
+	}
+
+@PutMapping("/detalles-cotizacion")
+public ResponseEntity<?> actualizarDetalleCotizacion(@RequestBody DetallesCotizacionesDTO dto) {
+    // Buscar detalle original
+    Integer id = dto.getIdDetallesCotizaciones();
+    Optional<DetallesCotizaciones> detalleOpt = detallesCotizacionesService.buscarDetallesCotizaciones(id);
+    if (detalleOpt.isEmpty()) {
+        return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/detalles-cotizacion/{id}")
-    public Optional<DetallesCotizaciones> buscarVenta(@PathVariable Integer id) {
-        return detallesCotizacionesService.buscarDetallesCotizaciones(id);
+    DetallesCotizaciones detalle = detalleOpt.get();
+    Productos productoAnterior = detalle.getProductos();
+
+    // Obtener nuevo producto
+    Productos nuevoProducto = productosRepository.findById(dto.getId_producto()).orElse(null);
+    if (nuevoProducto == null) {
+        return ResponseEntity.badRequest().body("Producto nuevo no encontrado con ID: " + dto.getId_producto());
     }
 
-    @PostMapping("/detalles-cotizacion")
-    public ResponseEntity<?> guardarDetallesCotizaciones(@RequestBody DetallesCotizacionesDTO dto) {
-        Productos producto = productosRepository.findById(dto.getId_producto()).orElse(null);
-        if (producto == null) {
-            return ResponseEntity.badRequest().body("Producto no encontrado con ID: " + dto.getId_producto());
-        }
-
-        Cotizaciones cotizacion = cotizacionesRepository.findById(dto.getId_cotizacion()).orElse(null);
-        if (cotizacion == null) {
-            return ResponseEntity.badRequest().body("Cotización no encontrada con ID: " + dto.getId_cotizacion());
-        }
-
-        Optional<Inventario> inventarioOpt = inventarioRepository.findByProductoIdproducto(dto.getId_producto());
-        if (inventarioOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Inventario no encontrado para el producto ID: " + dto.getId_producto());
-        }
-
-        Inventario inventario = inventarioOpt.get();
-        if (inventario.getStock() < dto.getCantidad()) {
-            return ResponseEntity.badRequest().body("Stock insuficiente. Disponible: " + inventario.getStock());
-        }
-
-        inventario.setStock(inventario.getStock() - dto.getCantidad());
-        inventarioRepository.save(inventario);
-
-        DetallesCotizaciones detallesCotizaciones = new DetallesCotizaciones();
-        detallesCotizaciones.setCantidad(dto.getCantidad());
-        detallesCotizaciones.setFechaCotizacion(dto.getFechaCotizaciones());
-        detallesCotizaciones.setPrecioUnitario(dto.getPrecioUnitario());
-        detallesCotizaciones.setSubTotal(dto.getSubTotal());
-        detallesCotizaciones.setProductos(producto);
-        detallesCotizaciones.setCotizaciones(cotizacion);
-        return ResponseEntity.ok(detallesCotizacionesService.guardarDetallesCotizaciones(detallesCotizaciones));
+    Cotizaciones nuevaCotizacion = cotizacionesRepository.findById(dto.getId_cotizacion()).orElse(null);
+    if (nuevaCotizacion == null) {
+        return ResponseEntity.badRequest().body("Cotización nueva no encontrada con ID: " + dto.getId_cotizacion());
     }
 
-    @PutMapping("/detalles-cotizaciones/{id}")
-    public ResponseEntity<?> actualizarDetallesCotizaciones(@PathVariable Integer id, @RequestBody DetallesCotizacionesDTO dto) {
-        Optional<DetallesCotizaciones> detallesOpt = detallesCotizacionesService.buscarDetallesCotizaciones(id);
-        if (detallesOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        DetallesCotizaciones detalles = detallesOpt.get();
-        Cotizaciones cotizacion = detalles.getCotizaciones();
-        if (cotizacion == null) {
-            return ResponseEntity.badRequest().body("Cotización no encontrada para el detalle con ID: " + id);
-        }
+    // Revertir stock del producto anterior
+    InventarioProducto inventarioAnterior = inventarioProductoRepository
+            .findFirstByProducto_Idproducto(productoAnterior.getIdproducto()).orElse(null);
+    if (inventarioAnterior == null) {
+        return ResponseEntity.badRequest().body("Inventario no encontrado para el producto anterior.");
+    }
+    inventarioAnterior.setStockactual(inventarioAnterior.getStockactual() + detalle.getCantidad());
+    inventarioProductoRepository.save(inventarioAnterior);
 
-        Productos producto = productosRepository.findById(dto.getId_producto()).orElse(null);
-        if (producto == null) {
-            return ResponseEntity.badRequest().body("Producto no encontrado con ID: " + dto.getId_producto());
-        }
-
-        Optional<Inventario> inventarioOpt = inventarioRepository.findByProductoIdproducto(dto.getId_producto());
-        if (inventarioOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Inventario no encontrado para el producto ID: " + dto.getId_producto());
-        }
-
-        Inventario inventario = inventarioOpt.get();
-
-        inventario.setStock(inventario.getStock() + detalles.getCantidad());
-
-        if (inventario.getStock() < dto.getCantidad()) {
-            return ResponseEntity.badRequest().body("Stock insuficiente. Disponible: " + inventario.getStock());
-        }
-
-        inventario.setStock(inventario.getStock() - dto.getCantidad());
-        inventarioRepository.save(inventario);
-
-        detalles.setCantidad(dto.getCantidad());
-        detalles.setPrecioUnitario(dto.getPrecioUnitario());
-        detalles.setSubTotal(dto.getSubTotal());
-        detalles.setFechaCotizacion(dto.getFechaCotizaciones());
-        detalles.setProductos(producto);
-
-        return ResponseEntity.ok(detallesCotizacionesService.guardarDetallesCotizaciones(detalles));
+    // Ajustar stock del nuevo producto
+    InventarioProducto inventarioNuevo = inventarioProductoRepository
+            .findFirstByProducto_Idproducto(nuevoProducto.getIdproducto()).orElse(null);
+    if (inventarioNuevo == null) {
+        return ResponseEntity.badRequest().body("Inventario no encontrado para el nuevo producto.");
     }
 
-
-    @PostMapping("/convertir-cotizacion/{id}")
-    public ResponseEntity<?> convertirCotizacion(@PathVariable Integer id) {
-        Optional<Cotizaciones> cotOpt = cotizacionesRepository.findById(id);
-        if (cotOpt.isEmpty()) return ResponseEntity.notFound().build();
-
-        Cotizaciones cot = cotOpt.get();
-
-        // 1. Crear nueva Venta
-        Ventas venta = new Ventas();
-        venta.setFecha_venta(LocalDate.now());
-        venta.setCliente(cot.getCliente()); // Asumiendo que hay una relación
-        venta.setTotal_venta(cot.getTotalCotizacion()); // O calcula el total
-        venta.setCotizaciones(cot);
-        venta.setNro_comrprobante(cot.getNumeroCotizacion());
-        ventasRepository.save(venta);
-
-        // 2. Copiar detalles de cotización a detalles de venta
-        List<DetallesCotizaciones> detallesCot = detallesCotizacionesService.buscarPorCotizacion(cot.getIdCotizaciones());
-
-        for (DetallesCotizaciones detCot : detallesCot) {
-            DetallesVentas detVenta = new DetallesVentas();
-            detVenta.setProductos(detCot.getProductos());
-            detVenta.setCantidad(detCot.getCantidad());
-            detVenta.setPecioUnitario(detCot.getPrecioUnitario());
-            detVenta.setSubTotal(detCot.getSubTotal());
-            detVenta.setVentas(venta);
-
-            detallesVentasRepository.save(detVenta);
-
-            // 3. Actualizar stock si corresponde
-            Inventario inv = inventarioRepository.findByProductoIdproducto(detCot.getProductos().getIdproducto())
-                                .orElse(null);
-            if (inv != null) {
-                inv.setStock(inv.getStock() - detCot.getCantidad());
-                inventarioRepository.save(inv);
-            }
-        }
-        cotizacionesRepository.save(cot);
-        return ResponseEntity.ok("Cotización convertida en venta exitosamente.");
+    if (inventarioNuevo.getStockactual() < dto.getCantidad()) {
+        return ResponseEntity.badRequest().body("Stock insuficiente para el nuevo producto. Disponible: " + inventarioNuevo.getStockactual());
     }
 
-    @DeleteMapping("/detalles-cotizaciones/{id}")
-    public ResponseEntity<?> eliminarDetalleCotizacion(@PathVariable Integer id) {
-        Optional<DetallesCotizaciones> detalleOpt = detallesCotizacionesService.buscarDetallesCotizaciones(id);
-        if (detalleOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    inventarioNuevo.setStockactual(inventarioNuevo.getStockactual() - dto.getCantidad());
+    inventarioProductoRepository.save(inventarioNuevo);
 
-        DetallesCotizaciones detalle = detalleOpt.get();
+    // Registrar ajuste de inventario
+    AjusteInventario ajuste = new AjusteInventario();
+    ajuste.setCantidad(dto.getCantidad());
+    ajuste.setDescripcion("AJUSTE POR ACTUALIZACIÓN DE COTIZACIÓN");
+    ajuste.setFechaAjuste(LocalDateTime.now());
+    ajuste.setInventarioProducto(inventarioNuevo);
+    ajusteInventarioRepository.save(ajuste);
 
-        // Devolver el stock al inventario
-        Productos producto = detalle.getProductos();
-        Optional<Inventario> inventarioOpt = inventarioRepository.findByProductoIdproducto(producto.getIdproducto());
+    // Actualizar los campos del detalle
+    detalle.setCantidad(dto.getCantidad());
+    detalle.setPrecioUnitario(dto.getPrecioUnitario());
+    detalle.setSubTotal(dto.getSubTotal());
+    detalle.setFechaCotizacion(dto.getFechaCotizaciones());
+    detalle.setProductos(nuevoProducto);
+    detalle.setCotizaciones(nuevaCotizacion);
 
-        if (inventarioOpt.isPresent()) {
-            Inventario inventario = inventarioOpt.get();
-            inventario.setStock(inventario.getStock() + detalle.getCantidad());
-            inventarioRepository.save(inventario);
-        }
+    return ResponseEntity.ok(detallesCotizacionesService.guardarDetallesCotizaciones(detalle));
+}
 
-        // Eliminar el detalle de cotización
-        detallesCotizacionesService.eliminarDetallesCotizaciones(id);
+	@DeleteMapping("/detalles-cotizacion/{id}")
+	public ResponseEntity<?> eliminarDetalleCotizacion(@PathVariable Integer id) {
+		Optional<DetallesCotizaciones> detalleOpt = detallesCotizacionesService.buscarDetallesCotizaciones(id);
+		if (detalleOpt.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
 
-        return ResponseEntity.ok("Detalle de cotización eliminado correctamente.");
-    }
+		DetallesCotizaciones detalle = detalleOpt.get();
+		Optional<InventarioProducto> inventarioOpt = inventarioProductoRepository.findFirstByProducto_Idproducto(detalle.getProductos().getIdproducto());
 
+		if (inventarioOpt.isEmpty()) {
+			return ResponseEntity.badRequest().body("Inventario no encontrado para el producto.");
+		}
+
+		InventarioProducto inventario = inventarioOpt.get();
+
+		// Restaurar stock
+		inventario.setStockactual(inventario.getStockactual() + detalle.getCantidad());
+		inventarioProductoRepository.save(inventario);
+
+		// Ajuste de inventario
+		AjusteInventario ajuste = new AjusteInventario();
+		ajuste.setCantidad(detalle.getCantidad());
+		ajuste.setDescripcion("AJUSTE POR ELIMINACIÓN DE COTIZACIÓN");
+		ajuste.setFechaAjuste(LocalDateTime.now());
+		ajuste.setInventarioProducto(inventario);
+		ajusteInventarioRepository.save(ajuste);
+
+		detallesCotizacionesService.eliminarDetallesCotizaciones(id);
+		return ResponseEntity.ok().body("Detalle de cotización eliminado y stock actualizado.");
+	}
 }
