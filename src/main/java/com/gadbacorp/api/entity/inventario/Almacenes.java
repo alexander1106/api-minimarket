@@ -1,22 +1,16 @@
 package com.gadbacorp.api.entity.inventario;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gadbacorp.api.entity.administrable.Sucursales;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -28,9 +22,10 @@ public class Almacenes {
      @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idalmacen;
-
     private String nombre;
     private String descripcion;
+    private String  direccion;
+    private String encargado;
     private Integer estado = 1;
 
     // ← NUEVO: referencia a la sucursal
@@ -38,17 +33,13 @@ public class Almacenes {
     @JoinColumn(name = "id_sucursal", nullable = false)
     private Sucursales sucursal;
 
-    @OneToMany(mappedBy = "almacen",cascade = CascadeType.ALL,orphanRemoval = true)
-    @JsonIgnore
-    private List<AlmacenProducto> almacenProductos = new ArrayList<>();
-
     public Almacenes() { }
 
     public Almacenes(Integer id) {
         this.idalmacen = id;
     }
 
-    public Integer getIdalmacen() { 
+    public Integer getIdalmacen() {
         return idalmacen;
     }
 
@@ -72,6 +63,22 @@ public class Almacenes {
         this.descripcion = descripcion;
     }
 
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
+    public String getEncargado() {
+        return encargado;
+    }
+
+    public void setEncargado(String encargado) {
+        this.encargado = encargado;
+    }
+
     public Integer getEstado() {
         return estado;
     }
@@ -79,6 +86,7 @@ public class Almacenes {
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
+
     public Sucursales getSucursal() {
         return sucursal;
     }
@@ -87,19 +95,13 @@ public class Almacenes {
         this.sucursal = sucursal;
     }
 
-    public List<AlmacenProducto> getAlmacenProductos() {
-        return almacenProductos;
-    }
 
-    public void setAlmacenProductos(List<AlmacenProducto> almacenProductos) {
-        this.almacenProductos = almacenProductos;
-    }
- 
     @Override
     public String toString() {
-        return "Almacenes [idalmacen=" + idalmacen + ", nombre=" + nombre + ", descripcion=" + descripcion + ", estado="
-                + estado + "]";
+        return "Almacenes [idalmacen=" + idalmacen + ", nombre=" + nombre + ", descripcion=" + descripcion
+                + ", direccion=" + direccion + ", encargado=" + encargado + ", estado=" + estado + "]";
     }
+    
 
 
 }

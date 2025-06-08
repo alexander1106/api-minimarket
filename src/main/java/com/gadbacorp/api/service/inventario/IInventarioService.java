@@ -17,7 +17,4 @@ public interface IInventarioService {
 
     void eliminar(Integer id);
 
-    Inventario sincronizarStock(Integer idproducto, Integer idalmacen);
-
-    Inventario actualizarStock(Integer idinventario, Integer nuevoStock, Integer idproducto, Integer idalmacen);
 }

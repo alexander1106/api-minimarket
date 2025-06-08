@@ -51,8 +51,8 @@ public class AlmacenesController {
     }
 
     @PostMapping
-@ResponseStatus(HttpStatus.CREATED)
-public AlmacenesDTO guardar(@RequestBody AlmacenesDTO dto) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public AlmacenesDTO guardar(@RequestBody AlmacenesDTO dto) {
     // 4.1 Comprueba duplicado
     serviceAlmacenes.buscarPorNombre(dto.getNombre())
         .ifPresent(a -> {
@@ -69,16 +69,18 @@ public AlmacenesDTO guardar(@RequestBody AlmacenesDTO dto) {
             "Sucursal no encontrada id=" + dto.getIdSucursal()
         ));
 
-    // 4.3 Mapear DTO→Entidad y guardar
-    Almacenes ent = new Almacenes();
-    ent.setNombre(dto.getNombre());
-    ent.setDescripcion(dto.getDescripcion());
-    ent.setEstado(dto.getEstado());
-    ent.setSucursal(suc);
+        // 4.3 Mapear DTO→Entidad y guardar
+        Almacenes ent = new Almacenes();
+        ent.setNombre(dto.getNombre());
+        ent.setDescripcion(dto.getDescripcion());
+        ent.setEncargado(dto.getEncargado());
+        ent.setDireccion(dto.getDireccion());
+        ent.setEstado(dto.getEstado());
+        ent.setSucursal(suc);
 
-    serviceAlmacenes.guardar(ent);
-    return toDTO(ent);
-}
+        serviceAlmacenes.guardar(ent);
+        return toDTO(ent);
+    }
 
     @PutMapping
     public AlmacenesDTO modificar(@RequestBody AlmacenesDTO dto) {
@@ -94,6 +96,8 @@ public AlmacenesDTO guardar(@RequestBody AlmacenesDTO dto) {
         ent.setIdalmacen(dto.getIdalmacen());
         ent.setNombre(dto.getNombre());
         ent.setDescripcion(dto.getDescripcion());
+        ent.setEncargado(dto.getEncargado());
+        ent.setDireccion(dto.getDireccion());
         ent.setEstado(dto.getEstado());
         ent.setSucursal(suc);
 
@@ -114,6 +118,8 @@ public AlmacenesDTO guardar(@RequestBody AlmacenesDTO dto) {
         dto.setIdalmacen(e.getIdalmacen());
         dto.setNombre(e.getNombre());
         dto.setDescripcion(e.getDescripcion());
+        dto.setEncargado(e.getEncargado());
+        dto.setDireccion(e.getDireccion());
         dto.setEstado(e.getEstado());
         dto.setIdSucursal(e.getSucursal().getIdSucursal());
         return dto;
