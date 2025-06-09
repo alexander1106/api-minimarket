@@ -1,7 +1,6 @@
 package com.gadbacorp.api.controller.inventario;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +14,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.gadbacorp.api.entity.inventario.InventarioProducto;
 import com.gadbacorp.api.entity.inventario.TrasladoInventarioProducto;
 import com.gadbacorp.api.entity.inventario.TrasladoInventarioProductoDTO;
+import com.gadbacorp.api.service.inventario.IInventarioProductoService;
 import com.gadbacorp.api.service.inventario.ITrasladoInventarioProductoService;
 
 @RestController
@@ -28,10 +29,12 @@ public class TrasladoInventarioProductoController {
     @Autowired
     private ITrasladoInventarioProductoService trasladoService;
 
+    @Autowired
+    private IInventarioProductoService invProdService;
+
     @GetMapping
     public ResponseEntity<List<TrasladoInventarioProductoDTO>> listar() {
-        List<TrasladoInventarioProductoDTO> lista = trasladoService.buscarTodos()
-            .stream()
+        List<TrasladoInventarioProductoDTO> lista = trasladoService.buscarTodos().stream()
             .map(this::toDTO)
             .collect(Collectors.toList());
         return ResponseEntity.ok(lista);
@@ -39,33 +42,73 @@ public class TrasladoInventarioProductoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TrasladoInventarioProductoDTO> obtener(@PathVariable Integer id) {
-        Optional<TrasladoInventarioProductoDTO> op = trasladoService.buscarId(id).map(this::toDTO);
-        return op.map(ResponseEntity::ok)
-                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        return trasladoService.buscarId(id)
+            .map(this::toDTO)
+            .map(ResponseEntity::ok)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Traslado no encontrado id=" + id
+            ));
     }
 
     @PostMapping
-    public ResponseEntity<TrasladoInventarioProductoDTO> crear(@RequestBody TrasladoInventarioProductoDTO dto) {
-        TrasladoInventarioProductoDTO guardado = toDTO(
-            trasladoService.guardar(toEntity(dto))
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
+    public ResponseEntity<TrasladoInventarioProductoDTO> crear(
+            @RequestBody TrasladoInventarioProductoDTO dto) {
+
+        TrasladoInventarioProducto entidad = toEntity(dto);
+        TrasladoInventarioProducto guardado = trasladoService.guardar(entidad);
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(toDTO(guardado));
     }
 
-    // PUT y DELETE devuelven 403, según la lógica del servicio
     @PutMapping
-    public ResponseEntity<?> actualizar(@RequestBody TrasladoInventarioProductoDTO dto) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                             .body("No está permitido modificar un traslado de inventario.");
+    public ResponseEntity<TrasladoInventarioProductoDTO> actualizar(
+            @RequestBody TrasladoInventarioProductoDTO dto) {
+
+        if (dto.getIdtraslado() == null) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Debe incluir el campo 'idtraslado' en el JSON para actualizar"
+            );
+        }
+        TrasladoInventarioProducto entidad = toEntity(dto);
+        TrasladoInventarioProducto modificado = trasladoService.modificar(entidad);
+        return ResponseEntity.ok(toDTO(modificado));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                             .body("No está permitido eliminar un traslado de inventario.");
+    public ResponseEntity<String> eliminar(@PathVariable Integer id) {
+        trasladoService.eliminar(id);
+        return ResponseEntity.ok("Traslado eliminado correctamente");
     }
 
-    // —— Métodos de mapeo DTO <-> Entity (solo usados aquí) ——
+    // — Helpers de mapeo — 
+
+    private TrasladoInventarioProducto toEntity(TrasladoInventarioProductoDTO dto) {
+        TrasladoInventarioProducto t = new TrasladoInventarioProducto();
+        if (dto.getIdtraslado() != null) {
+            t.setIdtraslado(dto.getIdtraslado());
+        }
+
+        InventarioProducto origen = invProdService.buscarPorId(dto.getOrigenId())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "InventarioProducto origen no encontrado id=" + dto.getOrigenId()
+            ));
+
+        InventarioProducto destino = invProdService.buscarPorId(dto.getDestinoId())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "InventarioProducto destino no encontrado id=" + dto.getDestinoId()
+            ));
+
+        t.setOrigen(origen);
+        t.setDestino(destino);
+        t.setCantidad(dto.getCantidad());
+        t.setFechaTraslado(dto.getFechaTraslado());
+        return t;
+    }
 
     private TrasladoInventarioProductoDTO toDTO(TrasladoInventarioProducto t) {
         TrasladoInventarioProductoDTO dto = new TrasladoInventarioProductoDTO();
@@ -75,22 +118,5 @@ public class TrasladoInventarioProductoController {
         dto.setCantidad(t.getCantidad());
         dto.setFechaTraslado(t.getFechaTraslado());
         return dto;
-    }
-
-    private TrasladoInventarioProducto toEntity(TrasladoInventarioProductoDTO dto) {
-        TrasladoInventarioProducto entity = new TrasladoInventarioProducto();
-        entity.setIdtraslado(dto.getIdtraslado());
-        // OJO: Solo setea el ID en Origen y Destino (no traes todo el objeto aquí)
-        InventarioProducto origen = new InventarioProducto();
-        origen.setIdinventarioproducto(dto.getOrigenId());
-        entity.setOrigen(origen);
-
-        InventarioProducto destino = new InventarioProducto();
-        destino.setIdinventarioproducto(dto.getDestinoId());
-        entity.setDestino(destino);
-
-        entity.setCantidad(dto.getCantidad());
-        entity.setFechaTraslado(dto.getFechaTraslado());
-        return entity;
     }
 }
