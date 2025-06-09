@@ -7,7 +7,6 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.caja.AperturaCaja;
 
 import jakarta.persistence.CascadeType;
@@ -15,8 +14,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 @Entity
@@ -28,10 +25,7 @@ public class Empleado {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idEmpleado;
-    @ManyToOne
-    @JoinColumn(name = "idSucursal")
-    private Sucursales idSucursal;
-    
+
     private String nombre;
     private String apellidos;
     private String correoElectronico;
@@ -55,11 +49,10 @@ public class Empleado {
     private List<AperturaCaja> aperturaCaja;
 
 
-    public Empleado(Integer idEmpleado, Sucursales idSucursal, String nombre, String apellidos, String correoElectronico,
+    public Empleado(Integer idEmpleado, String nombre, String apellidos, String correoElectronico,
             String dni, String contrasenaHash, Integer estado, Integer rollId, LocalDateTime fechaCreacion,
             Integer permisosId, String turno) {
         this.idEmpleado = idEmpleado;
-        this.idSucursal = idSucursal;
         this.nombre = nombre;
         this.apellidos = apellidos;
         this.correoElectronico = correoElectronico;
@@ -80,13 +73,7 @@ public class Empleado {
         this.idEmpleado = idEmpleado;
     }
 
-    public Sucursales getIdSucursal() {
-        return idSucursal;
-    }
 
-    public void setIdSucursal(Sucursales idSucursal) {
-        this.idSucursal = idSucursal;
-    }
 
     public String getNombre() {
         return nombre;
@@ -168,7 +155,7 @@ public class Empleado {
 
     @Override
     public String toString() {
-        return "empleado [idEmpleado=" + idEmpleado + ", idSucursal=" + idSucursal + ", nombre=" + nombre
+        return "empleado [idEmpleado=" + idEmpleado + ", nombre=" + nombre
                 + ", apellidos=" + apellidos + ", correoElectronico=" + correoElectronico + ", dni=" + dni
                 + ", contrasenaHash=" + contrasenaHash + ", estado=" + estado + ", rollId=" + rollId
                 + ", fechaCreacion=" + fechaCreacion + ", permisosId=" + permisosId + ", turno=" + turno + "]";

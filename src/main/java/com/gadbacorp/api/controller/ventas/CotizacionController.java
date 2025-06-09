@@ -46,12 +46,12 @@ public class CotizacionController {
         return cotizacionesService.listarCotizacioneses();
     }
     
-    @GetMapping("/cotizacion/{id}")
+    @GetMapping("/cotizaciones/{id}")
     public Optional<Cotizaciones> buscarCotizaciones(@PathVariable Integer id) {
         return cotizacionesService.buscarCotizacion(id);
     }
 
-    @PostMapping("/cotizacion")
+    @PostMapping("/cotizaciones")
     public ResponseEntity<?> guardarCotizacion(@RequestBody CotizacionesDTO dto) {
         Clientes cliente = clientesRepository.findById(dto.getId_cliente()).orElse(null);
         if (cliente == null) {
@@ -65,73 +65,72 @@ public class CotizacionController {
         cotizaciones.setCliente(cliente); // Primero asigna el cliente
         return ResponseEntity.ok(cotizacionesService.guardarCotizacion(cotizaciones));
     }
-@PutMapping("/cotizacion")
-public ResponseEntity<?> actualizarCotizacion(@RequestBody CotizacionesDTO dto) {
-    if (dto.getIdCotizaciones() == null) {
-        return ResponseEntity.badRequest().body("Debe proporcionar el ID de la cotización.");
-    }
-
-    Optional<Cotizaciones> optionalCotizacion = cotizacionesService.buscarCotizacion(dto.getIdCotizaciones());
-    if (optionalCotizacion.isEmpty()) {
-        return ResponseEntity.notFound().build();
-    }
-
-    Cotizaciones cotizacion = optionalCotizacion.get();
-
-    // Actualizar campos principales
-    cotizacion.setFechaCotizacion(dto.getFechaCotizacion());
-    cotizacion.setEstadoCotizacion(dto.getEstadoCotizacion());
-    cotizacion.setNumeroCotizacion(dto.getNumeroCotizacion());
-    cotizacion.setTotalCotizacion(dto.getTotalCotizacion());
-    // Actualizar cliente si corresponde
-    if (dto.getId_cliente() != null && 
-        (cotizacion.getCliente() == null || !cotizacion.getCliente().getIdCliente().equals(dto.getId_cliente()))) {
-        
-        Optional<Clientes> clienteOpt = clientesRepository.findById(dto.getId_cliente());
-        if (clienteOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Cliente no encontrado con ID: " + dto.getId_cliente());
-        }
-        cotizacion.setCliente(clienteOpt.get());
-    }
-
-    Cotizaciones actualizada = cotizacionesService.guardarCotizacion(cotizacion);
-    return ResponseEntity.ok(actualizada);
-}
-
-    // Eliminar venta
- @DeleteMapping("/cotizacion/{id}")
-public ResponseEntity<?> eliminarCotizacion(@PathVariable Integer id) {
-    Optional<Cotizaciones> optionalCotizacion = cotizacionesService.buscarCotizacion(id);
-    if (optionalCotizacion.isEmpty()) {
-        return ResponseEntity.notFound().build();
-    }
-
-    Cotizaciones cotizacion = optionalCotizacion.get();
-    List<DetallesCotizaciones> detalles = cotizacionesService.buscarDetallesPorCotizacion(id); // Este método debe existir
-
-    for (DetallesCotizaciones detalle : detalles) {
-        Integer productoId = detalle.getProductos().getIdproducto();
-        Integer cantidad = detalle.getCantidad();
-
-        List<InventarioProducto> inventarios = inventarioProductoRepository.findAllByProducto_Idproducto(productoId);
-        for (InventarioProducto inventario : inventarios) {
-            inventario.setStockactual(inventario.getStockactual() + cantidad); // Se revierte la salida del stock
-            inventarioProductoRepository.save(inventario);
-
-            AjusteInventario ajuste = new AjusteInventario();
-            ajuste.setCantidad(cantidad);
-            ajuste.setDescripcion("REVERTIR ELIMINACIÓN COTIZACIÓN");
-            ajuste.setFechaAjuste(java.time.LocalDateTime.now());
-            ajuste.setInventarioProducto(inventario);
-            ajusteInventarioRepository.save(ajuste);
+    @PutMapping("/cotizaciones")
+    public ResponseEntity<?> actualizarCotizacion(@RequestBody CotizacionesDTO dto) {
+        if (dto.getIdCotizaciones() == null) {
+            return ResponseEntity.badRequest().body("Debe proporcionar el ID de la cotización.");
         }
 
-        // Opcional: eliminar el detalle
-        cotizacionesService.eliminarDetalleCotizacion(detalle.getIdDetallesCotizaciones());
+        Optional<Cotizaciones> optionalCotizacion = cotizacionesService.buscarCotizacion(dto.getIdCotizaciones());
+        if (optionalCotizacion.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Cotizaciones cotizacion = optionalCotizacion.get();
+
+        // Actualizar campos principales
+        cotizacion.setFechaCotizacion(dto.getFechaCotizacion());
+        cotizacion.setEstadoCotizacion(dto.getEstadoCotizacion());
+        cotizacion.setNumeroCotizacion(dto.getNumeroCotizacion());
+        cotizacion.setTotalCotizacion(dto.getTotalCotizacion());
+        // Actualizar cliente si corresponde
+        if (dto.getId_cliente() != null && 
+            (cotizacion.getCliente() == null || !cotizacion.getCliente().getIdCliente().equals(dto.getId_cliente()))) {
+            
+            Optional<Clientes> clienteOpt = clientesRepository.findById(dto.getId_cliente());
+            if (clienteOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Cliente no encontrado con ID: " + dto.getId_cliente());
+            }
+            cotizacion.setCliente(clienteOpt.get());
+        }
+
+        Cotizaciones actualizada = cotizacionesService.guardarCotizacion(cotizacion);
+        return ResponseEntity.ok(actualizada);
     }
 
-    cotizacionesService.eliminarCotizaciones(id);
-    return ResponseEntity.ok("Cotización eliminada correctamente y stock revertido.");
-}
+    @DeleteMapping("/cotizacion/{id}")
+    public ResponseEntity<?> eliminarCotizacion(@PathVariable Integer id) {
+        Optional<Cotizaciones> optionalCotizacion = cotizacionesService.buscarCotizacion(id);
+        if (optionalCotizacion.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Cotizaciones cotizacion = optionalCotizacion.get();
+        List<DetallesCotizaciones> detalles = cotizacionesService.buscarDetallesPorCotizacion(id); // Este método debe existir
+
+        for (DetallesCotizaciones detalle : detalles) {
+            Integer productoId = detalle.getProductos().getIdproducto();
+            Integer cantidad = detalle.getCantidad();
+
+            List<InventarioProducto> inventarios = inventarioProductoRepository.findAllByProducto_Idproducto(productoId);
+            for (InventarioProducto inventario : inventarios) {
+                inventario.setStockactual(inventario.getStockactual() + cantidad); // Se revierte la salida del stock
+                inventarioProductoRepository.save(inventario);
+
+                AjusteInventario ajuste = new AjusteInventario();
+                ajuste.setCantidad(cantidad);
+                ajuste.setDescripcion("REVERTIR ELIMINACIÓN COTIZACIÓN");
+                ajuste.setFechaAjuste(java.time.LocalDateTime.now());
+                ajuste.setInventarioProducto(inventario);
+                ajusteInventarioRepository.save(ajuste);
+            }
+
+            // Opcional: eliminar el detalle
+            cotizacionesService.eliminarDetalleCotizacion(detalle.getIdDetallesCotizaciones());
+        }
+
+        cotizacionesService.eliminarCotizaciones(id);
+        return ResponseEntity.ok("Cotización eliminada correctamente y stock revertido.");
+    }
 
 }

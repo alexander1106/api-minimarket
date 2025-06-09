@@ -11,6 +11,7 @@ import com.gadbacorp.api.service.administrable.IEmpresasService;
 
 @Service
 public class EmpresasService implements IEmpresasService{
+    
     @Autowired
     private EmpresasRepository repoEmpresas;
     public List<Empresas> buscarTodos(){

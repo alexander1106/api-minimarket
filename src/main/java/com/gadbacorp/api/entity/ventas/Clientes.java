@@ -1,6 +1,5 @@
 package com.gadbacorp.api.entity.ventas;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 import org.hibernate.annotations.SQLDelete;
@@ -24,7 +23,6 @@ public class Clientes {
     @Column(name="id_cliente")
     private Integer idCliente; 
     private String tipoDocumento; 
-    private String tipoContribuyente; 
     private String documento;
     private String nombre; 
     private String  telefono; 
@@ -32,7 +30,6 @@ public class Clientes {
     private String direccion;
     private LocalDate fecha_registro;
     private Integer estado=1;
-
 
     public Clientes(Integer idCliente) {
         this.idCliente = idCliente;
@@ -127,14 +124,6 @@ public class Clientes {
         this.ventas = ventas;
     }
 
-    public String getTipoContribuyente() {
-        return tipoContribuyente;
-    }
-
-    public void setTipoContribuyente(String tipoContribuyente) {
-        this.tipoContribuyente = tipoContribuyente;
-    }
-
     public List<Cotizaciones> getCotizaciones() {
         return cotizaciones;
     }
@@ -146,7 +135,7 @@ public class Clientes {
     @Override
     public String toString() {
         return "Clientes [idCliente=" + idCliente + ", tipoDocumento=" + tipoDocumento + ", tipoContribuyente="
-                + tipoContribuyente + ", documento=" + documento + ", nombre=" + nombre + ", telefono=" + telefono
+                 + ", documento=" + documento + ", nombre=" + nombre + ", telefono=" + telefono
                 + ", email=" + email + ", direccion=" + direccion + ", fecha_registro=" + fecha_registro + ", estado="
                 + estado + ", ventas=" + ventas + ", cotizaciones=" + cotizaciones + "]";
     }

@@ -94,106 +94,106 @@ public class DetallesDevolucionesController {
     }
 
     @PutMapping("/detalles-devoluciones")
-public ResponseEntity<?> actualizarDetalle(@RequestBody DetallesDevolucionDTO dto) {
-    Optional<DetallesDevolucion> detalleOpt = detallesDevoluciones.buscarDetalleDevolucion(dto.getIdDetallesDevoluciones());
-    if (detalleOpt.isEmpty()) {
-        return ResponseEntity.notFound().build();
-    }
-
-    DetallesDevolucion detalleExistente = detalleOpt.get();
-    Integer productoAnteriorId = detalleExistente.getProductos().getIdproducto();
-
-    // Obtener inventario del producto anterior
-    InventarioProducto inventarioAnterior = inventarioProductoRepository.findFirstByProducto_Idproducto(productoAnteriorId)
-            .orElse(null);
-    if (inventarioAnterior == null) {
-        return ResponseEntity.badRequest().body("Inventario no encontrado para producto anterior ID: " + productoAnteriorId);
-    }
-
-    // Obtener nuevo producto
-    Productos nuevoProducto = productosRepository.findById(dto.getId_producto()).orElse(null);
-    if (nuevoProducto == null) {
-        return ResponseEntity.badRequest().body("Producto nuevo no encontrado con ID: " + dto.getId_producto());
-    }
-
-    // Obtener inventario del nuevo producto
-    InventarioProducto inventarioNuevo = inventarioProductoRepository.findFirstByProducto_Idproducto(dto.getId_producto())
-            .orElse(null);
-    if (inventarioNuevo == null) {
-        return ResponseEntity.badRequest().body("Inventario no encontrado para producto nuevo ID: " + dto.getId_producto());
-    }
-
-    // Si es el mismo producto
-    if (productoAnteriorId.equals(dto.getId_producto())) {
-        int diferencia = dto.getCantidad() - detalleExistente.getCantidad();
-
-        if (diferencia == 0) {
-            // Solo actualizar campos no relacionados a inventario
-            detalleExistente.setPecioUnitario(dto.getPecioUnitario());
-            detalleExistente.setSubTotal(dto.getSubTotal());
-            return ResponseEntity.ok(detallesDevoluciones.guardarDetallesDevolucion(detalleExistente));
+    public ResponseEntity<?> actualizarDetalle(@RequestBody DetallesDevolucionDTO dto) {
+        Optional<DetallesDevolucion> detalleOpt = detallesDevoluciones.buscarDetalleDevolucion(dto.getIdDetallesDevoluciones());
+        if (detalleOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
 
-        int nuevoStock = inventarioNuevo.getStockactual() + diferencia;
-        if (nuevoStock < 0) {
-            return ResponseEntity.badRequest().body("No se puede actualizar: el stock resultante sería negativo.");
+        DetallesDevolucion detalleExistente = detalleOpt.get();
+        Integer productoAnteriorId = detalleExistente.getProductos().getIdproducto();
+
+        // Obtener inventario del producto anterior
+        InventarioProducto inventarioAnterior = inventarioProductoRepository.findFirstByProducto_Idproducto(productoAnteriorId)
+                .orElse(null);
+        if (inventarioAnterior == null) {
+            return ResponseEntity.badRequest().body("Inventario no encontrado para producto anterior ID: " + productoAnteriorId);
         }
 
-        inventarioNuevo.setStockactual(nuevoStock);
-        inventarioProductoRepository.save(inventarioNuevo);
-
-        AjusteInventario ajuste = new AjusteInventario();
-        ajuste.setCantidad(Math.abs(diferencia));
-        ajuste.setDescripcion("AJUSTE POR EDICIÓN DE DEVOLUCIÓN");
-        ajuste.setFechaAjuste(LocalDateTime.now());
-        ajuste.setInventarioProducto(inventarioNuevo);
-        ajusteInventarioRepository.save(ajuste);
-    } else {
-        // Si es un producto diferente
-        if (dto.getCantidad() == detalleExistente.getCantidad()) {
-            // No hacer ajustes de inventario, solo actualizar producto, precio y subtotal
-            detalleExistente.setProductos(nuevoProducto);
-            detalleExistente.setPecioUnitario(dto.getPecioUnitario());
-            detalleExistente.setSubTotal(dto.getSubTotal());
-            return ResponseEntity.ok(detallesDevoluciones.guardarDetallesDevolucion(detalleExistente));
+        // Obtener nuevo producto
+        Productos nuevoProducto = productosRepository.findById(dto.getId_producto()).orElse(null);
+        if (nuevoProducto == null) {
+            return ResponseEntity.badRequest().body("Producto nuevo no encontrado con ID: " + dto.getId_producto());
         }
 
-        int nuevoStockNuevo = inventarioNuevo.getStockactual() + dto.getCantidad();
-        int nuevoStockAnterior = inventarioAnterior.getStockactual() - detalleExistente.getCantidad();
-
-        if (nuevoStockAnterior < 0) {
-            return ResponseEntity.badRequest().body("No se puede revertir: el stock del producto anterior quedaría negativo.");
+        // Obtener inventario del nuevo producto
+        InventarioProducto inventarioNuevo = inventarioProductoRepository.findFirstByProducto_Idproducto(dto.getId_producto())
+                .orElse(null);
+        if (inventarioNuevo == null) {
+            return ResponseEntity.badRequest().body("Inventario no encontrado para producto nuevo ID: " + dto.getId_producto());
         }
 
-        inventarioAnterior.setStockactual(nuevoStockAnterior);
-        inventarioNuevo.setStockactual(nuevoStockNuevo);
+        // Si es el mismo producto
+        if (productoAnteriorId.equals(dto.getId_producto())) {
+            int diferencia = dto.getCantidad() - detalleExistente.getCantidad();
 
-        inventarioProductoRepository.save(inventarioAnterior);
-        inventarioProductoRepository.save(inventarioNuevo);
+            if (diferencia == 0) {
+                // Solo actualizar campos no relacionados a inventario
+                detalleExistente.setPecioUnitario(dto.getPecioUnitario());
+                detalleExistente.setSubTotal(dto.getSubTotal());
+                return ResponseEntity.ok(detallesDevoluciones.guardarDetallesDevolucion(detalleExistente));
+            }
 
-        AjusteInventario ajusteAnulacion = new AjusteInventario();
-        ajusteAnulacion.setCantidad(detalleExistente.getCantidad());
-        ajusteAnulacion.setDescripcion("AJUSTE POR ANULACIÓN DE DETALLE ANTERIOR");
-        ajusteAnulacion.setFechaAjuste(LocalDateTime.now());
-        ajusteAnulacion.setInventarioProducto(inventarioAnterior);
-        ajusteInventarioRepository.save(ajusteAnulacion);
+            int nuevoStock = inventarioNuevo.getStockactual() + diferencia;
+            if (nuevoStock < 0) {
+                return ResponseEntity.badRequest().body("No se puede actualizar: el stock resultante sería negativo.");
+            }
 
-        AjusteInventario ajusteNuevo = new AjusteInventario();
-        ajusteNuevo.setCantidad(dto.getCantidad());
-        ajusteNuevo.setDescripcion("AJUSTE POR NUEVO DETALLE DE DEVOLUCIÓN");
-        ajusteNuevo.setFechaAjuste(LocalDateTime.now());
-        ajusteNuevo.setInventarioProducto(inventarioNuevo);
-        ajusteInventarioRepository.save(ajusteNuevo);
+            inventarioNuevo.setStockactual(nuevoStock);
+            inventarioProductoRepository.save(inventarioNuevo);
+
+            AjusteInventario ajuste = new AjusteInventario();
+            ajuste.setCantidad(Math.abs(diferencia));
+            ajuste.setDescripcion("AJUSTE POR EDICIÓN DE DEVOLUCIÓN");
+            ajuste.setFechaAjuste(LocalDateTime.now());
+            ajuste.setInventarioProducto(inventarioNuevo);
+            ajusteInventarioRepository.save(ajuste);
+        } else {
+            // Si es un producto diferente
+            if (dto.getCantidad() == detalleExistente.getCantidad()) {
+                // No hacer ajustes de inventario, solo actualizar producto, precio y subtotal
+                detalleExistente.setProductos(nuevoProducto);
+                detalleExistente.setPecioUnitario(dto.getPecioUnitario());
+                detalleExistente.setSubTotal(dto.getSubTotal());
+                return ResponseEntity.ok(detallesDevoluciones.guardarDetallesDevolucion(detalleExistente));
+            }
+
+            int nuevoStockNuevo = inventarioNuevo.getStockactual() + dto.getCantidad();
+            int nuevoStockAnterior = inventarioAnterior.getStockactual() - detalleExistente.getCantidad();
+
+            if (nuevoStockAnterior < 0) {
+                return ResponseEntity.badRequest().body("No se puede revertir: el stock del producto anterior quedaría negativo.");
+            }
+
+            inventarioAnterior.setStockactual(nuevoStockAnterior);
+            inventarioNuevo.setStockactual(nuevoStockNuevo);
+
+            inventarioProductoRepository.save(inventarioAnterior);
+            inventarioProductoRepository.save(inventarioNuevo);
+
+            AjusteInventario ajusteAnulacion = new AjusteInventario();
+            ajusteAnulacion.setCantidad(detalleExistente.getCantidad());
+            ajusteAnulacion.setDescripcion("AJUSTE POR ANULACIÓN DE DETALLE ANTERIOR");
+            ajusteAnulacion.setFechaAjuste(LocalDateTime.now());
+            ajusteAnulacion.setInventarioProducto(inventarioAnterior);
+            ajusteInventarioRepository.save(ajusteAnulacion);
+
+            AjusteInventario ajusteNuevo = new AjusteInventario();
+            ajusteNuevo.setCantidad(dto.getCantidad());
+            ajusteNuevo.setDescripcion("AJUSTE POR NUEVO DETALLE DE DEVOLUCIÓN");
+            ajusteNuevo.setFechaAjuste(LocalDateTime.now());
+            ajusteNuevo.setInventarioProducto(inventarioNuevo);
+            ajusteInventarioRepository.save(ajusteNuevo);
+        }
+
+        // Actualizar todos los campos del detalle
+        detalleExistente.setProductos(nuevoProducto);
+        detalleExistente.setCantidad(dto.getCantidad());
+        detalleExistente.setPecioUnitario(dto.getPecioUnitario());
+        detalleExistente.setSubTotal(dto.getSubTotal());
+
+        return ResponseEntity.ok(detallesDevoluciones.guardarDetallesDevolucion(detalleExistente));
     }
-
-    // Actualizar todos los campos del detalle
-    detalleExistente.setProductos(nuevoProducto);
-    detalleExistente.setCantidad(dto.getCantidad());
-    detalleExistente.setPecioUnitario(dto.getPecioUnitario());
-    detalleExistente.setSubTotal(dto.getSubTotal());
-
-    return ResponseEntity.ok(detallesDevoluciones.guardarDetallesDevolucion(detalleExistente));
-}
 
 
     @DeleteMapping("/detalles-devoluciones/{id}")

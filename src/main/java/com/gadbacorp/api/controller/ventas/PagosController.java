@@ -22,7 +22,6 @@ import com.gadbacorp.api.entity.ventas.Ventas;
 import com.gadbacorp.api.repository.ventas.MetodosPagoRepository;
 import com.gadbacorp.api.repository.ventas.PagosRepository;
 import com.gadbacorp.api.repository.ventas.VentasRepository;
-import com.gadbacorp.api.service.ventas.IMetodosPagoService;
 import com.gadbacorp.api.service.ventas.IPagosService;
 
 @RestController
@@ -30,12 +29,11 @@ import com.gadbacorp.api.service.ventas.IPagosService;
 public class PagosController {
 
     @Autowired
-    private IMetodosPagoService metodosPagoService;
+    private IPagosService pagosService;
 
     @Autowired
-    private IPagosService pagosService;
-    @Autowired
     private MetodosPagoRepository metodosPagoRepository;
+    
     @Autowired
     private VentasRepository ventasRepository;
     @Autowired
@@ -45,38 +43,42 @@ public class PagosController {
     public List<Pagos> listarPagos() {
         return pagosService.listarPagos();
     }
-@PostMapping("/pago")
-public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
-    Pagos pago = new Pagos();
-    pago.setEstadoPago(dto.getEstadoPago());
-    pago.setObservaciones(dto.getObservaciones());
-    pago.setReferenciaPago(dto.getReferenciaPago());
-    pago.setFechaPago(dto.getFechaPago());
-    pago.setMontoPagado(dto.getMontoPagado());
 
-    MetodosPago metodo = metodosPagoRepository.findById(dto.getId_metodo_pago()).orElse(null);
-    Ventas venta = ventasRepository.findById(dto.getId_venta()).orElse(null);
-    
-    if (venta == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Venta no encontrada.");
+    @PostMapping("/pagos")
+    public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
+        Pagos pago = new Pagos();
+        pago.setEstadoPago(dto.getEstadoPago());
+        pago.setObservaciones(dto.getObservaciones());
+        pago.setReferenciaPago(dto.getReferenciaPago());
+        pago.setFechaPago(dto.getFechaPago());
+        pago.setMontoPagado(dto.getMontoPagado());
+
+        MetodosPago metodo = metodosPagoRepository.findById(dto.getId_metodo_pago()).orElse(null);
+        Ventas venta = ventasRepository.findById(dto.getId_venta()).orElse(null);
+        
+        if (venta == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Venta no encontrada.");
+        }
+        
+        if (metodo == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Metodo no encontrada.");
+        }
+        pago.setVentas(venta);
+        pago.setMetodosPago(metodo);
+
+        // Cambiar estado de la venta a "PAGADO"
+        venta.setEstado_venta("PAGADO"); // Asegúrate que "estado" sea un campo de la entidad Ventas
+        ventasRepository.save(venta); // Guardar la venta actualizada
+
+        return ResponseEntity.ok(pagosService.guardarPago(pago));
     }
-    
-    if (metodo == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Metodo no encontrada.");
+
+     @GetMapping("/pagos/{id}")
+    public Optional<Pagos> buscarId(@PathVariable("id") Integer id){
+        return pagosService.buscarPago(id);
     }
-    pago.setVentas(venta);
-    pago.setMetodosPago(metodo);
 
-    // Cambiar estado de la venta a "PAGADO"
-    venta.setEstado_venta("PAGADO"); // Asegúrate que "estado" sea un campo de la entidad Ventas
-    ventasRepository.save(venta); // Guardar la venta actualizada
-
-    return ResponseEntity.ok(pagosService.guardarPago(pago));
-}
-
-
-
-    @PutMapping("/pago")
+    @PutMapping("/pagos")
     public ResponseEntity<?> modificar(@RequestBody PagosDTO dto) {
         if (dto.getIdPago() == null) {
             return ResponseEntity.badRequest().body("El ID del pago es obligatorio para modificar.");
@@ -105,12 +107,7 @@ public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
         return ResponseEntity.ok(pagoActualizado);
     }
 
-
-    @GetMapping("/pago/{id}")
-    public Optional<Pagos> buscarId(@PathVariable("id") Integer id){
-        return pagosService.buscarPago(id);
-    }
-    @DeleteMapping("/pago/{id}")
+    @DeleteMapping("/pagos/{id}")
     public String eliminar(@PathVariable Integer id){
         pagosService.eliminarPago(id);
         return "El pago fue eliminado";

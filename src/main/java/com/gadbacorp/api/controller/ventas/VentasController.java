@@ -6,7 +6,15 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.gadbacorp.api.entity.inventario.AjusteInventario;
 import com.gadbacorp.api.entity.inventario.InventarioProducto;
@@ -52,12 +60,12 @@ private CotizacionesRepository cotizacionesRepository;
         return ventasService.listarVentaas();
     }
 
-    @GetMapping("/venta/{id}")
+    @GetMapping("/ventas/{id}")
     public Optional<Ventas> buscarVenta(@PathVariable Integer id) {
         return ventasService.buscarVenta(id);
     }
 
-    @PostMapping("/venta")
+    @PostMapping("/ventas")
     public ResponseEntity<?> guardarVenta(@RequestBody VentasDTO dto) {
         Clientes cliente = clientesRepository.findById(dto.getId_cliente()).orElse(null);
         if (cliente == null) {
@@ -79,7 +87,7 @@ private CotizacionesRepository cotizacionesRepository;
         return ResponseEntity.ok(ventasService.guardarVenta(venta));
     }
 
-    @PutMapping("/venta")
+    @PutMapping("/ventas")
     public ResponseEntity<?> modificar(@RequestBody VentasDTO dto) {
         if (dto.getIdVenta() == null) {
             return ResponseEntity.badRequest().body("Id no existe");
@@ -98,7 +106,7 @@ private CotizacionesRepository cotizacionesRepository;
         return ResponseEntity.ok(ventasService.editarVenta(venta));
     }
 
-    @DeleteMapping("/venta/{id}")
+    @DeleteMapping("/ventas/{id}")
     public ResponseEntity<?> eliminarVenta(@PathVariable Integer id) {
         Optional<Ventas> ventaOpt = ventasRepository.findById(id);
         if (ventaOpt.isEmpty()) {

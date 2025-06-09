@@ -51,12 +51,12 @@ public class DetallesVentasController {
         return detallesVentasService.listDetallesVentas();
     }
 
-    @GetMapping("/detalles-venta/{id}")
+    @GetMapping("/detalles-ventas/{id}")
     public Optional<DetallesVentas> buscarVenta(@PathVariable Integer id) {
         return detallesVentasService.buscarDetallesVentas(id);
     }
 
-    @PostMapping("/detalles-venta")
+    @PostMapping("/detalles-ventas")
     public ResponseEntity<?> guardarDetallesVentas(@RequestBody DetallesVentasDTO dto) {
         Productos producto = productosRepository.findById(dto.getId_producto()).orElse(null);
         if (producto == null) {
@@ -99,7 +99,7 @@ public class DetallesVentasController {
         return ResponseEntity.ok(detallesVentasService.guardarDetallesVentas(detallesVentas));
     }
 
-    @PutMapping("/detalles-venta")
+    @PutMapping("/detalles-ventas")
     public ResponseEntity<?> actualizarDetalleVenta(@RequestBody DetallesVentasDTO dto) {
         Optional<DetallesVentas> detalleExistenteOpt = detallesVentasService.buscarDetallesVentas(dto.getIdDetallesVenta());
         if (detalleExistenteOpt.isEmpty()) {
@@ -183,7 +183,7 @@ public class DetallesVentasController {
         return ResponseEntity.ok(detallesVentasService.guardarDetallesVentas(detalleExistente));
     }
 
-    @DeleteMapping("/detalles-venta/{id}")
+    @DeleteMapping("/detalles-ventas/{id}")
     public ResponseEntity<?> eliminarDetalleVenta(@PathVariable Integer id) {
         Optional<DetallesVentas> detalleOpt = detallesVentasService.buscarDetallesVentas(id);
         if (detalleOpt.isEmpty()) {

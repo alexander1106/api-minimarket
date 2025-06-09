@@ -57,12 +57,12 @@ public class DevolucionesController {
         return devolucionesService.listarDevoluciones();
     }
 
-    @GetMapping("/devolucion/{id}")
+    @GetMapping("/devoluciones/{id}")
     public Optional<Devoluciones> buscarDevolucion(@PathVariable Integer id) {
         return devolucionesService.buscarDevolucion(id);
     }
 
-    @PostMapping("/devolucion")
+    @PostMapping("/devoluciones")
     public ResponseEntity<?> guardarDevolucion(@RequestBody DevolucionesDTO dto) {
         Ventas venta = ventasRepository.findById(dto.getId_venta()).orElse(null);
         if (venta == null) {
@@ -113,7 +113,7 @@ public class DevolucionesController {
         return ResponseEntity.ok(devolucionGuardada);
     }
 
-    @DeleteMapping("/devolucion/{id}")
+    @DeleteMapping("/devoluciones/{id}")
     public ResponseEntity<?> eliminarDevolucion(@PathVariable Integer id) {
         Optional<Devoluciones> optionalDevolucion = devolucionesService.buscarDevolucion(id);
         if (optionalDevolucion.isEmpty()) {
@@ -154,7 +154,7 @@ public class DevolucionesController {
         return ResponseEntity.ok("Devolución eliminada correctamente y cambios revertidos.");
     }
 
-    @PutMapping("/devolucion")
+    @PutMapping("/devoluciones")
     public ResponseEntity<?> actualizarDevolucion(@RequestBody DevolucionesDTO dto) {
         if (dto.getId_devolucion() == null) {
             return ResponseEntity.badRequest().body("Debe proporcionar el ID de la devolución.");

@@ -16,6 +16,7 @@ import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
 import com.gadbacorp.api.repository.inventario.TrasladoInventarioProductoRepository;
 import com.gadbacorp.api.service.inventario.ITrasladoInventarioProductoService;
 
+
 @Service
 public class TrasladoInventarioProductoService implements ITrasladoInventarioProductoService {
 
@@ -39,6 +40,29 @@ public class TrasladoInventarioProductoService implements ITrasladoInventarioPro
     @Transactional
     public TrasladoInventarioProducto guardar(TrasladoInventarioProducto traslado) {
         return ejecutarTraslado(traslado);
+    }
+
+    @Override
+    @Transactional
+    public TrasladoInventarioProducto modificar(TrasladoInventarioProducto trasladoNuevo) {
+        // 1) Buscar el registro original en BD
+        TrasladoInventarioProducto original = trasladoRepo.findById(trasladoNuevo.getIdtraslado())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Traslado no encontrado id=" + trasladoNuevo.getIdtraslado()
+            ));
+
+        // 2) Revertir efectos del traslado original (devolver stock a origen / quitar stock de destino)
+        revertirTraslado(original);
+
+        // 3) Conservar el mismo ID y, si no se provee nueva fecha, mantener la original
+        trasladoNuevo.setIdtraslado(original.getIdtraslado());
+        if (trasladoNuevo.getFechaTraslado() == null) {
+            trasladoNuevo.setFechaTraslado(original.getFechaTraslado());
+        }
+
+        // 4) Ejecutar el “nuevo traslado” (aplicar validaciones y persistir)
+        return ejecutarTraslado(trasladoNuevo);
     }
 
     private TrasladoInventarioProducto ejecutarTraslado(TrasladoInventarioProducto traslado) {
@@ -109,23 +133,44 @@ public class TrasladoInventarioProductoService implements ITrasladoInventarioPro
         return trasladoRepo.save(traslado);
     }
 
+    private void revertirTraslado(TrasladoInventarioProducto traslado) {
+        // Cargar nuevamente ambas filas de InventarioProducto desde BD
+        InventarioProducto origen = invProdRepo.findById(traslado.getOrigen().getIdinventarioproducto())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Traslado original inválido: InventarioProducto origen no existe."
+            ));
 
-    @Override
-    @Transactional
-    public TrasladoInventarioProducto modificar(TrasladoInventarioProducto trasladoNuevo) {
-        throw new ResponseStatusException(
-            HttpStatus.FORBIDDEN,
-            "No está permitido modificar un traslado de inventario."
-        );
+        InventarioProducto destino = invProdRepo.findById(traslado.getDestino().getIdinventarioproducto())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Traslado original inválido: InventarioProducto destino no existe."
+            ));
+
+        int cantidad = traslado.getCantidad();
+
+        origen.setStockactual(origen.getStockactual() + cantidad);
+        invProdRepo.save(origen);
+        if (destino.getStockactual() < cantidad) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No se puede revertir el traslado (" + traslado.getIdtraslado() + "): " +
+                "stock en destino (" + destino.getStockactual() + ") es menor que la cantidad original (" + cantidad + ")."
+            );
+        }
+        destino.setStockactual(destino.getStockactual() - cantidad);
+        invProdRepo.save(destino);
     }
 
     @Override
     @Transactional
     public void eliminar(Integer id) {
-        throw new ResponseStatusException(
-            HttpStatus.FORBIDDEN,
-            "No está permitido eliminar un traslado de inventario."
-        );
+        if (!trasladoRepo.existsById(id)) {
+            throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Traslado no encontrado id=" + id
+            );
+        }
+        trasladoRepo.deleteById(id);
     }
-
 }

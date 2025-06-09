@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.gadbacorp.api.entity.inventario.Categorias;
-import com.gadbacorp.api.entity.inventario.CategoriasDTO;
 
 
 public interface ICategoriasService {
