@@ -25,14 +25,15 @@ public class Caja {
     private Integer idCaja; 
     private String nombreCaja;
     private Double saldoActual; 
-    private Integer estado;
+    private Integer estado=1;
     private String estadoCaja;
 
-    @OneToMany(mappedBy = "cajas", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @OneToMany(mappedBy = "caja")
     private List<AperturaCaja> aperturaCajas;
 
     
+    public Caja() {
+    }
     @OneToMany(mappedBy = "cajaOrigen", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<TransferenciasEntreCajas> transferenciasOrigen;
@@ -54,8 +55,9 @@ public class Caja {
     public void setTransferenciasDestino(List<TransferenciasEntreCajas> transferenciasDestino) {
         this.transferenciasDestino = transferenciasDestino;
     }
-    public Caja(Integer id_caja) {
-        //TODO Auto-generated constructor stub
+  
+    public Caja(Integer idCaja) {
+        this.idCaja = idCaja;
     }
     public Integer getIdCaja() {
         return idCaja;

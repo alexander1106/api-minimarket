@@ -27,6 +27,7 @@ public class ArqueoCaja {
     private Double ingresosTotales; 
     private Double egresosTotales; 
     private Double saldoSistema; 
+    private Integer estado=1;
     private Double saldoReal; 
     private Double diferencia; 
     private String observaciones; 
@@ -116,4 +117,15 @@ public class ArqueoCaja {
     public void setAperturaCaja(AperturaCaja aperturaCaja) {
         this.aperturaCaja = aperturaCaja;
     }
+
+    public Integer getEstado() {
+        return estado;
+    }
+
+    public void setEstado(Integer estado) {
+        this.estado = estado;
+    }
+
+    
 }
+

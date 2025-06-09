@@ -14,6 +14,7 @@ public class TransaccionesCajaDTO {
     private String concepto; 
     private Double monto; 
     private Date fecha; 
+    private Integer estado=1;
     private String observaciones; 
     private Integer id_apertura_caja;
     public Integer getIdTransaccionesCaja() {
@@ -57,6 +58,12 @@ public class TransaccionesCajaDTO {
     }
     public void setId_apertura_caja(Integer id_apertura_caja) {
         this.id_apertura_caja = id_apertura_caja;
+    }
+    public Integer getEstado() {
+        return estado;
+    }
+    public void setEstado(Integer estado) {
+        this.estado = estado;
     } 
     
 }

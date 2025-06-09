@@ -4,13 +4,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gadbacorp.api.entity.inventario.Categorias;
 import com.gadbacorp.api.entity.inventario.CategoriasDTO;
+import com.gadbacorp.api.entity.inventario.Productos;
+import com.gadbacorp.api.repository.inventario.ProductosRepository;
 import com.gadbacorp.api.service.inventario.ICategoriasService;
 
 @RestController
@@ -35,36 +38,87 @@ public class CategoriasController {
     @Autowired
     private ICategoriasService serviceCategorias;
 
+
+    // 1) Inyecta el repositorio de productos
+    @Autowired
+    private ProductosRepository productoRepo;
+
+
+    /** Convierte una entidad Categoria en un DTO sencillo */
     private CategoriasDTO toDTO(Categorias c) {
-        CategoriasDTO dto = new CategoriasDTO(
+        return new CategoriasDTO(
             c.getIdcategoria(),
             c.getNombre(),
             c.getImagen()
         );
-        List<Integer> ids = c.getProductos()
-                              .stream()
-                              .map(p -> p.getIdproducto())
-                              .collect(Collectors.toList());
-        dto.setProductos(ids);
-        return dto;
     }
 
+    /** Nuevo método: devuelve lista de maps que incluyen productos */
     @GetMapping
-    @Transactional(readOnly = true)
-    public ResponseEntity<List<CategoriasDTO>> listarTodas() {
-        // usamos el método del servicio que ya devuelve DTOs
-        List<CategoriasDTO> lista = serviceCategorias.listarConProductos();
-        return ResponseEntity.ok(lista);
+    public ResponseEntity<List<Map<String,Object>>> listarTodasConProductos() {
+        List<Categorias> categorias = serviceCategorias.buscarTodos();
+
+        List<Map<String,Object>> respuesta = categorias.stream().map(c -> {
+            Map<String,Object> mapCat = new LinkedHashMap<>();
+            mapCat.put("idcategoria", c.getIdcategoria());
+            mapCat.put("nombre",      c.getNombre());
+            mapCat.put("imagen",      c.getImagen());
+
+            // 2) Trae productos relacionados
+            List<Productos> prods = productoRepo.findByCategoria_Idcategoria(c.getIdcategoria());
+            // 3) Mapea sólo los campos que quieras
+            List<Map<String,Object>> listaProds = prods.stream().map(p -> {
+                Map<String,Object> m = new LinkedHashMap<>();
+                m.put("idproducto", p.getIdproducto());
+                m.put("nombre",     p.getNombre());
+                m.put("descripcion",     p.getDescripcion());
+                m.put("fechaVencimiento",     p.getFechaVencimiento());
+                m.put("tipoImpuesto",     p.getTipoImpuesto());
+                m.put("costoCompra",     p.getCostoCompra());
+                m.put("costoventa",     p.getCostoVenta());
+                m.put("costoMayor",     p.getCostoMayor());
+                m.put("imagen",     p.getImagen());
+
+                return m;
+            }).collect(Collectors.toList());
+
+            mapCat.put("productos", listaProds);
+            return mapCat;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(respuesta);
     }
 
-
+    /** Similar para obtener una sola categoría */
     @GetMapping("/{id}")
-    @Transactional(readOnly = true)
-    public ResponseEntity<CategoriasDTO> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<Map<String,Object>> obtenerPorIdConProductos(@PathVariable Integer id) {
         Optional<Categorias> opt = serviceCategorias.buscarId(id);
-        return opt
-            .map(c -> ResponseEntity.ok(toDTO(c)))
-            .orElseGet(() -> ResponseEntity.notFound().build());
+        if (opt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Categorias c = opt.get();
+        Map<String,Object> mapCat = new LinkedHashMap<>();
+        mapCat.put("idcategoria", c.getIdcategoria());
+        mapCat.put("nombre",      c.getNombre());
+        mapCat.put("imagen",      c.getImagen());
+
+        List<Productos> prods = productoRepo.findByCategoria_Idcategoria(c.getIdcategoria());
+        List<Map<String,Object>> listaProds = prods.stream().map(p -> {
+            Map<String,Object> m = new LinkedHashMap<>();
+            m.put("idproducto", p.getIdproducto());
+            m.put("nombre",     p.getNombre());
+            m.put("descripcion",     p.getDescripcion());
+            m.put("fechaVencimiento",     p.getFechaVencimiento());
+            m.put("tipoImpuesto",     p.getTipoImpuesto());
+            m.put("costoCompra",     p.getCostoCompra());
+            m.put("costoventa",     p.getCostoVenta());
+            m.put("costoMayor",     p.getCostoMayor());
+            m.put("imagen",     p.getImagen());
+            return m;
+        }).collect(Collectors.toList());
+
+        mapCat.put("productos", listaProds);
+        return ResponseEntity.ok(mapCat);
     }
 
     @PostMapping
@@ -103,7 +157,6 @@ public class CategoriasController {
             return ResponseEntity.status(500).body("Error al crear categoría: " + e.getMessage());
         }
     }
-
 
     @PutMapping
     public ResponseEntity<?> modificar(@RequestBody CategoriasDTO dto) {
@@ -151,7 +204,7 @@ public class CategoriasController {
             return ResponseEntity.status(500).body("Error al modificar categoría: " + e.getMessage());
         }
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         Optional<Categorias> opt = serviceCategorias.buscarId(id);

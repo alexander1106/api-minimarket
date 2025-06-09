@@ -11,13 +11,14 @@ public class ArqueoCajaDTO {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idArqueoCaja;
     private Date fechaArqueo;
-    private Double saldoInciial; 
+    private Double saldoIncial; 
     private Double ingresosTotales; 
     private Double egresosTotales; 
     private Double saldoSistema; 
     private Double saldoReal; 
     private Double diferencia; 
     private String observaciones; 
+    private Integer estado=1; 
     private Integer id_apertura_caja;
     public Integer getIdArqueoCaja() {
         return idArqueoCaja;
@@ -31,11 +32,11 @@ public class ArqueoCajaDTO {
     public void setFechaArqueo(Date fechaArqueo) {
         this.fechaArqueo = fechaArqueo;
     }
-    public Double getSaldoInciial() {
-        return saldoInciial;
+    public Double getSaldoIncial() {
+        return saldoIncial;
     }
-    public void setSaldoInciial(Double saldoInciial) {
-        this.saldoInciial = saldoInciial;
+    public void setSaldoInciial(Double saldoIncial) {
+        this.saldoIncial = saldoIncial;
     }
     public Double getIngresosTotales() {
         return ingresosTotales;
@@ -78,6 +79,12 @@ public class ArqueoCajaDTO {
     }
     public void setId_apertura_caja(Integer id_apertura_caja) {
         this.id_apertura_caja = id_apertura_caja;
+    }
+    public Integer getEstado() {
+        return estado;
+    }
+    public void setEstado(Integer estado) {
+        this.estado = estado;
     }
     
     

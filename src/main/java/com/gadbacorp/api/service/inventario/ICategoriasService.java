@@ -21,5 +21,4 @@ public interface ICategoriasService {
 
     void eliminar(Integer id);
 
-    List<CategoriasDTO> listarConProductos();
 }   

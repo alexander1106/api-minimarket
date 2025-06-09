@@ -50,11 +50,11 @@ public class Empleado {
         this.idEmpleado = idEmpleado;
     }
 
-
     @OneToMany(mappedBy = "empleados", cascade = CascadeType.ALL)
-    @JsonIgnore
+     @JsonIgnore
     private List<AperturaCaja> aperturaCaja;
-    
+
+
     public Empleado(Integer idEmpleado, Sucursales idSucursal, String nombre, String apellidos, String correoElectronico,
             String dni, String contrasenaHash, Integer estado, Integer rollId, LocalDateTime fechaCreacion,
             Integer permisosId, String turno) {
@@ -174,14 +174,17 @@ public class Empleado {
                 + ", fechaCreacion=" + fechaCreacion + ", permisosId=" + permisosId + ", turno=" + turno + "]";
     }
 
-    public List<AperturaCaja> getAperturaCajas() {
+
+    public List<AperturaCaja> getAperturaCaja() {
         return aperturaCaja;
     }
 
-    public void setAperturaCajas(List<AperturaCaja> aperturaCajas) {
-        this.aperturaCaja = aperturaCajas;
+
+    public void setAperturaCaja(List<AperturaCaja> aperturaCaja) {
+        this.aperturaCaja = aperturaCaja;
     }
-    
+
+
 
 
 }

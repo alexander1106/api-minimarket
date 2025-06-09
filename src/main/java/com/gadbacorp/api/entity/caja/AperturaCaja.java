@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.gadbacorp.api.entity.empleados.Empleado;
 
 import jakarta.persistence.CascadeType;
@@ -32,6 +33,7 @@ public class AperturaCaja {
     private Date fechaCierre; 
     private Double saldoInicial; 
     private Double saldoFinal; 
+    private Integer estado=1; // 1 activo, 0 inactivo
 
     public AperturaCaja(Integer idAperturaCaja) {
         this.idAperturaCaja = idAperturaCaja;
@@ -42,27 +44,32 @@ public class AperturaCaja {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idCaja")
-    private Caja cajas;
+    @JsonIgnoreProperties("aperturaCajas") // ignora el campo que causaría el ciclo
+    private Caja caja;
     
+  
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idEmpleado")
+    @JsonIgnore
     private Empleado empleados;
+
 
     @OneToMany(mappedBy = "aperturaCaja", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<TransaccionesCaja> transaccionesCajas;
     
-      @OneToMany(mappedBy = "aperturaCaja", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "aperturaCaja", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<ArqueoCaja> arqueoCaja;
     
 
-    public Caja getCajas() {
-        return cajas;
+    public Caja getCaja() {
+        return caja;
     }
 
-    public void setCajas(Caja cajas) {
-        this.cajas = cajas;
+    public void setCaja(Caja caja) {
+        this.caja = caja;
     }
 
     public Empleado getEmpleados() {
@@ -121,14 +128,6 @@ public class AperturaCaja {
         this.saldoFinal = saldoFinal;
     }
 
-    public Caja getCaja() {
-        return cajas;
-    }
-
-    public void setCaja(Caja cajas) {
-        this.cajas = cajas;
-    }
-
     public Empleado getEmpleado() {
         return empleados;
     }
@@ -143,6 +142,14 @@ public class AperturaCaja {
 
     public void setArqueoCaja(List<ArqueoCaja> arqueoCaja) {
         this.arqueoCaja = arqueoCaja;
+    }
+
+    public Integer getEstado() {
+        return estado;
+    }
+
+    public void setEstado(Integer estado) {
+        this.estado = estado;
     }
 
 

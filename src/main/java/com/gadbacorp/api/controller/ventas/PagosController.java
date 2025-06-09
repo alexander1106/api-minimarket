@@ -45,22 +45,36 @@ public class PagosController {
     public List<Pagos> listarPagos() {
         return pagosService.listarPagos();
     }
+@PostMapping("/pago")
+public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
+    Pagos pago = new Pagos();
+    pago.setEstadoPago(dto.getEstadoPago());
+    pago.setObservaciones(dto.getObservaciones());
+    pago.setReferenciaPago(dto.getReferenciaPago());
+    pago.setFechaPago(dto.getFechaPago());
+    pago.setMontoPagado(dto.getMontoPagado());
 
-    @PostMapping("/pago")
-    public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
-        Pagos pago = new Pagos();
-        pago.setEstadoPago(dto.getEstadoPago());
-        pago.setObservaciones(dto.getObservaciones());
-        pago.setReferenciaPago(dto.getReferenciaPago());
-        pago.setFechaPago(dto.getFechaPago());
-        pago.setMontoPagado(dto.getMontoPagado());
-        pago.setEstadoPago(dto.getEstadoPago());
-        MetodosPago metodo = metodosPagoRepository.findById(dto.getId_metodo_pago()).orElse(null);
-        Ventas venta =  ventasRepository.findById(dto.getId_venta()).orElse(null);
-        pago.setVentas(venta);
-        pago.setMetodosPago(metodo);
-        return ResponseEntity.ok(pagosService.guardarPago(pago));        
+    MetodosPago metodo = metodosPagoRepository.findById(dto.getId_metodo_pago()).orElse(null);
+    Ventas venta = ventasRepository.findById(dto.getId_venta()).orElse(null);
+    
+    if (venta == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Venta no encontrada.");
     }
+    
+    if (metodo == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Metodo no encontrada.");
+    }
+    pago.setVentas(venta);
+    pago.setMetodosPago(metodo);
+
+    // Cambiar estado de la venta a "PAGADO"
+    venta.setEstado_venta("PAGADO"); // Asegúrate que "estado" sea un campo de la entidad Ventas
+    ventasRepository.save(venta); // Guardar la venta actualizada
+
+    return ResponseEntity.ok(pagosService.guardarPago(pago));
+}
+
+
 
     @PutMapping("/pago")
     public ResponseEntity<?> modificar(@RequestBody PagosDTO dto) {

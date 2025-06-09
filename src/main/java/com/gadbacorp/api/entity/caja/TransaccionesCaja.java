@@ -15,8 +15,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="transacciones-caja")
-@SQLDelete(sql="UPDATE transacciones-caja SET estado = 0 WHERE id_transacciones_caja = ?")
+@Table(name="transacciones_caja")
+@SQLDelete(sql="UPDATE transacciones_caja SET estado = 0 WHERE id_transacciones_caja = ?")
 @Where(clause = "estado = 1")
 public class TransaccionesCaja {
     @Id
@@ -25,6 +25,7 @@ public class TransaccionesCaja {
     private String tipoMovimiento; 
     private String concepto; 
     private Double monto; 
+    private Integer estado=1;
     private Date fecha; 
     private String observaciones; 
 
@@ -86,6 +87,14 @@ public class TransaccionesCaja {
 
     public void setAperturaCaja(AperturaCaja aperturaCaja) {
         this.aperturaCaja = aperturaCaja;
+    }
+
+    public Integer getEstado() {
+        return estado;
+    }
+
+    public void setEstado(Integer estado) {
+        this.estado = estado;
     }
 
   
