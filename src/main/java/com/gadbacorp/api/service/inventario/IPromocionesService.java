@@ -3,17 +3,17 @@ package com.gadbacorp.api.service.inventario;
 import java.util.List;
 import java.util.Optional;
 
-import com.gadbacorp.api.entity.inventario.PromocionesDTO;
+import com.gadbacorp.api.entity.inventario.Promociones;
 
 public interface IPromocionesService {
 
-    List<PromocionesDTO> buscarTodosDTO();
+    List<Promociones> buscarTodos();
 
-    Optional<PromocionesDTO> buscarIdDTO(Integer id);
+    Optional<Promociones> buscarId(Integer id);
 
-    PromocionesDTO guardarDTO(PromocionesDTO dto);
+    Promociones guardar(Promociones promociones);
 
-    PromocionesDTO actualizarDTO(Integer id, PromocionesDTO dto);
+    Promociones modificar(Promociones promociones);
 
     void eliminar(Integer id);
 }

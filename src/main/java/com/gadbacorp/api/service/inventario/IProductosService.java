@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.gadbacorp.api.entity.inventario.Productos;
-import com.gadbacorp.api.entity.inventario.ProductosDTO;
 
 public interface IProductosService {
     
@@ -15,11 +14,6 @@ public interface IProductosService {
     Optional<Productos> buscarId(Integer id);
     void eliminar(Integer id);
 
-    // Métodos para DTOs
-    List<ProductosDTO> buscarTodosDTO();
-    Optional<ProductosDTO> buscarIdDTO(Integer id);
-    ProductosDTO guardarDTO(ProductosDTO dto);
-    ProductosDTO actualizarDTO(Integer id, ProductosDTO dto);
 }
 
  

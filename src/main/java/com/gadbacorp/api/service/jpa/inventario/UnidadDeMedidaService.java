@@ -11,40 +11,35 @@ import com.gadbacorp.api.repository.inventario.UnidadDeMedidaRepository;
 import com.gadbacorp.api.service.inventario.IUnidadDeMedidaService;
 
 @Service
-public class UnidadDeMedidaService implements IUnidadDeMedidaService{
-@Autowired
+public class UnidadDeMedidaService implements IUnidadDeMedidaService {
+
+    @Autowired
     private UnidadDeMedidaRepository repoUnidadDeMedida;
-    public List<UnidadDeMedida> buscarTodos(){
+
+    @Override
+    public List<UnidadDeMedida> buscarTodos() {
         return repoUnidadDeMedida.findAll();
     }
+
     @Override
     public UnidadDeMedida guardar(UnidadDeMedida unidad) {
-    Optional<UnidadDeMedida> existente = repoUnidadDeMedida.findByNombreIgnoreCase(unidad.getNombre());
-
-    if (existente.isPresent()) {
-        throw new IllegalArgumentException("Ya existe una unidad de medida con ese nombre.");
+        return repoUnidadDeMedida.save(unidad);
     }
 
-    return repoUnidadDeMedida.save(unidad);
-    }
-    
     @Override
     public UnidadDeMedida modificar(UnidadDeMedida unidad) {
-    Optional<UnidadDeMedida> existente = repoUnidadDeMedida.findByNombreIgnoreCase(unidad.getNombre());
-
-    // Validar si ya existe otra unidad con ese nombre y es diferente al que estamos modificando
-    if (existente.isPresent() && !existente.get().getIdunidadmedida().equals(unidad.getIdunidadmedida())) {
-        throw new IllegalArgumentException("Ya existe una unidad de medida con ese nombre.");
+        return repoUnidadDeMedida.save(unidad);
     }
 
-    return repoUnidadDeMedida.save(unidad);
-}
-
-    public Optional<UnidadDeMedida> buscarId(Integer id){
+    @Override
+    public Optional<UnidadDeMedida> buscarId(Integer id) {
         return repoUnidadDeMedida.findById(id);
     }
 
-    public void eliminar(Integer id){
+    @Override
+    public void eliminar(Integer id) {
         repoUnidadDeMedida.deleteById(id);
     }
+
+
 }

@@ -4,10 +4,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.gadbacorp.api.entity.administrable.Sucursales;
-import com.gadbacorp.api.entity.empleados.Empleado;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,16 +25,13 @@ public class Almacenes {
     private String nombre;
     private String descripcion;
     private String  direccion;
+    private String encargado;
     private Integer estado = 1;
 
     // ← NUEVO: referencia a la sucursal
     @ManyToOne
     @JoinColumn(name = "id_sucursal", nullable = false)
     private Sucursales sucursal;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "idempleado", nullable = false)
-    private Empleado encargado;
 
     public Almacenes() { }
 
@@ -92,19 +87,20 @@ public class Almacenes {
         this.sucursal = sucursal;
     }
 
-    public Empleado getEncargado() {
+
+    public String getEncargado() {
         return encargado;
     }
 
-    public void setEncargado(Empleado encargado) {
+    public void setEncargado(String encargado) {
         this.encargado = encargado;
     }
 
     @Override
     public String toString() {
         return "Almacenes [idalmacen=" + idalmacen + ", nombre=" + nombre + ", descripcion=" + descripcion
-                + ", direccion=" + direccion + ", estado=" + estado + ", sucursal=" + sucursal + ", encargado="
-                + encargado + "]";
+                + ", direccion=" + direccion + ", encargado=" + encargado + ", estado=" + estado + ", sucursal="
+                + sucursal + "]";
     }
 
     

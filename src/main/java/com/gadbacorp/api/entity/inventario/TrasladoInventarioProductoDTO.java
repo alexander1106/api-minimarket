@@ -7,6 +7,7 @@ public class TrasladoInventarioProductoDTO {
     private Integer origenId;    // corresponde a idinventarioproducto_origen
     private Integer destinoId;   // corresponde a idinventarioproducto_destino
     private Integer cantidad;
+    private String descripcion;
     private LocalDateTime fechaTraslado;
 
     public TrasladoInventarioProductoDTO() { }
@@ -16,6 +17,7 @@ public class TrasladoInventarioProductoDTO {
             Integer origenId,
             Integer destinoId,
             Integer cantidad,
+            String descripcion,
             LocalDateTime fechaTraslado
     ) {
         this.idtraslado = idtraslado;
@@ -23,6 +25,8 @@ public class TrasladoInventarioProductoDTO {
         this.destinoId = destinoId;
         this.cantidad = cantidad;
         this.fechaTraslado = fechaTraslado;
+        this.descripcion = descripcion;
+
     }
 
     public Integer getIdtraslado() {
@@ -59,6 +63,14 @@ public class TrasladoInventarioProductoDTO {
     public void setFechaTraslado(LocalDateTime fechaTraslado) {
         this.fechaTraslado = fechaTraslado;
     }
+    
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
 
     @Override
     public String toString() {
@@ -70,4 +82,5 @@ public class TrasladoInventarioProductoDTO {
             + ", fechaTraslado=" + fechaTraslado
             + "]";
     }
+
 }

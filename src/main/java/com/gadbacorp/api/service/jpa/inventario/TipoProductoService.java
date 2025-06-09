@@ -11,41 +11,35 @@ import com.gadbacorp.api.repository.inventario.TipoProductoRepository;
 import com.gadbacorp.api.service.inventario.ITipoProductoService;
 
 @Service
-public class TipoProductoService implements ITipoProductoService{
+public class TipoProductoService implements ITipoProductoService {
+
     @Autowired
     private TipoProductoRepository repoTipoProducto;
-    public List<TipoProducto> buscarTodos(){
+
+    @Override
+    public List<TipoProducto> buscarTodos() {
         return repoTipoProducto.findAll();
     }
+
     @Override
     public TipoProducto guardar(TipoProducto tipoproducto) {
-    Optional<TipoProducto> existente = repoTipoProducto.findByNombreIgnoreCase(tipoproducto.getNombre());
-
-    if (existente.isPresent()) {
-        throw new IllegalArgumentException("Ya existe un tipo de producto con ese nombre.");
-        }
-
         return repoTipoProducto.save(tipoproducto);
     }
 
-    
     @Override
     public TipoProducto modificar(TipoProducto tipoproducto) {
-    Optional<TipoProducto> existente = repoTipoProducto.findByNombreIgnoreCase(tipoproducto.getNombre());
-
-    if (existente.isPresent() && !existente.get().getIdtipoproducto().equals(tipoproducto.getIdtipoproducto())) {
-        throw new IllegalArgumentException("Ya existe un tipo de producto con ese nombre.");
-        }
-
         return repoTipoProducto.save(tipoproducto);
     }
 
-
-    public Optional<TipoProducto> buscarId(Integer id){
+    @Override
+    public Optional<TipoProducto> buscarId(Integer id) {
         return repoTipoProducto.findById(id);
     }
 
-    public void eliminar(Integer id){
+    @Override
+    public void eliminar(Integer id) {
         repoTipoProducto.deleteById(id);
     }
+
+
 }

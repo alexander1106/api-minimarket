@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,86 +13,82 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.gadbacorp.api.entity.administrable.Sucursales;
-import com.gadbacorp.api.entity.empleados.Empleado;
 import com.gadbacorp.api.entity.inventario.Almacenes;
 import com.gadbacorp.api.entity.inventario.AlmacenesDTO;
 import com.gadbacorp.api.service.administrable.ISucursalesService;
-import com.gadbacorp.api.service.empleados.IEmpleadoServices;
 import com.gadbacorp.api.service.inventario.IAlmacenesService;
 
 @RestController
-@RequestMapping("/api/minimarket/almacenes")
-@CrossOrigin("*")
+@RequestMapping("/api/minimarket")
 public class AlmacenesController {
 
-    @Autowired
-    private IAlmacenesService serviceAlmacenes;
+    @Autowired private IAlmacenesService service;
+    @Autowired private ISucursalesService sucursalesService;
 
-    @Autowired
-    private ISucursalesService serviceSucursales;
-
-    @Autowired
-    private IEmpleadoServices serviceEmpleados;
-
-    /** GET /api/minimarket/almacenes */
-    @GetMapping
-    public List<AlmacenesDTO> listarTodos() {
-        return serviceAlmacenes.buscarTodos()
-            .stream()
-            .map(this::toDTO)
-            .collect(Collectors.toList());
+    @GetMapping("/almacenes")
+    public List<AlmacenesDTO> listar() {
+        return service.buscarTodos()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
-    /** GET /api/minimarket/almacenes/{id} */
-    @GetMapping("/{id}")
-    public AlmacenesDTO buscarPorId(@PathVariable Integer id) {
-        Almacenes ent = serviceAlmacenes.buscarId(id)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Almacén no encontrado id=" + id
-            ));
-        return toDTO(ent);
+    @GetMapping("/almacenes/{id}")
+    public AlmacenesDTO obtener(@PathVariable Integer id) {
+        Almacenes entidad = service.buscarId(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Almacén no encontrado id=" + id));
+        return toDTO(entidad);
     }
 
-    /** POST /api/minimarket/almacenes */
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public AlmacenesDTO guardar(@RequestBody AlmacenesDTO dto) {
-        // validar duplicado por nombre
-        serviceAlmacenes.buscarPorNombre(dto.getNombre().trim())
-            .ifPresent(a -> {
-                throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Ya existe un almacén con nombre: " + dto.getNombre()
-                );
-            });
+    @PostMapping("/almacenes")
+    public ResponseEntity<AlmacenesDTO> crear(@RequestBody AlmacenesDTO dto) {
+        Sucursales sucursal = sucursalesService.buscarId(dto.getIdSucursal())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Sucursal no encontrada con ID: " + dto.getIdSucursal()));
 
-        Almacenes ent = toEntity(dto);
-        Almacenes guardado = serviceAlmacenes.guardar(ent);
-        return toDTO(guardado);
+        Almacenes entidad = new Almacenes();
+        entidad.setIdalmacen(dto.getIdalmacen());
+        entidad.setNombre(dto.getNombre() != null ? dto.getNombre().trim() : null);
+        entidad.setDescripcion(dto.getDescripcion());
+        entidad.setEncargado(dto.getEncargado() != null? dto.getEncargado().trim() : null);
+        entidad.setDireccion(dto.getDireccion() != null ? dto.getDireccion().trim() : null);
+        entidad.setEstado(dto.getEstado());
+        entidad.setSucursal(sucursal);
+
+        Almacenes almacenGuardado = service.guardar(entidad);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(almacenGuardado));
     }
 
-    /** PUT /api/minimarket/almacenes */
-    @PutMapping
-    public AlmacenesDTO modificar(@RequestBody AlmacenesDTO dto) {
-        Almacenes ent = toEntity(dto);
-        Almacenes actualizado = serviceAlmacenes.modificar(ent);
-        return toDTO(actualizado);
+    @PutMapping("/almacenes")
+    public AlmacenesDTO actualizar(@RequestBody AlmacenesDTO dto) {
+        Almacenes existente = service.buscarId(dto.getIdalmacen())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Almacén no encontrado id=" + dto.getIdalmacen()));
+
+        Sucursales sucursal = sucursalesService.buscarId(dto.getIdSucursal())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Sucursal no encontrada con ID: " + dto.getIdSucursal()));
+
+        existente.setNombre(dto.getNombre() != null ? dto.getNombre().trim() : null);
+        existente.setDescripcion(dto.getDescripcion());
+        existente.setEncargado(dto.getEncargado()!= null? dto.getEncargado().trim() : null);
+        existente.setDireccion(dto.getDireccion() != null ? dto.getDireccion().trim() : null);
+        existente.setEstado(dto.getEstado());
+        existente.setSucursal(sucursal);
+
+        return toDTO(service.modificar(existente));
     }
 
-    /** DELETE /api/minimarket/almacenes/{id} */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/almacenes/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
-        serviceAlmacenes.eliminar(id);
+        service.eliminar(id);
         return ResponseEntity.ok("Almacén eliminado correctamente");
     }
-
-    // ——— Métodos privados de mapeo ———
 
     private AlmacenesDTO toDTO(Almacenes e) {
         AlmacenesDTO dto = new AlmacenesDTO();
@@ -101,36 +96,9 @@ public class AlmacenesController {
         dto.setNombre(e.getNombre());
         dto.setDescripcion(e.getDescripcion());
         dto.setDireccion(e.getDireccion());
+        dto.setEncargado(e.getEncargado());
         dto.setEstado(e.getEstado());
         dto.setIdSucursal(e.getSucursal().getIdSucursal());
-        dto.setIdEmpleado(e.getEncargado().getIdEmpleado());
         return dto;
-    }
-
-    private Almacenes toEntity(AlmacenesDTO dto) {
-        Almacenes e = new Almacenes();
-        e.setIdalmacen(dto.getIdalmacen());
-        e.setNombre(dto.getNombre().trim());
-        e.setDescripcion(dto.getDescripcion());
-        e.setDireccion(dto.getDireccion().trim());
-        e.setEstado(dto.getEstado());
-
-        // vincular sucursal
-        Sucursales suc = serviceSucursales.buscarId(dto.getIdSucursal())
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Sucursal no encontrada id=" + dto.getIdSucursal()
-            ));
-        e.setSucursal(suc);
-
-        // vincular empleado encargado
-        Empleado emp = serviceEmpleados.buscarId(dto.getIdEmpleado())
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Empleado no encontrado id=" + dto.getIdEmpleado()
-            ));
-        e.setEncargado(emp);
-
-        return e;
     }
 }
