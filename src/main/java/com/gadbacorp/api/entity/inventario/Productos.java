@@ -10,6 +10,8 @@ import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gadbacorp.api.entity.ventas.DetallesCotizaciones;
+import com.gadbacorp.api.entity.ventas.DetallesDevolucion;
 import com.gadbacorp.api.entity.ventas.DetallesVentas;
 
 import jakarta.persistence.CascadeType;
@@ -27,11 +29,11 @@ import jakarta.persistence.Table;
 @Table(name = "productos")
 @SQLDelete(sql="UPDATE productos SET estado = 0 WHERE idproducto = ?")
 @Where(clause = "estado = 1")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Productos {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idproducto;
-
     private String nombre;
     private String descripcion;
     private LocalDate fechaVencimiento;
@@ -65,6 +67,15 @@ public class Productos {
     @OneToMany(mappedBy = "productos", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<DetallesVentas> detallesVentas;
+
+    @OneToMany(mappedBy = "productos", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<DetallesCotizaciones> detallesCotizacioneses;
+    
+    @OneToMany(mappedBy = "productos", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<DetallesDevolucion> detallesDevoluciones;
+    
     
 
     public Productos() { }
@@ -137,13 +148,6 @@ public class Productos {
         this.costoMayor = costoMayor;
     }
 
-    public String getImagen() {
-        return imagen;
-    }
-
-    public void setImagen(String imagen) {
-        this.imagen = imagen;
-    }
 
     public Integer getEstado() {
         return estado;
@@ -193,7 +197,32 @@ public class Productos {
         this.detallesVentas = detallesVentas;
     }
 
-    @Override
+
+    public List<DetallesCotizaciones> getDetallesCotizacioneses() {
+        return detallesCotizacioneses;
+    }
+
+    public void setDetallesCotizacioneses(List<DetallesCotizaciones> detallesCotizacioneses) {
+        this.detallesCotizacioneses = detallesCotizacioneses;
+    }
+
+    public List<DetallesDevolucion> getDetallesDevoluciones() {
+        return detallesDevoluciones;
+    }
+
+    public void setDetallesDevoluciones(List<DetallesDevolucion> detallesDevoluciones) {
+        this.detallesDevoluciones = detallesDevoluciones;
+    }
+
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
+    }
+
+     @Override
     public String toString() {
         return "Productos [idproducto=" + idproducto + ", nombre=" + nombre + ", descripcion=" + descripcion
                 + ", fechaVencimiento=" + fechaVencimiento + ", tipoImpuesto=" + tipoImpuesto + ", costoCompra="
@@ -201,6 +230,5 @@ public class Productos {
                 + ", estado=" + estado + ", categoria=" + categoria + ", unidadMedida=" + unidadMedida
                 + ", tipoProducto=" + tipoProducto + "]";
     }
-
 
 }

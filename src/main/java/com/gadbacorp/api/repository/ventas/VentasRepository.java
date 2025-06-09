@@ -9,4 +9,6 @@ import com.gadbacorp.api.entity.ventas.Ventas;
 
 public interface VentasRepository extends JpaRepository<Ventas, Integer> {
     List<Ventas> findByClienteIdCliente(Integer clienteId);
+    
+
 }

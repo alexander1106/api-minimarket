@@ -12,4 +12,3 @@ public interface InventarioRepository extends JpaRepository<Inventario, Integer>
         String nombre
     );
 }
- 

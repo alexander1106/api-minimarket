@@ -1,18 +1,11 @@
 package com.gadbacorp.api.entity.ventas;
 
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import java.time.LocalDate;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
-@Entity
-@Table(name="ventas")
-@SQLDelete(sql="UPDATE ventas SET estado = 0 WHERE id_venta = ?")
-@Where(clause = "estado = 1")
 public class VentasDTO {
 
     @Id
@@ -21,9 +14,12 @@ public class VentasDTO {
     private double total_venta; 
     private String tipo_comprobante; 
     private String nro_comrprobante; 
-    private String fecha_venta;
+    private LocalDate  fecha_venta;
     private Integer estado=1;
+    private String estado_venta;
     private Integer id_cliente;
+    private Integer id_cotizacion;
+
 
     public Integer getIdVenta() {
         return idVenta;
@@ -50,10 +46,10 @@ public class VentasDTO {
         this.nro_comrprobante = nro_comrprobante;
     }
    
-    public String getFecha_venta() {
+    public LocalDate  getFecha_venta() {
         return fecha_venta;
     }
-    public void setFecha_venta(String fecha_venta) {
+    public void setFecha_venta(LocalDate  fecha_venta) {
         this.fecha_venta = fecha_venta;
     }
     public Integer getEstado() {
@@ -68,6 +64,17 @@ public class VentasDTO {
     public void setId_cliente(Integer id_cliente) {
         this.id_cliente = id_cliente;
     }
-
+    public String getEstado_venta() {
+        return estado_venta;
+    }
+    public void setEstado_venta(String estado_venta) {
+        this.estado_venta = estado_venta;
+    }
+    public Integer getId_cotizacion() {
+        return id_cotizacion;
+    }
+    public void setId_cotizacion(Integer id_cotizacion) {
+        this.id_cotizacion = id_cotizacion;
+    }
     
 }

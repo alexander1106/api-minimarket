@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -26,6 +27,7 @@ import com.gadbacorp.api.service.inventario.IProductosService;
 
 @RestController
 @RequestMapping("/api/minimarket/productos")
+@CrossOrigin("*")
 public class ProductosController {
 
     @Autowired

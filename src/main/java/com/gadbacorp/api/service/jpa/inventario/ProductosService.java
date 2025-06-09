@@ -65,17 +65,18 @@ public class ProductosService implements IProductosService {
     public void eliminar(Integer id) {
         repoProductos.deleteById(id);
     }
-
+    @Override
     public List<ProductosDTO> buscarTodosDTO() {
         return repoProductos.findAll().stream()
             .map(this::toDTO)
             .collect(Collectors.toList());
     }
-
+    @Override
     public Optional<ProductosDTO> buscarIdDTO(Integer id) {
         return repoProductos.findById(id).map(this::toDTO);
     }
 
+    @Override
     public ProductosDTO guardarDTO(ProductosDTO dto) {
         Optional<Productos> existente = repoProductos.findByNombreIgnoreCase(dto.getNombre());
         if (existente.isPresent()) {
@@ -85,7 +86,7 @@ public class ProductosService implements IProductosService {
         Productos creado = repoProductos.save(producto);
         return toDTO(creado);
     }
-
+    @Override
     public ProductosDTO actualizarDTO(Integer id, ProductosDTO dto) {
         Productos producto = repoProductos.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
