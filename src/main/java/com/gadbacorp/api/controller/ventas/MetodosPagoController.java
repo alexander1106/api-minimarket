@@ -4,9 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,10 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gadbacorp.api.entity.ventas.MetodosPago;
 import com.gadbacorp.api.service.ventas.IMetodosPagoService;
-
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin("*")
 public class MetodosPagoController {
 
     @Autowired
@@ -31,25 +27,27 @@ public class MetodosPagoController {
     public List<MetodosPago> buscarTodos() {
         return metodosPagoService.listarMetodosPago();
     }
-   @PostMapping("/metodo-pago")
-    public ResponseEntity<MetodosPago> crearMetodoPago(@RequestBody MetodosPago metodoPago) {
-        MetodosPago nuevo = metodosPagoService.guardarMetodoPago(metodoPago);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+    @PostMapping("/metodos-pago")
+    public ResponseEntity<?> guardarMetodoPago(@RequestBody MetodosPago metodoPago) {
+        if (metodosPagoService.existeMetodoConNombre(metodoPago.getNombre())) {
+            return ResponseEntity.badRequest().body("Ya existe un método de pago con ese nombre.");
+        }
+        return ResponseEntity.ok(metodosPagoService.guardarMetodoPago(metodoPago));
     }
 
-    @PutMapping("/metodo-pago")
-    public MetodosPago modificar(@RequestBody MetodosPago metodoPago) {
-        metodosPagoService.guardarMetodoPago(metodoPago);
-        return metodoPago;
-    }
-    @GetMapping("/metodo-pago/{id}")
+    @GetMapping("/metodos-pago/{id}")
     public Optional<MetodosPago> buscarId(@PathVariable("id") Integer id){
         return metodosPagoService.obtenerMetodoPago(id);
     }
-    @DeleteMapping("/metodo-pago/{id}")
-    public String eliminar(@PathVariable Integer id){
-        metodosPagoService.eliminarMetodoPago(id);
-        return "Metodo de pago eliminado";
+
+    @PutMapping("/metodos-pago")
+    public ResponseEntity<?> modificar(@RequestBody MetodosPago metodoPago) {
+        return ResponseEntity.ok(metodosPagoService.editarMetodosPago(metodoPago));
     }
 
+    @DeleteMapping("/metodos-pago/{id}")
+    public String eliminar(@PathVariable Integer id){
+        metodosPagoService.eliminarMetodoPago(id);
+        return "Método de pago eliminado";
+    }
 }

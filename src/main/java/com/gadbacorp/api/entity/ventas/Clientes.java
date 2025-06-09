@@ -1,5 +1,5 @@
 package com.gadbacorp.api.entity.ventas;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.hibernate.annotations.SQLDelete;
@@ -23,17 +23,14 @@ public class Clientes {
     @Column(name="id_cliente")
     private Integer idCliente; 
     private String tipoDocumento; 
-    private String tipoContribuyente; 
     private String documento;
     private String nombre; 
     private String  telefono; 
     private String email;
     private String direccion;
-    private Date fecha_registro;
+    private LocalDate fecha_registro;
     private Integer estado=1;
 
-
-    
     public Clientes(Integer idCliente) {
         this.idCliente = idCliente;
     }
@@ -43,6 +40,9 @@ public class Clientes {
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private List<Ventas> ventas;
+
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
+    private List<Cotizaciones> cotizaciones;
 
     public Integer getIdCliente() {
         return idCliente;
@@ -100,11 +100,11 @@ public class Clientes {
         this.direccion = direccion;
     }
 
-    public Date getFecha_registro() {
+    public LocalDate getFecha_registro() {
         return fecha_registro;
     }
 
-    public void setFecha_registro(Date fecha_registro) {
+    public void setFecha_registro(LocalDate fecha_registro) {
         this.fecha_registro = fecha_registro;
     }
 
@@ -124,11 +124,20 @@ public class Clientes {
         this.ventas = ventas;
     }
 
-    public String getTipoContribuyente() {
-        return tipoContribuyente;
+    public List<Cotizaciones> getCotizaciones() {
+        return cotizaciones;
     }
 
-    public void setTipoContribuyente(String tipoContribuyente) {
-        this.tipoContribuyente = tipoContribuyente;
+    public void setCotizaciones(List<Cotizaciones> cotizaciones) {
+        this.cotizaciones = cotizaciones;
     }
+
+    @Override
+    public String toString() {
+        return "Clientes [idCliente=" + idCliente + ", tipoDocumento=" + tipoDocumento + ", tipoContribuyente="
+                 + ", documento=" + documento + ", nombre=" + nombre + ", telefono=" + telefono
+                + ", email=" + email + ", direccion=" + direccion + ", fecha_registro=" + fecha_registro + ", estado="
+                + estado + ", ventas=" + ventas + ", cotizaciones=" + cotizaciones + "]";
+    }
+    
 }

@@ -1,114 +1,88 @@
 package com.gadbacorp.api.entity.delivery;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.gadbacorp.api.entity.ventas.Ventas;
-
+import com.gadbacorp.api.entity.empleados.Empleado;
 
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
+import com.gadbacorp.api.entity.ventas.Ventas;
+
 @Entity
 @Table(name = "Delivery")
+@SQLDelete(sql = "UPDATE Delivery SET estado=0 WHERE idempresa = ?")
+@Where(clause = "estado=1")
 public class Delivery {
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+private String direccion;
 
-    @Column(name = "direccionEntrega")
-    private String direccion;
+@Enumerated(EnumType.ORDINAL)
+private EstadoDelivery estado;
 
-    private Integer estado;
+@Temporal(TemporalType.TIMESTAMP)
+private Date fechaEntrega;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaEntrega;
+@Temporal(TemporalType.TIMESTAMP)
+private Date fechaEnvio;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaEnvio;
+@Column(precision = 10, scale = 2)
+private BigDecimal costoEnvio;
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal costoEnvio;
+@Column(length = 200)
+private String observaciones;
 
-    @Column(length = 200)
-    private String observaciones;
+@ManyToOne(fetch = FetchType.EAGER)
+@JoinColumn(name = "idVenta")
+@JsonIgnoreProperties("delivery")
+private Ventas venta;
 
-    @ManyToOne
-    @JoinColumn(name = "idVenta")
-    @JsonIgnoreProperties("delivery")
-    private Ventas venta;
+@ManyToOne(fetch = FetchType.EAGER)
+@JoinColumn(name = "id_vehiculo")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+private Vehiculo vehiculo;
 
+@ManyToOne(fetch = FetchType.EAGER)
+@JoinColumn(name = "id_empleado")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+private Empleado empleado;
 
-    public Long getId() {
-        return id;
-    }
+// Getters y Setters
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+public Long getId() { return id; }
+public void setId(Long id) { this.id = id; }
 
-    public String getDireccion() {
-        return direccion;
-    }
+public String getDireccion() { return direccion; }
+public void setDireccion(String direccion) { this.direccion = direccion; }
 
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
-    }
+public EstadoDelivery getEstado() { return estado; }
+public void setEstado(EstadoDelivery estado) { this.estado = estado; }
 
-    public Integer getEstado() {
-        return estado;
-    }
+public Date getFechaEntrega() { return fechaEntrega; }
+public void setFechaEntrega(Date fechaEntrega) { this.fechaEntrega = fechaEntrega; }
 
-    public void setEstado(Integer estado) {
-        this.estado = estado;
-    }
+public Date getFechaEnvio() { return fechaEnvio; }
+public void setFechaEnvio(Date fechaEnvio) { this.fechaEnvio = fechaEnvio; }
 
-    public Date getFechaEntrega() {
-        return fechaEntrega;
-    }
+public BigDecimal getCostoEnvio() { return costoEnvio; }
+public void setCostoEnvio(BigDecimal costoEnvio) { this.costoEnvio = costoEnvio; }
 
-    public void setFechaEntrega(Date fechaEntrega) {
-        this.fechaEntrega = fechaEntrega;
-    }
+public String getObservaciones() { return observaciones; }
+public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
 
-    public Date getFechaEnvio() {
-        return fechaEnvio;
-    }
+public Ventas getVenta() { return venta; }
+public void setVenta(Ventas venta) { this.venta = venta; }
 
-    public void setFechaEnvio(Date fechaEnvio) {
-        this.fechaEnvio = fechaEnvio;
-    }
+public Vehiculo getVehiculo() { return vehiculo; }
+public void setVehiculo(Vehiculo vehiculo) { this.vehiculo = vehiculo; }
 
-    public BigDecimal getCostoEnvio() {
-        return costoEnvio;
-    }
-
-    public void setCostoEnvio(BigDecimal costoEnvio) {
-        this.costoEnvio = costoEnvio;
-    }
-
-    public String getObservaciones() {
-        return observaciones;
-    }
-
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
-    
-    public Ventas getVenta() {
-    return venta;
-    }
-
-    public void setVenta(Ventas venta) {
-    this.venta = venta;
-    }
-
-    
-    // Getters y Setters
-    // ...
-
-
-
+public Empleado getEmpleado() { return empleado; }
+public void setEmpleado(Empleado empleado) { this.empleado = empleado; }
 }

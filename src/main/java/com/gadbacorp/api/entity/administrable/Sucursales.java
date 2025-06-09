@@ -25,39 +25,26 @@ import jakarta.persistence.Table;
 @SQLDelete(sql = "UPDATE sucursales SET estado=0 WHERE id_sucursal = ?")
 @Where(clause = "estado=1")
 public class Sucursales {
-        @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_sucursal")
     private Integer idSucursal;
 
     @Column(name = "nombre_sucursal")
     private String nombreSucursal;
-
-    private Integer contacto;
-
+    private String contacto;
     private String direccion;
-
-    private Integer estado=1;
+    private Integer estado = 1;
 
     @ManyToOne
-    @JoinColumn(name = "idempresa")
+    @JoinColumn(name = "idempresa", referencedColumnName = "idempresa")
     private Empresas empresa;
 
-    // ← NUEVO: lista de almacenes de esta sucursal
-    @OneToMany(mappedBy = "sucursal",cascade= CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Almacenes> almacenes = new ArrayList<>();
 
-    // getters y setters existentes…
-
-    public List<Almacenes> getAlmacenes() {
-        return almacenes;
-    }
-
-    public void setAlmacenes(List<Almacenes> almacenes) {
-        this.almacenes = almacenes;
-    }
-
+    // Getters y Setters
     public Integer getIdSucursal() {
         return idSucursal;
     }
@@ -74,11 +61,11 @@ public class Sucursales {
         this.nombreSucursal = nombreSucursal;
     }
 
-    public Integer getContacto() {
+    public String getContacto() {
         return contacto;
     }
 
-    public void setContacto(Integer contacto) {
+    public void setContacto(String contacto) {
         this.contacto = contacto;
     }
 
@@ -106,10 +93,17 @@ public class Sucursales {
         this.empresa = empresa;
     }
 
+    public List<Almacenes> getAlmacenes() {
+        return almacenes;
+    }
+
+    public void setAlmacenes(List<Almacenes> almacenes) {
+        this.almacenes = almacenes;
+    }
+
     @Override
     public String toString() {
         return "Sucursales [idSucursal=" + idSucursal + ", nombreSucursal=" + nombreSucursal + ", contacto=" + contacto
-                + ", direccion=" + direccion + ", estado=" + estado + ", empresa=" + empresa + "]";
+                + ", direccion=" + direccion + ", estado=" + estado + "]";
     }
-
 }

@@ -11,4 +11,6 @@ public interface IClientesService {
     Optional<Clientes> obtenerCliente(Integer clienteId);
     Clientes crearCliente(Clientes cliente);
     void eliminarCliente(Integer idCliente);
+    List<Clientes> buscarPorDocumento(String documento);
+
 }

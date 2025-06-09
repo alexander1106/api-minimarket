@@ -44,8 +44,6 @@ public class AjusteInventario {
         this.descripcion = descripcion;
     }
 
-    // Getters y setters
-
     public Integer getIdajusteinventario() {
         return idajusteinventario;
     }

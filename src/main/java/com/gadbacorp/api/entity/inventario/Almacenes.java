@@ -19,7 +19,7 @@ import jakarta.persistence.Table;
 @Where(clause="estado = 1")
 public class Almacenes {
     
-     @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idalmacen;
     private String nombre;
@@ -86,8 +86,6 @@ public class Almacenes {
     public void setSucursal(Sucursales sucursal) {
         this.sucursal = sucursal;
     }
-
-
     public String getEncargado() {
         return encargado;
     }
@@ -103,6 +101,7 @@ public class Almacenes {
                 + sucursal + "]";
     }
 
-    
+   
+
 
 }

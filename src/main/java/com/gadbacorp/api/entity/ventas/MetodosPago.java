@@ -5,7 +5,6 @@ import java.util.List;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,8 +24,8 @@ public class MetodosPago {
     private Integer idMetodoPago; 
     private String nombre; 
     private String descripcion;
-    
     private Integer estado =1;
+
     public Integer getIdMetodoPago() {
         return idMetodoPago;
     }
@@ -46,21 +45,19 @@ public class MetodosPago {
         this.estado = estado;
     }
 
-  @OneToMany(mappedBy = "metodosPago", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "metodosPago")
     private List<Pagos> pagos;
 
-  public List<Pagos> getPagos() {
-    return pagos;
-  }
-  public void setPagos(List<Pagos> pagos) {
-    this.pagos = pagos;
-  }
-  public String getDescripcion() {
-    return descripcion;
-  }
-  public void setDescripcion(String descripcion) {
-    this.descripcion = descripcion;
-  }
-
-
+    public List<Pagos> getPagos() {
+      return pagos;
+    }
+    public void setPagos(List<Pagos> pagos) {
+      this.pagos = pagos;
+    }
+    public String getDescripcion() {
+      return descripcion;
+    }
+    public void setDescripcion(String descripcion) {
+      this.descripcion = descripcion;
+    }
 }
