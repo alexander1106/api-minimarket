@@ -1,52 +1,51 @@
 package  com.gadbacorp.api.controller.delivery;
 
-import com.gadbacorp.api.entity.delivery.Vehiculo;
-import com.gadbacorp.api.service.delivery.VehiculoService;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.gadbacorp.api.entity.delivery.Vehiculo;
+import com.gadbacorp.api.service.delivery.IVehiculoService;
 
 @RestController
-@RequestMapping("/api/minimarket/vehiculos")
+@RequestMapping("/api/minimarket")
 public class VehiculosController {
     @Autowired
-    private VehiculoService vehiculoService;
+    private IVehiculoService service;
 
-    @GetMapping
-    public List<Vehiculo> getAllVehiculos() {
-        return vehiculoService.getAllVehiculos();
+    @GetMapping("/vehiculo")
+    public List<Vehiculo> listar() {
+        return service.buscarTodos();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Vehiculo> getVehiculoById(@PathVariable Long id) {
-        return vehiculoService.getVehiculoById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/vehiculo/{id}")
+    public Optional<Vehiculo> buscar(@PathVariable Integer id) {
+        return service.buscarId(id);
     }
 
-    @PostMapping
-    public Vehiculo createVehiculo(@RequestBody Vehiculo vehiculo) {
-        return vehiculoService.saveVehiculo(vehiculo);
+    @PostMapping("/vehiculo")
+    public Vehiculo guardar(@RequestBody Vehiculo vehiculo) {
+        return service.guardar(vehiculo);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Vehiculo> updateVehiculo(@PathVariable Long id, @RequestBody Vehiculo vehiculoDetails) {
-        Vehiculo updatedVehiculo = vehiculoService.updateVehiculo(id, vehiculoDetails);
-        return ResponseEntity.ok(updatedVehiculo);
+    @PutMapping("/vehiculo")
+    public Vehiculo modificar(@RequestBody Vehiculo vehiculo) {
+        return service.modificar(vehiculo);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVehiculo(@PathVariable Long id) {
-        vehiculoService.deleteVehiculo(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // Endpoint personalizado
-    @GetMapping("/estado/{estado}")
-    public List<Vehiculo> getVehiculosByEstado(@PathVariable String estado) {
-        return vehiculoService.getVehiculosByEstado(estado);
+    @DeleteMapping("/vehiculo/{id}")
+    public String eliminar(@PathVariable Integer id) {
+        service.eliminar(id);
+        return "Vehiculo eliminado";
     }
 }
+

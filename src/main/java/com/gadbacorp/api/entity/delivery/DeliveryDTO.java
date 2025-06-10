@@ -4,46 +4,121 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 public class DeliveryDTO {
-private Long id;
-private String direccion;
-private Integer estado;
-private Date fechaEntrega;
-private Date fechaEnvio;
-private BigDecimal costoEnvio;
-private String observaciones;
-private Long idVenta;
-private Long idVehiculo;
-private Integer idEmpleado;
+    private Integer iddelivery;
+    private String direccion;
+    private Date fechaEnvio;
+    private Date fechaEntrega;
+    private String encargado;
+    private BigDecimal costoEnvio;
+    private String observaciones;
+    private Integer estado;
+    private Integer idventa;
+    private Integer idvehiculo;
 
-// Getters y Setters
+    public DeliveryDTO() { }
 
-public Long getId() { return id; }
-public void setId(Long id) { this.id = id; }
+    public DeliveryDTO(Integer iddelivery, String direccion, Date fechaEnvio, Date fechaEntrega,
+                       String encargado, BigDecimal costoEnvio, String observaciones,
+                       Integer estado, Integer idventa, Integer idvehiculo) {
+        this.iddelivery = iddelivery;
+        this.direccion = direccion;
+        this.fechaEnvio = fechaEnvio;
+        this.fechaEntrega = fechaEntrega;
+        this.encargado = encargado;
+        this.costoEnvio = costoEnvio;
+        this.observaciones = observaciones;
+        this.estado = estado;
+        this.idventa = idventa;
+        this.idvehiculo = idvehiculo;
+    }
 
-public String getDireccion() { return direccion; }
-public void setDireccion(String direccion) { this.direccion = direccion; }
+    public Integer getIddelivery() {
+        return iddelivery;
+    }
 
-public Integer getEstado() { return estado; }
-public void setEstado(Integer estado) { this.estado = estado; }
+    public void setIddelivery(Integer iddelivery) {
+        this.iddelivery = iddelivery;
+    }
 
-public Date getFechaEntrega() { return fechaEntrega; }
-public void setFechaEntrega(Date fechaEntrega) { this.fechaEntrega = fechaEntrega; }
+    public String getDireccion() {
+        return direccion;
+    }
 
-public Date getFechaEnvio() { return fechaEnvio; }
-public void setFechaEnvio(Date fechaEnvio) { this.fechaEnvio = fechaEnvio; }
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
 
-public BigDecimal getCostoEnvio() { return costoEnvio; }
-public void setCostoEnvio(BigDecimal costoEnvio) { this.costoEnvio = costoEnvio; }
+    public Date getFechaEnvio() {
+        return fechaEnvio;
+    }
 
-public String getObservaciones() { return observaciones; }
-public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
+    public void setFechaEnvio(Date fechaEnvio) {
+        this.fechaEnvio = fechaEnvio;
+    }
 
-public Long getIdVenta() { return idVenta; }
-public void setIdVenta(Long idVenta) { this.idVenta = idVenta; }
+    public Date getFechaEntrega() {
+        return fechaEntrega;
+    }
 
-public Long getIdVehiculo() { return idVehiculo; }
-public void setIdVehiculo(Long idVehiculo) { this.idVehiculo = idVehiculo; }
+    public void setFechaEntrega(Date fechaEntrega) {
+        this.fechaEntrega = fechaEntrega;
+    }
 
-public Integer getIdEmpleado() { return idEmpleado; }
-public void setIdEmpleado(Integer idEmpleado) { this.idEmpleado = idEmpleado; }
+    public String getEncargado() {
+        return encargado;
+    }
+
+    public void setEncargado(String encargado) {
+        this.encargado = encargado;
+    }
+
+    public BigDecimal getCostoEnvio() {
+        return costoEnvio;
+    }
+
+    public void setCostoEnvio(BigDecimal costoEnvio) {
+        this.costoEnvio = costoEnvio;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
+    }
+
+    public Integer getEstado() {
+        return estado;
+    }
+
+    public void setEstado(Integer estado) {
+        this.estado = estado;
+    }
+
+    public Integer getIdventa() {
+        return idventa;
+    }
+
+    public void setIdventa(Integer idventa) {
+        this.idventa = idventa;
+    }
+
+    public Integer getIdvehiculo() {
+        return idvehiculo;
+    }
+
+    public void setIdvehiculo(Integer idvehiculo) {
+        this.idvehiculo = idvehiculo;
+    }
+
+    @Override
+    public String toString() {
+        return "DeliveryDTO [iddelivery=" + iddelivery + ", direccion=" + direccion + ", fechaEnvio=" + fechaEnvio
+                + ", fechaEntrega=" + fechaEntrega + ", encargado=" + encargado + ", costoEnvio=" + costoEnvio
+                + ", observaciones=" + observaciones + ", estado=" + estado + ", idventa=" + idventa + ", idvehiculo="
+                + idvehiculo + "]";
+    }
+
+    
 }
