@@ -25,7 +25,7 @@ public class DeliveryMapper {
     }
 
     if (delivery.getEmpleado() != null) {
-        dto.setIdEmpleado(delivery.getEmpleado().getIdEmpleado());
+        dto.setIdEmpleado(delivery.getEmpleado().getIdUsuario());
     }
 
     return dto;

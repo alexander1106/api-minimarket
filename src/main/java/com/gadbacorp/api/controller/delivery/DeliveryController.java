@@ -1,25 +1,33 @@
 package com.gadbacorp.api.controller.delivery;
 
-import com.gadbacorp.api.entity.delivery.Delivery;
-import com.gadbacorp.api.entity.delivery.DeliveryDTO;
-import com.gadbacorp.api.entity.delivery.EstadoDelivery;
-import com.gadbacorp.api.entity.delivery.Vehiculo;
-import com.gadbacorp.api.entity.empleados.Empleado;
-import com.gadbacorp.api.service.delivery.IDeliveryService;
-import com.gadbacorp.api.service.delivery.VehiculoService;
-import com.gadbacorp.api.service.ventas.IVentasService;
-import com.gadbacorp.api.service.empleados.IEmpleadoServices;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.gadbacorp.api.entity.delivery.Delivery;
+import com.gadbacorp.api.entity.delivery.DeliveryDTO;
+import com.gadbacorp.api.entity.delivery.EstadoDelivery;
+import com.gadbacorp.api.entity.delivery.Vehiculo;
+import com.gadbacorp.api.entity.empleados.Usuarios;
 import com.gadbacorp.api.entity.ventas.Ventas;
+import com.gadbacorp.api.service.delivery.IDeliveryService;
+import com.gadbacorp.api.service.delivery.VehiculoService;
+import com.gadbacorp.api.service.empleados.IUsuariosService;
+import com.gadbacorp.api.service.ventas.IVentasService;
 
 @RestController
 @RequestMapping("/api/minimarket/delivery")
@@ -36,7 +44,7 @@ public class DeliveryController {
     private VehiculoService vehiculoService;
 
     @Autowired
-    private IEmpleadoServices empleadoService;
+    private IUsuariosService empleadoService;
 
     @GetMapping
     public ResponseEntity<?> listarTodosDelivery() {
@@ -75,9 +83,9 @@ public class DeliveryController {
                 }
             }
 
-            Empleado empleado = null;
+            Usuarios empleado = null;
             if (deliveryDTO.getIdEmpleado() != null) {
-                Optional<Empleado> empleadoOpt = empleadoService.buscarId(deliveryDTO.getIdEmpleado());
+                Optional<Usuarios> empleadoOpt = empleadoService.buscarId(deliveryDTO.getIdEmpleado());
                 if (empleadoOpt.isEmpty()) {
                     return ResponseEntity.badRequest().body("Empleado no encontrado con ID: " + deliveryDTO.getIdEmpleado());
                 }
@@ -145,7 +153,7 @@ public class DeliveryController {
             }
 
             if (deliveryDTO.getIdEmpleado() != null) {
-                Optional<Empleado> empleadoOpt = empleadoService.buscarId(deliveryDTO.getIdEmpleado());
+                Optional<Usuarios> empleadoOpt = empleadoService.buscarId(deliveryDTO.getIdEmpleado());
                 if (empleadoOpt.isEmpty()) {
                     return ResponseEntity.badRequest().body("Empleado no encontrado con ID: " + deliveryDTO.getIdEmpleado());
                 }

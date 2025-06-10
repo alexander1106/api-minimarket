@@ -1,17 +1,28 @@
 package com.gadbacorp.api.entity.delivery;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.gadbacorp.api.entity.empleados.Empleado;
-
-import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.util.Date;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gadbacorp.api.entity.empleados.Usuarios;
 import com.gadbacorp.api.entity.ventas.Ventas;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
 @Table(name = "Delivery")
@@ -52,7 +63,7 @@ private Vehiculo vehiculo;
 @ManyToOne(fetch = FetchType.EAGER)
 @JoinColumn(name = "id_empleado")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-private Empleado empleado;
+private Usuarios empleado;
 
 // Getters y Setters
 
@@ -83,6 +94,6 @@ public void setVenta(Ventas venta) { this.venta = venta; }
 public Vehiculo getVehiculo() { return vehiculo; }
 public void setVehiculo(Vehiculo vehiculo) { this.vehiculo = vehiculo; }
 
-public Empleado getEmpleado() { return empleado; }
-public void setEmpleado(Empleado empleado) { this.empleado = empleado; }
+public Usuarios getEmpleado() { return empleado; }
+public void setEmpleado(Usuarios empleado) { this.empleado = empleado; }
 }

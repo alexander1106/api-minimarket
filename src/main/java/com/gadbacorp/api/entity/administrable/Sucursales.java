@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.gadbacorp.api.entity.empleados.Usuarios;
 import com.gadbacorp.api.entity.inventario.Almacenes;
 
 import jakarta.persistence.CascadeType;
@@ -25,6 +26,7 @@ import jakarta.persistence.Table;
 @SQLDelete(sql = "UPDATE sucursales SET estado=0 WHERE id_sucursal = ?")
 @Where(clause = "estado=1")
 public class Sucursales {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_sucursal")
@@ -40,7 +42,12 @@ public class Sucursales {
     @JoinColumn(name = "idempresa", referencedColumnName = "idempresa")
     private Empresas empresa;
 
-    @OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL)
+@JsonIgnore
+private List<Usuarios> usuarios = new ArrayList<>();
+
+  @OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Almacenes> almacenes = new ArrayList<>();
 
@@ -50,6 +57,14 @@ public class Sucursales {
     }
 
     public void setIdSucursal(Integer idSucursal) {
+        this.idSucursal = idSucursal;
+    }
+
+    
+    public Sucursales() {
+    }
+
+    public Sucursales(Integer idSucursal) {
         this.idSucursal = idSucursal;
     }
 
@@ -105,5 +120,13 @@ public class Sucursales {
     public String toString() {
         return "Sucursales [idSucursal=" + idSucursal + ", nombreSucursal=" + nombreSucursal + ", contacto=" + contacto
                 + ", direccion=" + direccion + ", estado=" + estado + "]";
+    }
+
+    public List<Usuarios> getUsuarios() {
+        return usuarios;
+    }
+
+    public void setUsuarios(List<Usuarios> usuarios) {
+        this.usuarios = usuarios;
     }
 }

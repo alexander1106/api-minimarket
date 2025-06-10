@@ -1,12 +1,17 @@
 package com.gadbacorp.api.entity.empleados;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.caja.AperturaCaja;
 
 import jakarta.persistence.CascadeType;
@@ -14,67 +19,54 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 @Entity
-@Table(name = "Empleados")
-@SQLDelete(sql = "UPDATE Empleados SET estado = 0 WHERE idEmpleado = ?")
+@Table(name = "usuarios")
+@SQLDelete(sql = "UPDATE usuarios SET estado = 0 WHERE id_usuario = ?")
 @Where(clause = "estado = 1")
-public class Empleado {
+public class Usuarios {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idEmpleado;
-
+    private Integer idUsuario;
     private String nombre;
     private String apellidos;
     private String correoElectronico;
     private String dni;
     private String contrasenaHash;
+
     private Integer estado;
     private Integer rollId;
     private LocalDateTime fechaCreacion;
-    private Integer permisosId;
     private String turno;
-    public Empleado() {
-    }
-
     
-     public Empleado(Integer idEmpleado) {
-        this.idEmpleado = idEmpleado;
+    
+    @Override
+    public String toString() {
+        return "Empleado [idUsuario=" + idUsuario + ", nombre=" + nombre + ", apellidos=" + apellidos
+                + ", correoElectronico=" + correoElectronico + ", dni=" + dni + ", contrasenaHash=" + contrasenaHash
+                + ", estado=" + estado + ", rollId=" + rollId + ", fechaCreacion=" + fechaCreacion  + ", turno=" + turno + ", aperturaCaja=" + aperturaCaja + "]";
     }
 
-    @OneToMany(mappedBy = "empleados", cascade = CascadeType.ALL)
+    public Usuarios(Integer idUsuario) {
+        this.idUsuario = idUsuario;
+    }
+
+    public Usuarios( ) {
+    }
+
+    @OneToMany(mappedBy = "usuarios", cascade = CascadeType.ALL)
      @JsonIgnore
     private List<AperturaCaja> aperturaCaja;
 
-
-    public Empleado(Integer idEmpleado, String nombre, String apellidos, String correoElectronico,
-            String dni, String contrasenaHash, Integer estado, Integer rollId, LocalDateTime fechaCreacion,
-            Integer permisosId, String turno) {
-        this.idEmpleado = idEmpleado;
-        this.nombre = nombre;
-        this.apellidos = apellidos;
-        this.correoElectronico = correoElectronico;
-        this.dni = dni;
-        this.contrasenaHash = contrasenaHash;
-        this.estado = estado;
-        this.rollId = rollId;
-        this.fechaCreacion = fechaCreacion;
-        this.permisosId = permisosId;
-        this.turno = turno;
-    }
-
-    public Integer getIdEmpleado() {
-        return idEmpleado;
-    }
-
-    public void setIdEmpleado(Integer idEmpleado) {
-        this.idEmpleado = idEmpleado;
-    }
-
-
-
+    @ManyToOne
+@JoinColumn(name = "id_sucursal", referencedColumnName = "id_sucursal")
+private Sucursales sucursal;
+ 
     public String getNombre() {
         return nombre;
     }
@@ -112,6 +104,8 @@ public class Empleado {
     }
 
     public void setContrasenaHash(String contrasenaHash) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        this.contrasenaHash = encoder.encode(contrasenaHash);
         this.contrasenaHash = contrasenaHash;
     }
 
@@ -139,28 +133,13 @@ public class Empleado {
         this.fechaCreacion = fechaCreacion;
     }
 
-    public Integer getPermisosId() {
-        return permisosId;
-    }
-
-    public void setPermisosId(Integer permisosId) {
-        this.permisosId = permisosId;
-    }
+    
     public String getTurno() {
         return turno;
     }
     public void setTurno(String turno) {
         this.turno = turno;
     }
-
-    @Override
-    public String toString() {
-        return "empleado [idEmpleado=" + idEmpleado + ", nombre=" + nombre
-                + ", apellidos=" + apellidos + ", correoElectronico=" + correoElectronico + ", dni=" + dni
-                + ", contrasenaHash=" + contrasenaHash + ", estado=" + estado + ", rollId=" + rollId
-                + ", fechaCreacion=" + fechaCreacion + ", permisosId=" + permisosId + ", turno=" + turno + "]";
-    }
-
 
     public List<AperturaCaja> getAperturaCaja() {
         return aperturaCaja;
@@ -171,7 +150,21 @@ public class Empleado {
         this.aperturaCaja = aperturaCaja;
     }
 
+    public Integer getIdUsuario() {
+        return idUsuario;
+    }
 
+    public void setIdUsuario(Integer idUsuario) {
+        this.idUsuario = idUsuario;
+    }
+    
 
+    public Sucursales getSucursal() {
+        return sucursal;
+    }
+
+    public void setSucursal(Sucursales sucursal) {
+        this.sucursal = sucursal;
+    }
 
 }

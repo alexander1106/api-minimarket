@@ -18,9 +18,9 @@
     import com.gadbacorp.api.entity.caja.AperturaCaja;
     import com.gadbacorp.api.entity.caja.AperturaCajaDTO;
     import com.gadbacorp.api.entity.caja.Caja;
-    import com.gadbacorp.api.entity.empleados.Empleado;
+    import com.gadbacorp.api.entity.empleados.Usuarios;
     import com.gadbacorp.api.repository.caja.CajaRepository;
-    import com.gadbacorp.api.repository.empleados.EmpleadosRepository;
+    import com.gadbacorp.api.repository.empleados.UsuarioRepository;
     import com.gadbacorp.api.service.caja.IAperturaCajaService;
 
     @RestController
@@ -32,7 +32,7 @@
         private IAperturaCajaService aperturaCajaService;
 
         @Autowired
-        private EmpleadosRepository empleadosRepository;
+        private UsuarioRepository empleadosRepository;
 
         @Autowired
         private CajaRepository cajaRepository;
@@ -63,7 +63,7 @@ public ResponseEntity<?> guardarAperturaCaja(@RequestBody AperturaCajaDTO dto) {
     }
 
     // Buscar empleado y caja
-    Optional<Empleado> empleadoOptional = empleadosRepository.findById(dto.getId_empleado());
+    Optional<Usuarios> empleadoOptional = empleadosRepository.findById(dto.getId_empleado());
     if (empleadoOptional.isEmpty()) {
         return ResponseEntity.badRequest().body("No se encontró el empleado con el ID proporcionado.");
     }
@@ -85,7 +85,7 @@ public ResponseEntity<?> guardarAperturaCaja(@RequestBody AperturaCajaDTO dto) {
     aperturaCaja.setFechaCierre(dto.getFechaCierre());
     aperturaCaja.setSaldoInicial(dto.getSaldoInicial());
     aperturaCaja.setSaldoFinal(dto.getSaldoFinal());
-    aperturaCaja.setEmpleado(empleadoOptional.get());
+    aperturaCaja.setUsuarios(empleadoOptional.get());
     aperturaCaja.setCaja(caja);
 
     return ResponseEntity.ok(aperturaCajaService.guardarAperturaCaja(aperturaCaja));
@@ -116,7 +116,7 @@ public ResponseEntity<?> modificarAperturaCaja(@RequestBody AperturaCajaDTO dto)
         return ResponseEntity.badRequest().body("No se encontró la caja con el ID proporcionado.");
     }
 
-    Optional<Empleado> empleadoOptional = empleadosRepository.findById(dto.getId_empleado());
+    Optional<Usuarios> empleadoOptional = empleadosRepository.findById(dto.getId_empleado());
     if(empleadoOptional.isEmpty()) {
         return ResponseEntity.badRequest().body("No se encontró el empleado con el ID proporcionado.");
     }
@@ -136,7 +136,7 @@ public ResponseEntity<?> modificarAperturaCaja(@RequestBody AperturaCajaDTO dto)
     aperturaCaja.setFechaCierre(dto.getFechaCierre());
     aperturaCaja.setSaldoInicial(dto.getSaldoInicial());
     aperturaCaja.setSaldoFinal(dto.getSaldoFinal());
-    aperturaCaja.setEmpleado(empleadoOptional.get());
+    aperturaCaja.setUsuarios(empleadoOptional.get());
     aperturaCaja.setCaja(cajaOptional.get());
 
     return ResponseEntity.ok(aperturaCajaService.editarAperturaCaja(aperturaCaja));

@@ -8,7 +8,7 @@ import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.gadbacorp.api.entity.empleados.Empleado;
+import com.gadbacorp.api.entity.empleados.Usuarios;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -50,9 +50,9 @@ public class AperturaCaja {
   
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "idEmpleado")
+    @JoinColumn(name = "idUsuario")
     @JsonIgnore
-    private Empleado empleados;
+    private Usuarios usuarios;
 
 
     @OneToMany(mappedBy = "aperturaCaja", cascade = CascadeType.ALL)
@@ -72,13 +72,7 @@ public class AperturaCaja {
         this.caja = caja;
     }
 
-    public Empleado getEmpleados() {
-        return empleados;
-    }
 
-    public void setEmpleados(Empleado empleados) {
-        this.empleados = empleados;
-    }
 
     public List<TransaccionesCaja> getTransaccionesCajas() {
         return transaccionesCajas;
@@ -128,14 +122,6 @@ public class AperturaCaja {
         this.saldoFinal = saldoFinal;
     }
 
-    public Empleado getEmpleado() {
-        return empleados;
-    }
-
-    public void setEmpleado(Empleado empleados) {
-        this.empleados = empleados;
-    }
-
     public List<ArqueoCaja> getArqueoCaja() {
         return arqueoCaja;
     }
@@ -150,6 +136,14 @@ public class AperturaCaja {
 
     public void setEstado(Integer estado) {
         this.estado = estado;
+    }
+
+    public Usuarios getUsuarios() {
+        return usuarios;
+    }
+
+    public void setUsuarios(Usuarios usuarios) {
+        this.usuarios = usuarios;
     }
 
 
