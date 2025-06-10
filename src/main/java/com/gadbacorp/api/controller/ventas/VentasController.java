@@ -79,6 +79,8 @@ private CotizacionesRepository cotizacionesRepository;
         venta.setNro_comrprobante(dto.getNro_comrprobante());
         venta.setEstado_venta(dto.getEstado_venta());
         venta.setFecha_venta(dto.getFecha_venta());
+        venta.setEstado_venta(dto.getEstado_venta());
+
         venta.setEstado(dto.getEstado());
         venta.setCliente(cliente);
         venta.setCotizaciones(cotizaciones);

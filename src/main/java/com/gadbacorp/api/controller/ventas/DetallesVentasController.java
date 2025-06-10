@@ -43,7 +43,7 @@ public class DetallesVentasController {
     @Autowired
     private AjusteInventarioRepository ajusteInventarioRepository;
 
-    @Autowired
+    @Autowired  
     private InventarioProductoRepository inventarioProductoRepository;
 
     @GetMapping("/detalles-ventas")
