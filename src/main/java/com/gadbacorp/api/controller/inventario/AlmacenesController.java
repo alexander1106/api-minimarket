@@ -55,10 +55,9 @@ public class AlmacenesController {
         entidad.setIdalmacen(dto.getIdalmacen());
         entidad.setNombre(dto.getNombre() != null ? dto.getNombre().trim() : null);
         entidad.setDescripcion(dto.getDescripcion());
-        entidad.setEncargado(dto.getEncargado());
+        entidad.setEncargado(dto.getEncargado() != null? dto.getEncargado().trim() : null);
         entidad.setDireccion(dto.getDireccion() != null ? dto.getDireccion().trim() : null);
         entidad.setEstado(dto.getEstado());
-        entidad.setEncargado(dto.getEncargado());
         entidad.setSucursal(sucursal);
 
         Almacenes almacenGuardado = service.guardar(entidad);
@@ -77,7 +76,7 @@ public class AlmacenesController {
 
         existente.setNombre(dto.getNombre() != null ? dto.getNombre().trim() : null);
         existente.setDescripcion(dto.getDescripcion());
-        existente.setEncargado(dto.getEncargado());
+        existente.setEncargado(dto.getEncargado()!= null? dto.getEncargado().trim() : null);
         existente.setDireccion(dto.getDireccion() != null ? dto.getDireccion().trim() : null);
         existente.setEstado(dto.getEstado());
         existente.setSucursal(sucursal);
@@ -97,7 +96,7 @@ public class AlmacenesController {
         dto.setNombre(e.getNombre());
         dto.setDescripcion(e.getDescripcion());
         dto.setDireccion(e.getDireccion());
-        dto.setEncargado(dto.getEncargado());
+        dto.setEncargado(e.getEncargado());
         dto.setEstado(e.getEstado());
         dto.setIdSucursal(e.getSucursal().getIdSucursal());
         return dto;

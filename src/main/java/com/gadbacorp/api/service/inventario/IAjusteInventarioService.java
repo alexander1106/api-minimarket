@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.gadbacorp.api.entity.inventario.AjusteInventario;
-import com.gadbacorp.api.entity.inventario.AjusteInventarioDTO;
 
 public interface IAjusteInventarioService {
 
@@ -14,8 +13,6 @@ public interface IAjusteInventarioService {
 
     AjusteInventario modificar(AjusteInventario ajusteInventario);
 
-    AjusteInventario ajustarStock(AjusteInventarioDTO dto);
-    AjusteInventario modificarAjuste(AjusteInventarioDTO dto);
 
     Optional<AjusteInventario> buscarId(Integer id);
 

@@ -1,7 +1,6 @@
 package com.gadbacorp.api.entity.ventas;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;

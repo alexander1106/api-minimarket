@@ -1,7 +1,6 @@
 package com.gadbacorp.api.controller.inventario;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,94 +19,82 @@ import org.springframework.web.server.ResponseStatusException;
 import com.gadbacorp.api.entity.inventario.Almacenes;
 import com.gadbacorp.api.entity.inventario.Inventario;
 import com.gadbacorp.api.entity.inventario.InventarioDTO;
-import com.gadbacorp.api.service.inventario.IInventarioService;
+import com.gadbacorp.api.repository.inventario.AlmacenesRepository;
+import com.gadbacorp.api.repository.inventario.InventarioRepository;
 
 @RestController
-@RequestMapping("/api/minimarket/inventario")
+@RequestMapping("/api/minimarket")
 public class InventarioController {
 
-    @Autowired
-    private IInventarioService serviceInventario;
+    @Autowired private InventarioRepository inventarioRepo;
+    @Autowired private AlmacenesRepository almacenesRepo;
 
-    private InventarioDTO toDTO(Inventario inventario) {
+    private InventarioDTO toDTO(Inventario inv) {
         InventarioDTO dto = new InventarioDTO();
-        dto.setIdinventario(inventario.getIdinventario());
-        dto.setIdalmacen(inventario.getAlmacen().getIdalmacen());
-        dto.setNombre(inventario.getNombre());
-        dto.setDescripcion(inventario.getDescripcion());
+        dto.setIdinventario(inv.getIdinventario());
+        dto.setIdalmacen(inv.getAlmacen().getIdalmacen());
+        dto.setNombre(inv.getNombre());
+        dto.setDescripcion(inv.getDescripcion());
         return dto;
     }
 
     private Inventario toEntity(InventarioDTO dto) {
-        Inventario inventario = new Inventario();
-        if (dto.getIdinventario() != null) {
-            inventario.setIdinventario(dto.getIdinventario());
-        }
-        inventario.setNombre(dto.getNombre());
-        inventario.setDescripcion(dto.getDescripcion());
-            Almacenes almacen =
-            new Almacenes();
+        Inventario inv = new Inventario();
+        if (dto.getIdinventario() != null) inv.setIdinventario(dto.getIdinventario());
+        inv.setNombre(dto.getNombre());
+        inv.setDescripcion(dto.getDescripcion());
+        Almacenes almacen = new Almacenes();
         almacen.setIdalmacen(dto.getIdalmacen());
-        inventario.setAlmacen(almacen);
-        return inventario;
+        inv.setAlmacen(almacen);
+        return inv;
     }
 
-    @GetMapping
-    public ResponseEntity<List<InventarioDTO>> listarTodos() {
-        List<InventarioDTO> lista = serviceInventario.buscarTodos().stream()
-            .map(this::toDTO)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(lista);
+    @GetMapping("/inventario")
+    public List<InventarioDTO> listar() {
+        return inventarioRepo.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<InventarioDTO> obtenerPorId(@PathVariable Integer id) {
-        Optional<Inventario> opt = serviceInventario.buscarId(id);
-        return opt.map(this::toDTO)
-                  .map(ResponseEntity::ok)
-                  .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/inventario/{id}")
+    public ResponseEntity<InventarioDTO> obtener(@PathVariable Integer id) {
+        Inventario inventario = inventarioRepo.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventario no encontrado id=" + id));
+
+        return ResponseEntity.ok(toDTO(inventario));
     }
 
-    @PostMapping
+    @PostMapping("/inventario")
     public ResponseEntity<?> crear(@RequestBody InventarioDTO dto) {
-        try {
-            Inventario entidad = toEntity(dto);
-            Inventario creado = serviceInventario.guardar(entidad);
-            return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(creado));
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body("Error al crear inventario");
-        }
+        Integer idAlmacen = dto.getIdalmacen();
+
+        Almacenes almacen = almacenesRepo.findById(idAlmacen)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Almacén no encontrado id=" + idAlmacen));
+
+        Inventario entidad = toEntity(dto);
+        entidad.setAlmacen(almacen);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(inventarioRepo.save(entidad)));
     }
 
-    @PutMapping
+    @PutMapping("/inventario")
     public ResponseEntity<?> actualizar(@RequestBody InventarioDTO dto) {
-        try {
-            // Aquí el id ya viene en el dto
-            Inventario entidad = toEntity(dto);
-            Inventario modificado = serviceInventario.modificar(entidad);
-            return ResponseEntity.ok(toDTO(modificado));
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body("Error al actualizar inventario");
-        }
+        Integer idInv = dto.getIdinventario();
+        Integer idAlmacenNuevo = dto.getIdalmacen();
+
+        Inventario existente = inventarioRepo.findById(idInv)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventario no encontrado id=" + idInv));
+
+        Almacenes nuevoAlmacen = almacenesRepo.findById(idAlmacenNuevo)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Almacén no encontrado id=" + idAlmacenNuevo));
+
+        existente.setAlmacen(nuevoAlmacen);
+        existente.setNombre(dto.getNombre().trim());
+        existente.setDescripcion(dto.getDescripcion());
+
+        return ResponseEntity.ok(toDTO(inventarioRepo.save(existente)));
     }
 
-
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/inventario/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
-        try {
-            serviceInventario.eliminar(id);
-            return ResponseEntity.ok("Inventario eliminado correctamente");
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body("Error al eliminar inventario");
-        }
+        inventarioRepo.deleteById(id);
+        return ResponseEntity.ok("Inventario eliminado correctamente");
     }
 }

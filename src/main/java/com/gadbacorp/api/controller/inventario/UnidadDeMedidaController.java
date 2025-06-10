@@ -1,7 +1,6 @@
 package com.gadbacorp.api.controller.inventario;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,18 +19,16 @@ import com.gadbacorp.api.entity.inventario.UnidadDeMedidaDTO;
 import com.gadbacorp.api.service.inventario.IUnidadDeMedidaService;
 
 @RestController
-@RequestMapping("/api/minimarket/unidad_medida")
+@RequestMapping("/api/minimarket")
 public class UnidadDeMedidaController {
 
     @Autowired
-    private IUnidadDeMedidaService serviceUnidadDeMedida;
+    private IUnidadDeMedidaService service;
 
-    // Conversión Entity -> DTO
     private UnidadDeMedidaDTO toDTO(UnidadDeMedida entity) {
         return new UnidadDeMedidaDTO(entity.getIdunidadmedida(), entity.getNombre());
     }
 
-    // Conversión DTO -> Entity
     private UnidadDeMedida toEntity(UnidadDeMedidaDTO dto) {
         UnidadDeMedida entity = new UnidadDeMedida();
         entity.setIdunidadmedida(dto.getIdunidadmedida());
@@ -39,60 +36,32 @@ public class UnidadDeMedidaController {
         return entity;
     }
 
-    // Listar todas las unidades de medida
-    @GetMapping
-    public List<UnidadDeMedidaDTO> listarTodos() {
-        return serviceUnidadDeMedida.buscarTodos()
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+    @GetMapping("/unidad_medida")
+    public List<UnidadDeMedidaDTO> listar() {
+        return service.buscarTodos().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
-    // Buscar unidad de medida por ID
-    @GetMapping("/{id}")
-    public ResponseEntity<UnidadDeMedidaDTO> buscarPorId(@PathVariable("id") Integer id) {
-        Optional<UnidadDeMedida> unidad = serviceUnidadDeMedida.buscarId(id);
-        return unidad.map(value -> ResponseEntity.ok(toDTO(value)))
-                     .orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/unidad_medida/{id}")
+    public ResponseEntity<UnidadDeMedidaDTO> buscar(@PathVariable Integer id) {
+        return service.buscarId(id)
+                .map(u -> ResponseEntity.ok(toDTO(u)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // Crear nueva unidad de medida
-    @PostMapping
-    public ResponseEntity<?> guardar(@RequestBody UnidadDeMedidaDTO dto) {
-    try {
-        UnidadDeMedida guardado = serviceUnidadDeMedida.guardar(toEntity(dto));
-        return ResponseEntity.ok(toDTO(guardado));
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    @PostMapping("/unidad_medida")
+    public UnidadDeMedidaDTO guardar(@RequestBody UnidadDeMedidaDTO dto) {
+        return toDTO(service.guardar(toEntity(dto)));
     }
-}
 
-    // Modificar unidad de medida existente
-    @PutMapping
-    public ResponseEntity<?> modificar(@RequestBody UnidadDeMedidaDTO dto) {
-    try {
-        Optional<UnidadDeMedida> existente = serviceUnidadDeMedida.buscarId(dto.getIdunidadmedida());
-
-        if (existente.isPresent()) {
-            UnidadDeMedida actualizado = serviceUnidadDeMedida.modificar(toEntity(dto));
-            return ResponseEntity.ok(toDTO(actualizado));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    @PutMapping("/unidad_medida")
+    public UnidadDeMedidaDTO modificar(@RequestBody UnidadDeMedidaDTO dto) {
+        return toDTO(service.modificar(toEntity(dto)));
     }
-}
 
-    // Eliminar (lógico) por ID
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminar(@PathVariable Integer id) {
-        Optional<UnidadDeMedida> unidad = serviceUnidadDeMedida.buscarId(id);
-        if (unidad.isPresent()) {
-            serviceUnidadDeMedida.eliminar(id);
-            return ResponseEntity.ok("Unidad de medida eliminada correctamente");
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @DeleteMapping("/unidad_medida/{id}")
+    public String eliminar(@PathVariable Integer id) {
+        service.eliminar(id);
+        return "Unidad de medida eliminada";
     }
+
 }

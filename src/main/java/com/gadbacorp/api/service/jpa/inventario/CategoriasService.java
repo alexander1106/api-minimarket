@@ -23,19 +23,11 @@ public class CategoriasService implements ICategoriasService {
 
     @Override
     public Categorias guardar(Categorias categoria) {
-        Optional<Categorias> existente = repoCategorias.findByNombreIgnoreCase(categoria.getNombre());
-        if (existente.isPresent()) {
-            throw new IllegalArgumentException("Ya existe una categoría con ese nombre.");
-        }
         return repoCategorias.save(categoria);
     }
 
     @Override
     public Categorias modificar(Categorias categoria) {
-        Optional<Categorias> existente = repoCategorias.findByNombreIgnoreCase(categoria.getNombre());
-        if (existente.isPresent() && !existente.get().getIdcategoria().equals(categoria.getIdcategoria())) {
-            throw new IllegalArgumentException("Ya existe una categoría con ese nombre.");
-        }
         return repoCategorias.save(categoria);
     }
 
@@ -46,8 +38,14 @@ public class CategoriasService implements ICategoriasService {
 
     @Override
     public void eliminar(Integer id) {
+        boolean existe = repoCategorias.existsById(id);
+        if (!existe) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND,
+                "Categoría no encontrada id=" + id
+            );
+        }
         repoCategorias.deleteById(id);
     }
-
 
 }

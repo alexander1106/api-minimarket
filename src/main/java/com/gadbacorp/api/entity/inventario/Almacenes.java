@@ -86,7 +86,6 @@ public class Almacenes {
     public void setSucursal(Sucursales sucursal) {
         this.sucursal = sucursal;
     }
-
     public String getEncargado() {
         return encargado;
     }

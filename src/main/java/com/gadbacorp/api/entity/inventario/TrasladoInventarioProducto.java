@@ -33,22 +33,25 @@ public class TrasladoInventarioProducto {
     private InventarioProducto destino;
 
     private Integer cantidad;
+    private String Descripcion;
     private LocalDateTime fechaTraslado;
     private Integer estado = 1;
 
     public TrasladoInventarioProducto() { }
 
-    public TrasladoInventarioProducto(
-            InventarioProducto origen,
-            InventarioProducto destino,
-            Integer cantidad,
-            LocalDateTime fechaTraslado
-    ) {
+    
+
+    public TrasladoInventarioProducto(Integer idtraslado, InventarioProducto origen, InventarioProducto destino,
+            Integer cantidad, String descripcion, LocalDateTime fechaTraslado, Integer estado) {
+        this.idtraslado = idtraslado;
         this.origen = origen;
         this.destino = destino;
         this.cantidad = cantidad;
+        Descripcion = descripcion;
         this.fechaTraslado = fechaTraslado;
+        this.estado = estado;
     }
+
 
     public Integer getIdtraslado() {
         return idtraslado;
@@ -92,6 +95,12 @@ public class TrasladoInventarioProducto {
         this.estado = estado;
     }
 
+    public String getDescripcion() {
+        return Descripcion;
+    }
+    public void setDescripcion(String descripcion) {
+        Descripcion = descripcion;
+    }
     @Override
     public String toString() {
         return "TrasladoInventarioProducto [idtraslado=" + idtraslado
