@@ -45,6 +45,13 @@ public class Empresas {
     @JsonIgnore
     private List<Sucursales> sucursales = new ArrayList<>();
 
+    public Empresas(Integer idempresa) {
+        this.idempresa = idempresa;
+    }
+    // ✅ Constructor vacío requerido por JPA
+    public Empresas() {
+    }
+
     // Getters y Setters
     public Integer getIdempresa() {
         return idempresa;

@@ -72,7 +72,6 @@ private CotizacionesRepository cotizacionesRepository;
             return ResponseEntity.badRequest().body("Cliente no encontrado con ID: " + dto.getId_cliente());
         }
         Cotizaciones cotizaciones = cotizacionesRepository.findById(dto.getId_cotizacion()).orElse(null);
-       
 
         Ventas venta = new Ventas();
         venta.setTotal_venta(dto.getTotal_venta());
