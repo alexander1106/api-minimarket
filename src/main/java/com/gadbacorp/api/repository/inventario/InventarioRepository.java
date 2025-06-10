@@ -11,4 +11,5 @@ public interface InventarioRepository extends JpaRepository<Inventario, Integer>
         Integer idAlmacen,
         String nombre
     );
+ 
 }

@@ -26,6 +26,8 @@ public class InventarioService implements IInventarioService {
         return repoInventario.findById(id);
     }
 
+    
+
     @Override
     public Inventario guardar(Inventario inventario) {
         return repoInventario.save(inventario);

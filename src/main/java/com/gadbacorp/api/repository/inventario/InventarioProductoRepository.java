@@ -1,6 +1,5 @@
 package com.gadbacorp.api.repository.inventario;
 
-
 import java.util.List;
 import java.util.Optional;
 
