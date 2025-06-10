@@ -31,7 +31,7 @@ public class ProveedoresController {
         return proveedor;
     }
     
-    @PutMapping("/proveedores") //La diferencia acá es que subiremos el id, no ponemos "/clientes/id" por temas de seguridad, acuérdate de la caja de la unidad 2, eso no era correcto
+    @PutMapping("/proveedores") 
     public Proveedores modificar(@RequestBody Proveedores proveedor) {        
         serviceProveedores.modificar(proveedor);
         return proveedor;
