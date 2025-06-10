@@ -7,13 +7,9 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.gadbacorp.api.entity.empleados.Usuarios;
 import com.gadbacorp.api.entity.ventas.Ventas;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,79 +17,123 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 
 @Entity
-@Table(name = "Delivery")
-@SQLDelete(sql = "UPDATE Delivery SET estado=0 WHERE idempresa = ?")
-@Where(clause = "estado=1")
+@Table(name = "delivery")
+@SQLDelete(sql = "UPDATE delivery SET estado = 0 WHERE iddelivery = ?")
+@Where(clause = "estado = 1")
 public class Delivery {
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
 
-private String direccion;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer iddelivery;
+    private String direccion;
+    private Date fechaEnvio;
+    private Date fechaEntrega;
+    private String encargado;
+    private BigDecimal costoEnvio;
+    private String observaciones;
+    private Integer estado = 1;
 
-@Enumerated(EnumType.ORDINAL)
-private EstadoDelivery estado;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idventa")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Ventas venta;
 
-@Temporal(TemporalType.TIMESTAMP)
-private Date fechaEntrega;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idvehiculo")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Vehiculo vehiculo;
 
-@Temporal(TemporalType.TIMESTAMP)
-private Date fechaEnvio;
+    public Delivery() {
+    }
 
-@Column(precision = 10, scale = 2)
-private BigDecimal costoEnvio;
+    public Integer getIddelivery() {
+        return iddelivery;
+    }
 
-@Column(length = 200)
-private String observaciones;
+    public void setIddelivery(Integer iddelivery) {
+        this.iddelivery = iddelivery;
+    }
 
-@ManyToOne(fetch = FetchType.EAGER)
-@JoinColumn(name = "idVenta")
-@JsonIgnoreProperties("delivery")
-private Ventas venta;
+    public String getDireccion() {
+        return direccion;
+    }
 
-@ManyToOne(fetch = FetchType.EAGER)
-@JoinColumn(name = "id_vehiculo")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-private Vehiculo vehiculo;
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
 
-@ManyToOne(fetch = FetchType.EAGER)
-@JoinColumn(name = "id_empleado")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-private Usuarios empleado;
+    public Date getFechaEnvio() {
+        return fechaEnvio;
+    }
 
-// Getters y Setters
+    public void setFechaEnvio(Date fechaEnvio) {
+        this.fechaEnvio = fechaEnvio;
+    }
 
-public Long getId() { return id; }
-public void setId(Long id) { this.id = id; }
+    public Date getFechaEntrega() {
+        return fechaEntrega;
+    }
 
-public String getDireccion() { return direccion; }
-public void setDireccion(String direccion) { this.direccion = direccion; }
+    public void setFechaEntrega(Date fechaEntrega) {
+        this.fechaEntrega = fechaEntrega;
+    }
 
-public EstadoDelivery getEstado() { return estado; }
-public void setEstado(EstadoDelivery estado) { this.estado = estado; }
+    public String getEncargado() {
+        return encargado;
+    }
 
-public Date getFechaEntrega() { return fechaEntrega; }
-public void setFechaEntrega(Date fechaEntrega) { this.fechaEntrega = fechaEntrega; }
+    public void setEncargado(String encargado) {
+        this.encargado = encargado;
+    }
 
-public Date getFechaEnvio() { return fechaEnvio; }
-public void setFechaEnvio(Date fechaEnvio) { this.fechaEnvio = fechaEnvio; }
+    public BigDecimal getCostoEnvio() {
+        return costoEnvio;
+    }
 
-public BigDecimal getCostoEnvio() { return costoEnvio; }
-public void setCostoEnvio(BigDecimal costoEnvio) { this.costoEnvio = costoEnvio; }
+    public void setCostoEnvio(BigDecimal costoEnvio) {
+        this.costoEnvio = costoEnvio;
+    }
 
-public String getObservaciones() { return observaciones; }
-public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
+    public String getObservaciones() {
+        return observaciones;
+    }
 
-public Ventas getVenta() { return venta; }
-public void setVenta(Ventas venta) { this.venta = venta; }
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
+    }
 
-public Vehiculo getVehiculo() { return vehiculo; }
-public void setVehiculo(Vehiculo vehiculo) { this.vehiculo = vehiculo; }
+    public Integer getEstado() {
+        return estado;
+    }
 
-public Usuarios getEmpleado() { return empleado; }
-public void setEmpleado(Usuarios empleado) { this.empleado = empleado; }
+    public void setEstado(Integer estado) {
+        this.estado = estado;
+    }
+
+    public Ventas getVenta() {
+        return venta;
+    }
+
+    public void setVenta(Ventas venta) {
+        this.venta = venta;
+    }
+
+    public Vehiculo getVehiculo() {
+        return vehiculo;
+    }
+
+    public void setVehiculo(Vehiculo vehiculo) {
+        this.vehiculo = vehiculo;
+    }
+
+    @Override
+    public String toString() {
+        return "Delivery [iddelivery=" + iddelivery + ", direccion=" + direccion + ", fechaEnvio=" + fechaEnvio
+                + ", fechaEntrega=" + fechaEntrega + ", encargado=" + encargado + ", costoEnvio=" + costoEnvio
+                + ", observaciones=" + observaciones + ", estado=" + estado + ", venta=" + venta + ", vehiculo="
+                + vehiculo + "]";
+    }
+
 }

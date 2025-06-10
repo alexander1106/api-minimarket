@@ -1,13 +1,10 @@
 package com.gadbacorp.api.controller.delivery;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,203 +12,121 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.gadbacorp.api.entity.delivery.Delivery;
 import com.gadbacorp.api.entity.delivery.DeliveryDTO;
-import com.gadbacorp.api.entity.delivery.EstadoDelivery;
 import com.gadbacorp.api.entity.delivery.Vehiculo;
-import com.gadbacorp.api.entity.empleados.Usuarios;
 import com.gadbacorp.api.entity.ventas.Ventas;
-import com.gadbacorp.api.service.delivery.IDeliveryService;
-import com.gadbacorp.api.service.delivery.VehiculoService;
-import com.gadbacorp.api.service.empleados.IUsuariosService;
-import com.gadbacorp.api.service.ventas.IVentasService;
+import com.gadbacorp.api.repository.delivery.DeliveryRepository;
+import com.gadbacorp.api.repository.delivery.VehiculoRepository;
+import com.gadbacorp.api.repository.ventas.VentasRepository;
 
 @RestController
-@RequestMapping("/api/minimarket/delivery")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@RequestMapping("/api/minimarket")
 public class DeliveryController {
 
     @Autowired
-    private IDeliveryService deliveryService;
+    private DeliveryRepository deliveryRepo;
 
     @Autowired
-    private IVentasService ventasService;
+    private VentasRepository ventasRepo;
 
     @Autowired
-    private VehiculoService vehiculoService;
+    private VehiculoRepository vehiculoRepo;
 
-    @Autowired
-    private IUsuariosService empleadoService;
-
-    @GetMapping
-    public ResponseEntity<?> listarTodosDelivery() {
-        try {
-            List<Delivery> deliveries = deliveryService.findAll();
-            return new ResponseEntity<>(deliveries, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al listar deliveries: " + e.getMessage());
-        }
+    private DeliveryDTO toDTO(Delivery d) {
+        return new DeliveryDTO(
+            d.getIddelivery(),
+            d.getDireccion(),
+            d.getFechaEnvio(),
+            d.getFechaEntrega(),
+            d.getEncargado(),
+            d.getCostoEnvio(),
+            d.getObservaciones(),
+            d.getEstado(),
+            d.getVenta().getIdVenta(),
+            d.getVehiculo().getIdvehiculo()
+        );
     }
 
-    @PostMapping
-    public ResponseEntity<?> crearDelivery(@RequestBody DeliveryDTO deliveryDTO) {
-        try {
-            if (deliveryDTO.getIdVenta() == null) {
-                return ResponseEntity.badRequest().body("El ID de venta es obligatorio");
-            }
-
-            Optional<Ventas> ventaOpt = ventasService.buscarVenta(deliveryDTO.getIdVenta().intValue());
-            if (ventaOpt.isEmpty()) {
-                return ResponseEntity.badRequest().body("Venta no encontrada con ID: " + deliveryDTO.getIdVenta());
-            }
-
-            Vehiculo vehiculo = null;
-            if (deliveryDTO.getIdVehiculo() != null) {
-                Optional<Vehiculo> vehiculoOpt = vehiculoService.getVehiculoById(deliveryDTO.getIdVehiculo());
-                if (vehiculoOpt.isEmpty()) {
-                    return ResponseEntity.badRequest().body("Vehículo no encontrado con ID: " + deliveryDTO.getIdVehiculo());
-                }
-                vehiculo = vehiculoOpt.get();
-            } else {
-                List<Vehiculo> todosVehiculos = vehiculoService.getAllVehiculos();
-                if (!todosVehiculos.isEmpty()) {
-                    vehiculo = todosVehiculos.get(0);
-                }
-            }
-
-            Usuarios empleado = null;
-            if (deliveryDTO.getIdEmpleado() != null) {
-                Optional<Usuarios> empleadoOpt = empleadoService.buscarId(deliveryDTO.getIdEmpleado());
-                if (empleadoOpt.isEmpty()) {
-                    return ResponseEntity.badRequest().body("Empleado no encontrado con ID: " + deliveryDTO.getIdEmpleado());
-                }
-                empleado = empleadoOpt.get();
-            }
-
-            Integer codigoEstado = deliveryDTO.getEstado();
-            if (codigoEstado == null) {
-                codigoEstado = EstadoDelivery.PENDIENTE.getCodigo();
-            }
-
-            EstadoDelivery estadoEnum;
-            try {
-                estadoEnum = EstadoDelivery.fromCodigo(codigoEstado);
-            } catch (IllegalArgumentException ex) {
-                return ResponseEntity.badRequest().body("Estado inválido: " + codigoEstado);
-            }
-
-            BigDecimal costoEnvio = deliveryDTO.getCostoEnvio() != null ? deliveryDTO.getCostoEnvio() : BigDecimal.ZERO;
-
-            Delivery delivery = new Delivery();
-            delivery.setVenta(ventaOpt.get());
-            delivery.setDireccion(deliveryDTO.getDireccion());
-            delivery.setEstado(estadoEnum);
-            delivery.setFechaEntrega(deliveryDTO.getFechaEntrega());
-            delivery.setFechaEnvio(deliveryDTO.getFechaEnvio());
-            delivery.setCostoEnvio(costoEnvio);
-            delivery.setObservaciones(deliveryDTO.getObservaciones());
-            delivery.setVehiculo(vehiculo);
-            delivery.setEmpleado(empleado);
-
-            Delivery deliveryGuardado = deliveryService.save(delivery);
-            return ResponseEntity.status(HttpStatus.CREATED).body(deliveryGuardado);
-
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al crear delivery: " + e.getMessage());
+    private Delivery toEntity(DeliveryDTO dto) {
+        Delivery d = new Delivery();
+        if (dto.getIddelivery() != null) d.setIddelivery(dto.getIddelivery());
+        d.setDireccion(dto.getDireccion());
+        d.setFechaEnvio(dto.getFechaEnvio());
+        d.setFechaEntrega(dto.getFechaEntrega());
+        d.setEncargado(dto.getEncargado());
+        d.setCostoEnvio(dto.getCostoEnvio());
+        d.setObservaciones(dto.getObservaciones());
+        if (dto.getEstado() != null) {
+            d.setEstado(dto.getEstado());
         }
+
+        Ventas venta = ventasRepo.findById(dto.getIdventa())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Venta no encontrada id=" + dto.getIdventa()));
+        d.setVenta(venta);
+
+        Vehiculo veh = vehiculoRepo.findById(dto.getIdvehiculo())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Vehículo no encontrado id=" + dto.getIdvehiculo()));
+        d.setVehiculo(veh);
+
+        return d;
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> actualizarDelivery(@PathVariable Long id, @RequestBody DeliveryDTO deliveryDTO) {
-        try {
-            Optional<Delivery> deliveryExistenteOpt = deliveryService.findById(id);
-            if (deliveryExistenteOpt.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            Delivery delivery = deliveryExistenteOpt.get();
-
-            if (deliveryDTO.getIdVenta() != null) {
-                Optional<Ventas> ventaOpt = ventasService.buscarVenta(deliveryDTO.getIdVenta().intValue());
-                if (ventaOpt.isEmpty()) {
-                    return ResponseEntity.badRequest().body("Venta no encontrada con ID: " + deliveryDTO.getIdVenta());
-                }
-                delivery.setVenta(ventaOpt.get());
-            }
-
-            if (deliveryDTO.getIdVehiculo() != null) {
-                Optional<Vehiculo> vehiculoOpt = vehiculoService.getVehiculoById(deliveryDTO.getIdVehiculo());
-                if (vehiculoOpt.isEmpty()) {
-                    return ResponseEntity.badRequest().body("Vehículo no encontrado con ID: " + deliveryDTO.getIdVehiculo());
-                }
-                delivery.setVehiculo(vehiculoOpt.get());
-            }
-
-            if (deliveryDTO.getIdEmpleado() != null) {
-                Optional<Usuarios> empleadoOpt = empleadoService.buscarId(deliveryDTO.getIdEmpleado());
-                if (empleadoOpt.isEmpty()) {
-                    return ResponseEntity.badRequest().body("Empleado no encontrado con ID: " + deliveryDTO.getIdEmpleado());
-                }
-                delivery.setEmpleado(empleadoOpt.get());
-            }
-
-            if (deliveryDTO.getDireccion() != null) {
-                delivery.setDireccion(deliveryDTO.getDireccion());
-            }
-
-            if (deliveryDTO.getEstado() != null) {
-                try {
-                    EstadoDelivery estadoEnum = EstadoDelivery.fromCodigo(deliveryDTO.getEstado());
-                    delivery.setEstado(estadoEnum);
-                } catch (IllegalArgumentException ex) {
-                    return ResponseEntity.badRequest().body("Estado inválido: " + deliveryDTO.getEstado());
-                }
-            }
-
-            if (deliveryDTO.getFechaEntrega() != null) {
-                delivery.setFechaEntrega(deliveryDTO.getFechaEntrega());
-            }
-
-            if (deliveryDTO.getFechaEnvio() != null) {
-                delivery.setFechaEnvio(deliveryDTO.getFechaEnvio());
-            }
-
-            if (deliveryDTO.getCostoEnvio() != null) {
-                delivery.setCostoEnvio(deliveryDTO.getCostoEnvio());
-            }
-
-            if (deliveryDTO.getObservaciones() != null) {
-                delivery.setObservaciones(deliveryDTO.getObservaciones());
-            }
-
-            Delivery deliveryActualizado = deliveryService.save(delivery);
-            return ResponseEntity.ok(deliveryActualizado);
-
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al actualizar delivery: " + e.getMessage());
-        }
+    @GetMapping("/delivery")
+    public List<DeliveryDTO> listar() {
+        return deliveryRepo.findAll().stream().map(this::toDTO).toList();
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarDelivery(@PathVariable Long id) {
-        try {
-            Optional<Delivery> deliveryExistente = deliveryService.findById(id);
-            if (deliveryExistente.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
+    @GetMapping("/delivery/{id}")
+    public DeliveryDTO obtener(@PathVariable Integer id) {
+        return deliveryRepo.findById(id)
+            .map(this::toDTO)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Delivery no encontrado id=" + id));
+    }
 
-            deliveryService.deleteById(id);
-            return ResponseEntity.ok("Delivery eliminado exitosamente");
+    @PostMapping("/delivery")
+    public ResponseEntity<DeliveryDTO> crear(@RequestBody DeliveryDTO dto) {
+        Delivery nuevo = toEntity(dto);
+        Delivery saved = deliveryRepo.save(nuevo);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(saved));
+    }
 
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al eliminar delivery: " + e.getMessage());
-        }
+    @PutMapping("/delivery")
+    public DeliveryDTO actualizar(@RequestBody DeliveryDTO dto) {
+        Delivery existente = deliveryRepo.findById(dto.getIddelivery())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Delivery no encontrado id=" + dto.getIddelivery()));
+
+        existente.setDireccion(dto.getDireccion());
+        existente.setFechaEnvio(dto.getFechaEnvio());
+        existente.setFechaEntrega(dto.getFechaEntrega());
+        existente.setEncargado(dto.getEncargado());
+        existente.setCostoEnvio(dto.getCostoEnvio());
+        existente.setObservaciones(dto.getObservaciones());
+        existente.setEstado(dto.getEstado());
+
+        Ventas venta = ventasRepo.findById(dto.getIdventa())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Venta no encontrada id=" + dto.getIdventa()));
+        existente.setVenta(venta);
+
+        Vehiculo veh = vehiculoRepo.findById(dto.getIdvehiculo())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Vehículo no encontrado id=" + dto.getIdvehiculo()));
+        existente.setVehiculo(veh);
+
+        return toDTO(deliveryRepo.save(existente));
+    }
+
+    @DeleteMapping("/delivery/{id}")
+    public ResponseEntity<String> eliminar(@PathVariable Integer id) {
+        deliveryRepo.deleteById(id);
+        return ResponseEntity.ok("Delivery eliminado correctamente");
     }
 }

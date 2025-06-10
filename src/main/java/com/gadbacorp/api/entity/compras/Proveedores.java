@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="proveedores")
-@SQLDelete(sql = "UPDATE proveedores SET estado=0 WHERE id = ?")
+@SQLDelete(sql = "UPDATE proveedores SET estado=0 WHERE Id_Proveedor = ?")
 @Where(clause = "estado=1")
 
 public class Proveedores {

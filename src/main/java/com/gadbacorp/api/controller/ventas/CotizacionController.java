@@ -98,7 +98,7 @@ public class CotizacionController {
         return ResponseEntity.ok(actualizada);
     }
 
-    @DeleteMapping("/cotizacion/{id}")
+    @DeleteMapping("/cotizaciones/{id}")
     public ResponseEntity<?> eliminarCotizacion(@PathVariable Integer id) {
         Optional<Cotizaciones> optionalCotizacion = cotizacionesService.buscarCotizacion(id);
         if (optionalCotizacion.isEmpty()) {

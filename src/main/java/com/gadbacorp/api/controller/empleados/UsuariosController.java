@@ -25,11 +25,9 @@ import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.empleados.Usuarios;
 import com.gadbacorp.api.entity.empleados.UsuariosDTO;
 import com.gadbacorp.api.entity.seguridad.Rol;
-import com.gadbacorp.api.entity.ventas.Clientes;
 import com.gadbacorp.api.repository.administrable.SucursalesRepository;
 import com.gadbacorp.api.repository.seguridad.RolRepository;
 import com.gadbacorp.api.service.empleados.IUsuariosService;
-import com.gadbacorp.api.service.jpa.administrable.SucursalesService;
 
 @RestController
 @RequestMapping("/api/minimarket")

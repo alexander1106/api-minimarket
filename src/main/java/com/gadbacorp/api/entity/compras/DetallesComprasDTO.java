@@ -1,43 +1,17 @@
 package com.gadbacorp.api.entity.compras;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.gadbacorp.api.entity.inventario.Productos;
-
-@Entity
-@Table(name = "detalle_compras")
-@SQLDelete(sql = "UPDATE detalle_compras SET estado=0 WHERE Id_detalle_compra = ?")
-@Where(clause = "estado=1")
-public class DetallesCompras {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id_detalle_compra")
+public class DetallesComprasDTO {
     private Integer idDetalleCompra;
-
-    @ManyToOne
-    @JoinColumn(name = "Id_compra")
-    @JsonIgnore
-    private Compras compra;
-
-    @ManyToOne
-    @JoinColumn(name = "Id_Producto")
-    private Productos producto;
-
+    private Integer idCompra;
+    private Integer idProducto;
     private Integer cantidad;
-
-    @Column(name = "precio_unitario")
     private BigDecimal precioUnitario;
-
     private BigDecimal subtotal;
+    private Integer estado = 1;
 
-    private Integer estado=1;
-
+    // Getters y Setters
     public Integer getIdDetalleCompra() {
         return idDetalleCompra;
     }
@@ -46,20 +20,20 @@ public class DetallesCompras {
         this.idDetalleCompra = idDetalleCompra;
     }
 
-    public Compras getCompra() {
-        return compra;
+    public Integer getIdCompra() {
+        return idCompra;
     }
 
-    public void setCompra(Compras compra) {
-        this.compra = compra;
+    public void setIdCompra(Integer idCompra) {
+        this.idCompra = idCompra;
     }
 
-    public Productos getProducto() {
-        return producto;
+    public Integer getIdProducto() {
+        return idProducto;
     }
 
-    public void setProducto(Productos producto) {
-        this.producto = producto;
+    public void setIdProducto(Integer idProducto) {
+        this.idProducto = idProducto;
     }
 
     public Integer getCantidad() {
@@ -93,7 +67,4 @@ public class DetallesCompras {
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
-
-    
-    
 }

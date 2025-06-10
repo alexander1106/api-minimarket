@@ -1,103 +1,102 @@
 package com.gadbacorp.api.entity.delivery;
 
-import jakarta.persistence.*;
-import java.util.Objects;
-
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 @Entity
 @Table(name = "vehiculos")
-@SQLDelete(sql = "UPDATE vehiculos SET estado=0 WHERE idempresa = ?")
+@SQLDelete(sql = "UPDATE vehiculos SET estado=0 WHERE idvehiculo = ?")
 @Where(clause = "estado=1")
 public class Vehiculo {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, unique = true, length = 10)
+    private Integer idvehiculo;
     private String placa;
-
-    @Column(nullable = false, length = 50)
     private String modelo;
-
-    @Column(nullable = false, length = 20)
     private String marca;
-
-    @Column(nullable = false, length = 10)
     private String anio;
-
-    @Column(nullable = false, length = 20)
     private String color;
-
-    @Column(name = "capacidad_kg", nullable = false)
-    private Double capacidadKg;
-
-    @Column(nullable = false, length = 20)
-    private String estado;
-
-    @Column(length = 200)
     private String observaciones;
+    private Integer estado = 1;
 
-    // Constructor vacío
-    public Vehiculo() {}
+    
 
-    // Getters y Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getPlaca() { return placa; }
-    public void setPlaca(String placa) { this.placa = placa; }
-
-    public String getModelo() { return modelo; }
-    public void setModelo(String modelo) { this.modelo = modelo; }
-
-    public String getMarca() { return marca; }
-    public void setMarca(String marca) { this.marca = marca; }
-
-    public String getAnio() { return anio; }
-    public void setAnio(String anio) { this.anio = anio; }
-
-    public String getColor() { return color; }
-    public void setColor(String color) { this.color = color; }
-
-    public Double getCapacidadKg() { return capacidadKg; }
-    public void setCapacidadKg(Double capacidadKg) { this.capacidadKg = capacidadKg; }
-
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
-
-    public String getObservaciones() { return observaciones; }
-    public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
-
-    // equals() y hashCode() (basados en id)
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Vehiculo)) return false;
-        Vehiculo that = (Vehiculo) o;
-        return Objects.equals(id, that.id);
+    public Vehiculo() {
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public Vehiculo(Integer idvehiculo, String placa, String modelo, String marca, String anio, String color,
+            String observaciones, Integer estado) {
+        this.idvehiculo = idvehiculo;
+        this.placa = placa;
+        this.modelo = modelo;
+        this.marca = marca;
+        this.anio = anio;
+        this.color = color;
+        this.observaciones = observaciones;
+        this.estado = estado;
     }
 
-    // toString()
+    public Integer getIdvehiculo() {
+        return idvehiculo;
+    }
+    public void setIdvehiculo(Integer idvehiculo) {
+        this.idvehiculo = idvehiculo;
+    }
+    public String getPlaca() {
+        return placa;
+    }
+    public void setPlaca(String placa) {
+        this.placa = placa;
+    }
+    public String getModelo() {
+        return modelo;
+    }
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
+    }
+    public String getMarca() {
+        return marca;
+    }
+    public void setMarca(String marca) {
+        this.marca = marca;
+    }
+    public String getAnio() {
+        return anio;
+    }
+    public void setAnio(String anio) {
+        this.anio = anio;
+    }
+    public String getColor() {
+        return color;
+    }
+    public void setColor(String color) {
+        this.color = color;
+    }
+    public Integer getEstado() {
+        return estado;
+    }
+    public void setEstado(Integer estado) {
+        this.estado = estado;
+    }
+    public String getObservaciones() {
+        return observaciones;
+    }
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
+    }
+
     @Override
     public String toString() {
-        return "Vehiculo{" +
-                "id=" + id +
-                ", placa='" + placa + '\'' +
-                ", modelo='" + modelo + '\'' +
-                ", marca='" + marca + '\'' +
-                ", anio='" + anio + '\'' +
-                ", color='" + color + '\'' +
-                ", capacidadKg=" + capacidadKg +
-                ", estado='" + estado + '\'' +
-                ", observaciones='" + observaciones + '\'' +
-                '}';
+        return "Vehiculo [idvehiculo=" + idvehiculo + ", placa=" + placa + ", modelo=" + modelo + ", marca=" + marca
+                + ", anio=" + anio + ", color=" + color + ", observaciones=" + observaciones + ", estado=" + estado
+                + "]";
     }
+    
+
 }
