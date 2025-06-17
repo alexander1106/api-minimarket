@@ -42,7 +42,6 @@ public class Empresas {
 
     // NUEVO: Relación con sucursales
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private List<Sucursales> sucursales = new ArrayList<>();
 
     public Empresas(Integer idempresa) {

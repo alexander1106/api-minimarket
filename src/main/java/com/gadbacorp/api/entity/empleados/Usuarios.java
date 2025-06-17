@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.caja.AperturaCaja;
+import com.gadbacorp.api.entity.seguridad.Rol;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -34,24 +35,19 @@ public class Usuarios {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idUsuario;
     private String nombre;
+    private String username;
     private String apellidos;
-    private String correoElectronico;
+    private String email;
     private String dni;
-    private String contrasenaHash;
-
-    private Integer estado;
-    private Integer rollId;
+    private String password;
+    private Integer estado=1;
     private LocalDateTime fechaCreacion;
     private String turno;
-    
-    
-    @Override
-    public String toString() {
-        return "Empleado [idUsuario=" + idUsuario + ", nombre=" + nombre + ", apellidos=" + apellidos
-                + ", correoElectronico=" + correoElectronico + ", dni=" + dni + ", contrasenaHash=" + contrasenaHash
-                + ", estado=" + estado + ", rollId=" + rollId + ", fechaCreacion=" + fechaCreacion  + ", turno=" + turno + ", aperturaCaja=" + aperturaCaja + "]";
-    }
+    @ManyToOne
+    @JoinColumn(name = "rol_id", referencedColumnName = "id") // 'id' es el PK de Rol
+    private Rol rol;
 
+    
     public Usuarios(Integer idUsuario) {
         this.idUsuario = idUsuario;
     }
@@ -83,14 +79,6 @@ private Sucursales sucursal;
         this.apellidos = apellidos;
     }
 
-    public String getCorreoElectronico() {
-        return correoElectronico;
-    }
-
-    public void setCorreoElectronico(String correoElectronico) {
-        this.correoElectronico = correoElectronico;
-    }
-
     public String getDni() {
         return dni;
     }
@@ -99,15 +87,24 @@ private Sucursales sucursal;
         this.dni = dni;
     }
 
-    public String getContrasenaHash() {
-        return contrasenaHash;
+
+    
+    public String getUsername() {
+        return username;
     }
 
-    public void setContrasenaHash(String contrasenaHash) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        this.contrasenaHash = encoder.encode(contrasenaHash);
-        this.contrasenaHash = contrasenaHash;
+    public void setUsername(String username) {
+        this.username = username;
     }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+ BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        this.password = encoder.encode(password);
+        this.password = password;    }
 
     public Integer getEstado() {
         return estado;
@@ -117,13 +114,6 @@ private Sucursales sucursal;
         this.estado = estado;
     }
 
-    public Integer getRollId() {
-        return rollId;
-    }
-
-    public void setRollId(Integer rollId) {
-        this.rollId = rollId;
-    }
 
     public LocalDateTime getFechaCreacion() {
         return fechaCreacion;
@@ -165,6 +155,22 @@ private Sucursales sucursal;
 
     public void setSucursal(Sucursales sucursal) {
         this.sucursal = sucursal;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Rol getRol() {
+        return rol;
+    }
+
+    public void setRol(Rol rol) {
+        this.rol = rol;
     }
 
 }

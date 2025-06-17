@@ -40,6 +40,7 @@ public class Sucursales {
 
     @ManyToOne
     @JoinColumn(name = "idempresa", referencedColumnName = "idempresa")
+    @JsonIgnore
     private Empresas empresa;
 
 

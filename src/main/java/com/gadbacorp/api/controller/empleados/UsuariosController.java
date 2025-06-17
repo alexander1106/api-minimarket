@@ -60,7 +60,7 @@ public class UsuariosController {
             return ResponseEntity.badRequest().body("sucursal no encontrado con ID: " + dto.getIdSucursal());
         }
 
-       Rol rol = rolRepository.findById(dto.getRollId()).orElse(null);
+        Rol rol = rolRepository.findById(dto.getRollId()).orElse(null);
         if (rol == null) {
             return ResponseEntity.badRequest().body("rol no encontrado con ID: " + dto.getRollId());
         }
@@ -69,13 +69,13 @@ public class UsuariosController {
                                     + dto.getApellidos();
         Usuarios usuarios= new Usuarios();
         
-        usuarios.setContrasenaHash(claveOriginal);
+        usuarios.setPassword(claveOriginal);
         usuarios.setApellidos(dto.getApellidos());
         usuarios.setNombre(dto.getNombre());
         usuarios.setSucursal(sucursales);
-        usuarios.setCorreoElectronico(dto.getCorreoElectronico());
-        usuarios.setRollId(dto.getRollId());
+        usuarios.setEmail(dto.getCorreoElectronico());
         usuarios.setFechaCreacion(dto.getFechaCreacion());
+        usuarios.setRol(rol);
 
         return ResponseEntity.ok(usuariosService.guardar(usuarios));
     }

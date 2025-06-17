@@ -10,8 +10,5 @@ import com.gadbacorp.api.entity.seguridad.Rol;
 @Repository
 public interface RolRepository extends JpaRepository<Rol, Integer> {
      Optional<Rol> findByNombre(String nombre);
-    // Aquí puedes agregar métodos personalizados si es necesario
-    // Por ejemplo, para buscar roles por nombre:
-    // Optional<Rol> findByNombre(String nombre);
-
+   
 }

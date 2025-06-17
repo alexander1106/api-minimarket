@@ -8,8 +8,8 @@ import com.gadbacorp.api.entity.seguridad.Modulo;
 
 public interface IModuloService {
     List<Modulo> listarTodos();
-    Optional<Modulo> obtenerPorId(Long id);
+    Optional<Modulo> obtenerPorId(Integer id);
     Modulo guardar(Modulo modulo);
-    Modulo actualizar(Long id, Modulo modulo);
-    void eliminar(Long id);
+    Modulo actualizar(Modulo modulo);
+    void eliminar(Integer id);
 }

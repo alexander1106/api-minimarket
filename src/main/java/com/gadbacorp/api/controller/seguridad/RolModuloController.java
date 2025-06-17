@@ -1,6 +1,5 @@
 package com.gadbacorp.api.controller.seguridad;
 
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,42 +14,42 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gadbacorp.api.entity.seguridad.Modulo;
-import com.gadbacorp.api.service.seguridad.IModuloService;
+import com.gadbacorp.api.entity.seguridad.RolModulo;
+import com.gadbacorp.api.service.seguridad.IRolModuloService;
 
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin(origins = "*") // Ajusta según tu frontend
-public class ModuloController {
+@CrossOrigin(origins = "*") // Ajusta según frontend
+public class RolModuloController {
 
     @Autowired
-    private IModuloService moduloService;
+    private IRolModuloService rolModuloService;
 
-    @GetMapping("/modulos")
-    public ResponseEntity<List<Modulo>> listar() {
-        return ResponseEntity.ok(moduloService.listarTodos());
+    @GetMapping("/rolesmodulos")
+    public ResponseEntity<List<RolModulo>> listar() {
+        return ResponseEntity.ok(rolModuloService.listarTodos());
     }
 
-    @GetMapping("/modulos/{id}")
-    public ResponseEntity<Modulo> obtener(@PathVariable Integer id) {
-        return moduloService.obtenerPorId(id)
+    @GetMapping("/rolesmodulos/{id}")
+    public ResponseEntity<RolModulo> obtener(@PathVariable Integer id) {
+        return rolModuloService.obtenerPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/modulos")
-    public ResponseEntity<Modulo> crear(@RequestBody Modulo modulo) {
-        return ResponseEntity.ok(moduloService.guardar(modulo));
+    @PostMapping("/rolesmodulos")
+    public ResponseEntity<RolModulo> crear(@RequestBody RolModulo rolModulo) {
+        return ResponseEntity.ok(rolModuloService.guardar(rolModulo));
     }
 
-    @PutMapping("/modulos")
-    public ResponseEntity<Modulo> actualizar(@RequestBody Modulo modulo) {
-        return ResponseEntity.ok(moduloService.actualizar( modulo));
+    @PutMapping("/rolesmodulos")
+    public ResponseEntity<RolModulo> actualizar(@RequestBody RolModulo rolModulo) {
+        return ResponseEntity.ok(rolModuloService.actualizar(rolModulo));
     }
 
-    @DeleteMapping("/modulos/{id}")
+    @DeleteMapping("/rolesmodulos/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
-        moduloService.eliminar(id);
+        rolModuloService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 }
