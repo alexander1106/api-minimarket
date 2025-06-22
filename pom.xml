@@ -92,11 +92,20 @@
 			<version>0.11.5</version>
 			<scope>runtime</scope>			
 		</dependency>
+	
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
-
+   <!-- Reactor Core (ya incluido normalmente con WebFlux, pero por si acaso) -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
+		   <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
 	</dependencies>
 
 	<build>

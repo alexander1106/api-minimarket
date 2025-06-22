@@ -1,18 +1,20 @@
 package com.gadbacorp.api.entity.empleados;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.caja.AperturaCaja;
+import com.gadbacorp.api.entity.seguridad.Authority;
 import com.gadbacorp.api.entity.seguridad.Rol;
 
 import jakarta.persistence.CascadeType;
@@ -29,7 +31,7 @@ import jakarta.persistence.Table;
 @Table(name = "usuarios")
 @SQLDelete(sql = "UPDATE usuarios SET estado = 0 WHERE id_usuario = ?")
 @Where(clause = "estado = 1")
-public class Usuarios {
+public class Usuarios implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,15 +41,27 @@ public class Usuarios {
     private String apellidos;
     private String email;
     private String dni;
+    private boolean enable = true; 
+
     private String password;
     private Integer estado=1;
     private LocalDateTime fechaCreacion;
     private String turno;
+        private String token;
+
     @ManyToOne
     @JoinColumn(name = "rol_id", referencedColumnName = "id") // 'id' es el PK de Rol
     private Rol rol;
 
     
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     public Usuarios(Integer idUsuario) {
         this.idUsuario = idUsuario;
     }
@@ -172,5 +186,26 @@ private Sucursales sucursal;
     public void setRol(Rol rol) {
         this.rol = rol;
     }
+
+    public boolean isEmpty() {
+        return false; // o alguna lógica válida según tu modelo
+    }
+  @Override
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        HashSet<Authority> authorities = new HashSet<>();
+        authorities.add(new Authority(this.rol.getNombre()));
+        return authorities;
+    }
+
+  public boolean getEnable() {
+    return enable;
+  }
+
+  public void setEnable(boolean enable) {
+    this.enable = enable;
+  }
+
+  
 
 }

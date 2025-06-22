@@ -1,16 +1,12 @@
-package com.gadbacorp.api.controller.empleados;
+package com.gadbacorp.api.controller.seguridad;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import javax.management.relation.Role;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +26,7 @@ import com.gadbacorp.api.repository.seguridad.RolRepository;
 import com.gadbacorp.api.service.empleados.IUsuariosService;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/minimarket")
 public class UsuariosController {
 
@@ -65,18 +62,19 @@ public class UsuariosController {
             return ResponseEntity.badRequest().body("rol no encontrado con ID: " + dto.getRollId());
         }
 
-        String claveOriginal =  dto.getNombre()
-                                    + dto.getApellidos();
         Usuarios usuarios= new Usuarios();
-        
-        usuarios.setPassword(claveOriginal);
-        usuarios.setApellidos(dto.getApellidos());
         usuarios.setNombre(dto.getNombre());
+        usuarios.setUsername(dto.getUsername());
+        usuarios.setApellidos(dto.getApellidos());
+        usuarios.setEmail(dto.getEmail());
+        usuarios.setPassword(passwordEncoder.encode(dto.getPassword()));
+        usuarios.setFechaCreacion(dto.getFechaCreacion());
+        usuarios.setDni(dto.getDni());
+        usuarios.setTurno(dto.getTurno());
         usuarios.setSucursal(sucursales);
-        usuarios.setEmail(dto.getCorreoElectronico());
         usuarios.setFechaCreacion(dto.getFechaCreacion());
         usuarios.setRol(rol);
-
+        usuarios.setSucursal(sucursales);
         return ResponseEntity.ok(usuariosService.guardar(usuarios));
     }
     

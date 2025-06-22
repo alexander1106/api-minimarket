@@ -14,30 +14,35 @@ import com.gadbacorp.api.service.empleados.IUsuariosService;
 public class UsuarioService implements IUsuariosService {
 
    @Autowired
-   private UsuarioRepository repoEmpleado;
+   private UsuarioRepository usuariosRepository;
    @Override
    public List<Usuarios> buscarTodos() {
-      return repoEmpleado.findAll();
+      return usuariosRepository.findAll();
    }
 
    @Override
    public Usuarios guardar(Usuarios empleado) {
-      return repoEmpleado.save(empleado);
+      return usuariosRepository.save(empleado);
    }
 
    @Override
    public Usuarios modificar(Usuarios empleado) {
-      return repoEmpleado.save(empleado);
+      return usuariosRepository.save(empleado);
    }
 
    @Override
    public Optional<Usuarios> buscarId(Integer id) {
-      return repoEmpleado.findById(id);
+      return usuariosRepository.findById(id);
    }
 
   @Override
     public void eliminar(Integer id) {
-        repoEmpleado.deleteById(id);
+        usuariosRepository.deleteById(id);
+    }
+  
+    @Override
+    public Usuarios obtenerUsuario(String username) {
+        return usuariosRepository.findByUsername(username);
     }
 
 }

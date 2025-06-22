@@ -1,11 +1,6 @@
 package com.gadbacorp.api.entity.empleados;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,96 +12,19 @@ public class UsuariosDTO {
     private Integer idUsuario;
     private Integer idSucursal;
     private String nombre;
+    private String username; 
     private String apellidos;
-    private String correoElectronico;
-    private String contrasenaHash;
-    private Integer estado;
+    private String email;
+    private String password;
+    private String dni;
+    private String turno; 
+    private Integer estado=1;
     private Integer rollId;
     private LocalDateTime fechaCreacion;
 
-    private String turno;
   
     public UsuariosDTO() {
     }
-
-    public Integer getIdSucursal() {
-        return idSucursal;
-    }
-
-   
-
-    public void setIdSucursal(Integer idSucursal) {
-        this.idSucursal = idSucursal;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getApellidos() {
-        return apellidos;
-    }
-
-    public void setApellidos(String apellidos) {
-        this.apellidos = apellidos;
-    }
-
-    public String getCorreoElectronico() {
-        return correoElectronico;
-    }
-
-    public void setCorreoElectronico(String correoElectronico) {
-        this.correoElectronico = correoElectronico;
-    }
-
-    public String getContrasenaHash() {
-        return contrasenaHash;
-    }
-
-      public void setContrasenaHash(String contrasenaHash) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        this.contrasenaHash = encoder.encode(contrasenaHash);
-        this.contrasenaHash = contrasenaHash;
-    }
-
-
-    public Integer getEstado() {
-        return estado;
-    }
-
-    public void setEstado(Integer estado) {
-        this.estado = estado;
-    }
-
-    public Integer getRollId() {
-        return rollId;
-    }
-
-    public void setRollId(Integer rollId) {
-        this.rollId = rollId;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-  
-    public String getTurno() {
-        return turno;
-    }
-    public void setTurno(String turno) {
-        this.turno = turno;
-    }
-
-
 
 
     public Integer getIdUsuario() {
@@ -114,11 +32,119 @@ public class UsuariosDTO {
     }
 
 
-
-
     public void setIdUsuario(Integer idUsuario) {
         this.idUsuario = idUsuario;
     }
 
-   
+
+    public Integer getIdSucursal() {
+        return idSucursal;
+    }
+
+
+    public void setIdSucursal(Integer idSucursal) {
+        this.idSucursal = idSucursal;
+    }
+
+
+    public String getNombre() {
+        return nombre;
+    }
+
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+
+    public String getUsername() {
+        return username;
+    }
+
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+
+    public String getApellidos() {
+        return apellidos;
+    }
+
+
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
+    }
+
+
+    public String getEmail() {
+        return email;
+    }
+
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+
+    public String getPassword() {
+        return password;
+    }
+
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+
+    public String getTurno() {
+        return turno;
+    }
+
+
+    public void setTurno(String turno) {
+        this.turno = turno;
+    }
+
+
+    public Integer getEstado() {
+        return estado;
+    }
+
+
+    public void setEstado(Integer estado) {
+        this.estado = estado;
+    }
+
+
+    public Integer getRollId() {
+        return rollId;
+    }
+
+
+    public void setRollId(Integer rollId) {
+        this.rollId = rollId;
+    }
+
+
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+
+    public String getDni() {
+        return dni;
+    }
+
+
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
+
+    
 }

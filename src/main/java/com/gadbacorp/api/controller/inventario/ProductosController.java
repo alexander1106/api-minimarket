@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,8 +27,10 @@ import com.gadbacorp.api.repository.inventario.InventarioRepository;
 import com.gadbacorp.api.repository.inventario.ProductosRepository;
 import com.gadbacorp.api.repository.inventario.TipoProductoRepository;
 import com.gadbacorp.api.repository.inventario.UnidadDeMedidaRepository;
+import com.gadbacorp.api.service.jpa.inventario.ProductosService;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/minimarket")
 public class ProductosController {
 
@@ -35,6 +38,8 @@ public class ProductosController {
     @Autowired private CategoriasRepository categoriasRepo;
     @Autowired private UnidadDeMedidaRepository unidadRepo;
     @Autowired private TipoProductoRepository tipoRepo;
+    @Autowired private ProductosService productosService;
+
     @Autowired private InventarioRepository inventarioRepo;
 
     @GetMapping("/productos")
@@ -42,11 +47,17 @@ public class ProductosController {
         return productosRepo.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
+      // ✅ Endpoint para listar productos por categoría
+    @GetMapping("/productos/{id}/categoria")
+    public List<Productos> listarPorCategoria(@PathVariable Integer id) {
+        return productosService.listarProductosPorCategoria(id);
+    }
     @GetMapping("/productos/{id}")
     public ProductosDTO obtener(@PathVariable Integer id) {
         return productosRepo.findById(id).map(this::toDTO)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado id=" + id));
     }
+    
 
     @PostMapping("/productos")
     public ResponseEntity<ProductosDTO> crear(@RequestBody ProductosDTO dto) {

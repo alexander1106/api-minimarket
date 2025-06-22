@@ -22,6 +22,12 @@ public class PasswordResetToken {
 
     private String token;
 
+    
+    // Constructor que recibe el token
+    public PasswordResetToken(String token) {
+        this.token = token;
+    }
+    
     @OneToOne
     @JoinColumn(name = "usuario_id")
     private Usuarios usuario;

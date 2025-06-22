@@ -1,4 +1,4 @@
-package com.gadbacorp.api.service.jpa.seguridad;
+package com.gadbacorp.api.entity.seguridad;
 
 public class ResetPasswordRequest {
 
@@ -7,6 +7,10 @@ public class ResetPasswordRequest {
 
     public String getToken() {
         return token;
+    }
+
+    public ResetPasswordRequest(String token) {
+        this.token = token;
     }
 
     public void setToken(String token) {
@@ -20,6 +24,4 @@ public class ResetPasswordRequest {
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
     }
-
-    
 }

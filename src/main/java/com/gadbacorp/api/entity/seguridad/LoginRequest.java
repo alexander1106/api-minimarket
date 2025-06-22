@@ -1,4 +1,4 @@
-package com.gadbacorp.api.service.jpa.seguridad;
+package com.gadbacorp.api.entity.seguridad;
 
 public class LoginRequest {
     private String username;

@@ -13,6 +13,7 @@ public interface IProductosService {
     Productos modificar(Productos producto);
     Optional<Productos> buscarId(Integer id);
     void eliminar(Integer id);
+    List<Productos> listarProductosPorCategoria(Integer id);
 
 }
 

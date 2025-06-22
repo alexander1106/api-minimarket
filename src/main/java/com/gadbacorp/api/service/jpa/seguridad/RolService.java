@@ -1,5 +1,4 @@
 package com.gadbacorp.api.service.jpa.seguridad;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +27,6 @@ public class RolService implements IRolService {
     @Override
     public Rol guardar(Rol rol) {
         return rolRepository.save(rol);
-
     }
 
     @Override
@@ -40,5 +38,4 @@ public class RolService implements IRolService {
     public void eliminar(Integer id) {
         rolRepository.deleteById(id);
     }
-    
 }

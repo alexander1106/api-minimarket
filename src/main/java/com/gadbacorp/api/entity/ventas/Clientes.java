@@ -25,6 +25,7 @@ public class Clientes {
     private String tipoDocumento; 
     private String documento;
     private String nombre; 
+    private String apellidos;
     private String  telefono; 
     private String email;
     private String direccion;
@@ -58,6 +59,14 @@ public class Clientes {
 
     public void setTipoDocumento(String tipoDocumento) {
         this.tipoDocumento = tipoDocumento;
+    }
+
+    public String getApellidos() {
+        return apellidos;
+    }
+
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
     }
 
     public String getDocumento() {

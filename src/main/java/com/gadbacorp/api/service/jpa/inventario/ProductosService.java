@@ -40,4 +40,9 @@ public class ProductosService implements IProductosService {
     public void eliminar(Integer id) {
         repoProductos.deleteById(id);
     }
+
+    @Override
+    public List<Productos> listarProductosPorCategoria(Integer id) {
+        return repoProductos.findByCategoria_Idcategoria(id);
+    }
 }
