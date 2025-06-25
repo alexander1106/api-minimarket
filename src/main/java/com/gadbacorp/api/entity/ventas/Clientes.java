@@ -5,6 +5,8 @@ import java.util.List;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,7 +42,9 @@ public class Clientes {
     }
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Ventas> ventas;
+    
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private List<Cotizaciones> cotizaciones;

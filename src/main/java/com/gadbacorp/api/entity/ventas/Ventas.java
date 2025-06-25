@@ -36,7 +36,7 @@ public class Ventas {
 
     @ManyToOne
     @JoinColumn(name = "id_cliente", referencedColumnName = "id_cliente")
-    @JsonIgnore // evita ciclos infinitos si usas JSON
+    @JsonIgnore
     private Clientes cliente;
 
     @OneToOne
