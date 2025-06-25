@@ -5,11 +5,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +24,7 @@ import com.gadbacorp.api.repository.delivery.VehiculoRepository;
 import com.gadbacorp.api.repository.ventas.VentasRepository;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/minimarket")
 public class DeliveryController {
 
@@ -46,36 +47,37 @@ public class DeliveryController {
             d.getCostoEnvio(),
             d.getObservaciones(),
             d.getEstado(),
-            d.getVenta().getIdVenta(),
+            d.getVenta(), // ✅ ahora sí el objeto completo
             d.getVehiculo().getIdvehiculo()
         );
     }
 
-    private Delivery toEntity(DeliveryDTO dto) {
-        Delivery d = new Delivery();
-        if (dto.getIddelivery() != null) d.setIddelivery(dto.getIddelivery());
-        d.setDireccion(dto.getDireccion());
-        d.setFechaEnvio(dto.getFechaEnvio());
-        d.setFechaEntrega(dto.getFechaEntrega());
-        d.setEncargado(dto.getEncargado());
-        d.setCostoEnvio(dto.getCostoEnvio());
-        d.setObservaciones(dto.getObservaciones());
-        if (dto.getEstado() != null) {
-            d.setEstado(dto.getEstado());
-        }
+  private Delivery toEntity(DeliveryDTO dto) {
+    Delivery d = new Delivery();
+    if (dto.getIddelivery() != null) d.setIddelivery(dto.getIddelivery());
+    d.setDireccion(dto.getDireccion());
+    d.setFechaEnvio(dto.getFechaEnvio());
+    d.setFechaEntrega(dto.getFechaEntrega());
+    d.setEncargado(dto.getEncargado());
+    d.setCostoEnvio(dto.getCostoEnvio());
+    d.setObservaciones(dto.getObservaciones());
+    if (dto.getEstado() != null) d.setEstado(dto.getEstado());
 
-        Ventas venta = ventasRepo.findById(dto.getIdventa())
+    // ✅ Obtener ID desde el objeto dto.getVenta()
+    if (dto.getVenta() != null && dto.getVenta().getIdVenta() != null) {
+        Ventas venta = ventasRepo.findById(dto.getVenta().getIdVenta())
             .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Venta no encontrada id=" + dto.getIdventa()));
+                HttpStatus.BAD_REQUEST, "Venta no encontrada id=" + dto.getVenta().getIdVenta()));
         d.setVenta(venta);
-
-        Vehiculo veh = vehiculoRepo.findById(dto.getIdvehiculo())
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Vehículo no encontrado id=" + dto.getIdvehiculo()));
-        d.setVehiculo(veh);
-
-        return d;
     }
+
+    Vehiculo veh = vehiculoRepo.findById(dto.getIdvehiculo())
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Vehículo no encontrado id=" + dto.getIdvehiculo()));
+    d.setVehiculo(veh);
+
+    return d;
+}
 
     @GetMapping("/delivery")
     public List<DeliveryDTO> listar() {
@@ -97,33 +99,7 @@ public class DeliveryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(saved));
     }
 
-    @PutMapping("/delivery")
-    public DeliveryDTO actualizar(@RequestBody DeliveryDTO dto) {
-        Delivery existente = deliveryRepo.findById(dto.getIddelivery())
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Delivery no encontrado id=" + dto.getIddelivery()));
-
-        existente.setDireccion(dto.getDireccion());
-        existente.setFechaEnvio(dto.getFechaEnvio());
-        existente.setFechaEntrega(dto.getFechaEntrega());
-        existente.setEncargado(dto.getEncargado());
-        existente.setCostoEnvio(dto.getCostoEnvio());
-        existente.setObservaciones(dto.getObservaciones());
-        existente.setEstado(dto.getEstado());
-
-        Ventas venta = ventasRepo.findById(dto.getIdventa())
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Venta no encontrada id=" + dto.getIdventa()));
-        existente.setVenta(venta);
-
-        Vehiculo veh = vehiculoRepo.findById(dto.getIdvehiculo())
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Vehículo no encontrado id=" + dto.getIdvehiculo()));
-        existente.setVehiculo(veh);
-
-        return toDTO(deliveryRepo.save(existente));
-    }
-
+ 
     @DeleteMapping("/delivery/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         deliveryRepo.deleteById(id);

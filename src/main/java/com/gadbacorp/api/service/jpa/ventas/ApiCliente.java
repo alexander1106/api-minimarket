@@ -26,7 +26,6 @@ public class ApiCliente {
             .header("Authorization", "Bearer " + TOKEN)
             .retrieve()
             .bodyToMono(String.class);
-
         return respuesta.block(); // Devuelve la respuesta directamente
     }
 }

@@ -52,6 +52,7 @@ public class ProductosController {
     public List<Productos> listarPorCategoria(@PathVariable Integer id) {
         return productosService.listarProductosPorCategoria(id);
     }
+    
     @GetMapping("/productos/{id}")
     public ProductosDTO obtener(@PathVariable Integer id) {
         return productosRepo.findById(id).map(this::toDTO)
