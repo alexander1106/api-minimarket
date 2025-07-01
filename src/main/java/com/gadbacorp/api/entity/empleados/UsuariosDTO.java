@@ -22,10 +22,8 @@ public class UsuariosDTO {
     private Integer rollId;
     private LocalDateTime fechaCreacion;
 
-  
     public UsuariosDTO() {
     }
-
 
     public Integer getIdUsuario() {
         return idUsuario;

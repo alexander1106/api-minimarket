@@ -47,6 +47,7 @@ public class Clientes {
     
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Cotizaciones> cotizaciones;
 
     public Integer getIdCliente() {

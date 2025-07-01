@@ -25,7 +25,6 @@ import com.gadbacorp.api.entity.seguridad.ResetPasswordRequest;
 import com.gadbacorp.api.excepciones.UsuarioDeshabilitadoException;
 import com.gadbacorp.api.service.jpa.Empleados.UsuarioService;
 import com.gadbacorp.api.service.jpa.seguridad.AuthService;
-import com.gadbacorp.api.service.jpa.seguridad.PasswordResetToken;
 import com.gadbacorp.api.service.jpa.seguridad.UserDetailsServiceImpl;
 
 @RestController
@@ -49,21 +48,32 @@ public class AuthController {
     @Autowired
     private UsuarioService serviceUsuario;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> generarToken(@RequestBody LoginRequest jwtRequest) throws Exception {
-        autenticar(jwtRequest.getUsername(), jwtRequest.getPassword());
-
-        UserDetails userDetails = userxDetailsServiceImpl.loadUserByUsername(jwtRequest.getUsername());
-        String token = jwtUtils.generateTokenUsua(userDetails);
-
-        Usuarios usuario = serviceUsuario.obtenerUsuario(jwtRequest.getUsername());
-        usuario.setToken(token); // opcional: guarda token actual en BD
-        serviceUsuario.guardar(usuario); // asegúrate de guardar
-
-        return ResponseEntity.ok(new PasswordResetToken(token));
-    }
-
   
+@PostMapping("/login")
+public ResponseEntity<?> generarToken(@RequestBody LoginRequest jwtRequest) throws Exception {
+    // Autenticar
+    autenticar(jwtRequest.getUsername(), jwtRequest.getPassword());
+
+    // Cargar detalles del usuario
+    UserDetails userDetails = userxDetailsServiceImpl.loadUserByUsername(jwtRequest.getUsername());
+
+    // Generar token
+    String token = jwtUtils.generateTokenUsua(userDetails);
+
+    // Obtener usuario
+    Usuarios usuario = serviceUsuario.obtenerUsuario(jwtRequest.getUsername());
+
+    // Guardar token si quieres
+    usuario.setToken(token);
+    serviceUsuario.guardar(usuario);
+// Obtener el rol (puedes sacarlo de tu entidad Usuarios)
+    String rol = usuario.getRol().getNombre();
+
+    // Devolver respuesta con token y rol
+    return ResponseEntity.ok(new AuthResponse(token, rol));
+}
+
+
     private void autenticar(String username, String password) throws Exception {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));

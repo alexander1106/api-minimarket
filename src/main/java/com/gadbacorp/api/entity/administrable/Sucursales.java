@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.gadbacorp.api.entity.caja.Caja;
 import com.gadbacorp.api.entity.empleados.Usuarios;
 import com.gadbacorp.api.entity.inventario.Almacenes;
 
@@ -43,12 +44,14 @@ public class Sucursales {
     @JsonIgnore
     private Empresas empresa;
 
-
+    @OneToMany(mappedBy = "sucursales")
+    private List<Caja> cajas;
+    
     @OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL)
-@JsonIgnore
-private List<Usuarios> usuarios = new ArrayList<>();
+    @JsonIgnore
+    private List<Usuarios> usuarios = new ArrayList<>();
 
-  @OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Almacenes> almacenes = new ArrayList<>();
 
@@ -129,5 +132,13 @@ private List<Usuarios> usuarios = new ArrayList<>();
 
     public void setUsuarios(List<Usuarios> usuarios) {
         this.usuarios = usuarios;
+    }
+
+    public List<Caja> getCajas() {
+        return cajas;
+    }
+
+    public void setCajas(List<Caja> cajas) {
+        this.cajas = cajas;
     }
 }

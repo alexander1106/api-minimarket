@@ -70,13 +70,14 @@ public class Usuarios implements UserDetails {
     }
 
     @OneToMany(mappedBy = "usuarios", cascade = CascadeType.ALL)
-     @JsonIgnore
+    @JsonIgnore
     private List<AperturaCaja> aperturaCaja;
 
     @ManyToOne
-@JoinColumn(name = "id_sucursal", referencedColumnName = "id_sucursal")
-private Sucursales sucursal;
- 
+    @JoinColumn(name = "id_sucursal", referencedColumnName = "id_sucursal")
+    @JsonIgnore
+    private Sucursales sucursal;
+    
     public String getNombre() {
         return nombre;
     }

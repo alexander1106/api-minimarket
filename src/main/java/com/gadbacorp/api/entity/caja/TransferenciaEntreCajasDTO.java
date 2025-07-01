@@ -12,11 +12,13 @@ public class TransferenciaEntreCajasDTO {
     private Integer idTransferenciaEntreCajas; 
     private Double monto;
     private Date fecha;
-    private String motivo; 
     private Integer estado=1;
     private String observaciones; 
     private Integer id_caja_origen; 
     private Integer id_caja_destino;
+        private Integer idMetodoPago;
+
+    
     public Integer getIdTransferenciaEntreCajas() {
         return idTransferenciaEntreCajas;
     }
@@ -35,12 +37,7 @@ public class TransferenciaEntreCajasDTO {
     public void setFecha(Date fecha) {
         this.fecha = fecha;
     }
-    public String getMotivo() {
-        return motivo;
-    }
-    public void setMotivo(String motivo) {
-        this.motivo = motivo;
-    }
+ 
     public String getObservaciones() {
         return observaciones;
     }
@@ -64,6 +61,12 @@ public class TransferenciaEntreCajasDTO {
     }
     public void setEstado(Integer estado) {
         this.estado = estado;
+    }
+    public Integer getIdMetodoPago() {
+        return idMetodoPago;
+    }
+    public void setIdMetodoPago(Integer idMetodoPago) {
+        this.idMetodoPago = idMetodoPago;
     }
     
 }

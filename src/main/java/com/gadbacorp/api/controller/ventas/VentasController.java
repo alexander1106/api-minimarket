@@ -83,7 +83,6 @@ private CotizacionesRepository cotizacionesRepository;
 
         venta.setEstado(dto.getEstado());
         venta.setCliente(cliente);
-        venta.setCotizaciones(cotizaciones);
 
         return ResponseEntity.ok(ventasService.guardarVenta(venta));
     }

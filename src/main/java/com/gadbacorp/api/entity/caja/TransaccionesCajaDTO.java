@@ -1,7 +1,5 @@
 package com.gadbacorp.api.entity.caja;
 
-import java.util.Date;
-
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,12 +9,12 @@ public class TransaccionesCajaDTO {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idTransaccionesCaja;
     private String tipoMovimiento; 
-    private String concepto; 
     private Double monto; 
-    private Date fecha; 
     private Integer estado=1;
     private String observaciones; 
-    private Integer id_apertura_caja;
+    private Integer idMetodoPago;
+        private Integer id_apertura_caja;
+
     public Integer getIdTransaccionesCaja() {
         return idTransaccionesCaja;
     }
@@ -29,24 +27,15 @@ public class TransaccionesCajaDTO {
     public void setTipoMovimiento(String tipoMovimiento) {
         this.tipoMovimiento = tipoMovimiento;
     }
-    public String getConcepto() {
-        return concepto;
-    }
-    public void setConcepto(String concepto) {
-        this.concepto = concepto;
-    }
+ 
     public Double getMonto() {
         return monto;
     }
     public void setMonto(Double monto) {
         this.monto = monto;
     }
-    public Date getFecha() {
-        return fecha;
-    }
-    public void setFecha(Date fecha) {
-        this.fecha = fecha;
-    }
+
+    
     public String getObservaciones() {
         return observaciones;
     }
@@ -64,6 +53,12 @@ public class TransaccionesCajaDTO {
     }
     public void setEstado(Integer estado) {
         this.estado = estado;
+    }
+    public Integer getIdMetodoPago() {
+        return idMetodoPago;
+    }
+    public void setIdMetodoPago(Integer idMetodoPago) {
+        this.idMetodoPago = idMetodoPago;
     } 
     
 }

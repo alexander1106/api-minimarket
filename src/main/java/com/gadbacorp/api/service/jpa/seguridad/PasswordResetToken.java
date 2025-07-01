@@ -21,8 +21,8 @@ public class PasswordResetToken {
     private Long id;
 
     private String token;
+    private String rol;
 
-    
     // Constructor que recibe el token
     public PasswordResetToken(String token) {
         this.token = token;
@@ -64,6 +64,14 @@ public class PasswordResetToken {
 
     public void setFechaExpiracion(LocalDateTime fechaExpiracion) {
         this.fechaExpiracion = fechaExpiracion;
+    }
+
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
     }
 
     // Getters y setters

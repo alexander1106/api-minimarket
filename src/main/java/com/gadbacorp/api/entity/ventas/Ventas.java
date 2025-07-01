@@ -6,9 +6,6 @@ import java.util.List;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +14,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 @Entity
 @Table(name="ventas")
@@ -36,13 +32,9 @@ public class Ventas {
 
     @ManyToOne
     @JoinColumn(name = "id_cliente", referencedColumnName = "id_cliente")
-    @JsonIgnore
     private Clientes cliente;
 
-    @OneToOne
-    @JoinColumn(name = "idCotizaciones", referencedColumnName = "idCotizaciones")
-    @JsonIgnoreProperties("ventas") // ignora solo el campo "ventas" en Cotizaciones para evitar ciclo
-    private Cotizaciones cotizaciones;
+
 
     @OneToMany(mappedBy = "ventas", cascade = CascadeType.ALL)
     private List<DetallesVentas> detallesVentas;
@@ -124,13 +116,6 @@ public class Ventas {
         this.cliente = cliente;
     }
 
-    public Cotizaciones getCotizaciones() {
-        return cotizaciones;
-    }
-
-    public void setCotizaciones(Cotizaciones cotizaciones) {
-        this.cotizaciones = cotizaciones;
-    }
 
     public List<DetallesVentas> getDetallesVentas() {
         return detallesVentas;
@@ -156,11 +141,5 @@ public class Ventas {
         this.devoluciones = devoluciones;
     }
 
-    @Override
-    public String toString() {
-        return "Ventas [idVenta=" + idVenta + ", total_venta=" + total_venta + ", tipo_comprobante=" + tipo_comprobante
-                + ", nro_comrprobante=" + nro_comrprobante + ", fecha_venta=" + fecha_venta + ", estado=" + estado
-                + ", estado_venta=" + estado_venta + ", cliente=" + cliente + ", cotizaciones=" + cotizaciones
-                + ", detallesVentas=" + detallesVentas + ", pagos=" + pagos + ", devoluciones=" + devoluciones + "]";
-    }
+   
 }
