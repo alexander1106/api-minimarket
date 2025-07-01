@@ -41,17 +41,28 @@ public class TipoProductoService implements ITipoProductoService {
     }
 
     @Override
-    public TipoProducto modificar(TipoProducto tipo) {
-        // Validar duplicado excluyendo la misma entidad
-        Optional<TipoProducto> dup = repoTipoProducto.findByNombreIgnoreCase(tipo.getNombre());
-        if (dup.isPresent() && !dup.get().getIdtipoproducto().equals(tipo.getIdtipoproducto())) {
-            throw new ResponseStatusException(
-                HttpStatus.CONFLICT,
-                "Ya existe un tipo de producto con ese nombre"
-            );
-        }
-        return repoTipoProducto.save(tipo);
+public TipoProducto modificar(TipoProducto tipo) {
+    // 0) Validar que no esté siendo usado por ningún producto
+    boolean enUso = prodRepo.existsByTipoProducto_Idtipoproducto(tipo.getIdtipoproducto());
+    if (enUso) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "No se puede editar: este tipo está siendo usado en productos"
+        );
     }
+
+    // 1) Validar duplicado excluyendo la misma entidad
+    Optional<TipoProducto> dup = repoTipoProducto.findByNombreIgnoreCase(tipo.getNombre());
+    if (dup.isPresent() && !dup.get().getIdtipoproducto().equals(tipo.getIdtipoproducto())) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Ya existe un tipo de producto con ese nombre"
+        );
+    }
+
+    // 2) Guardar
+    return repoTipoProducto.save(tipo);
+}
 
     @Override
     public Optional<TipoProducto> buscarId(Integer id) {

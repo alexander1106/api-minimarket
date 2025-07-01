@@ -19,7 +19,7 @@ public class UsuariosDTO {
     private String dni;
     private String turno; 
     private Integer estado=1;
-    private Integer rollId;
+    private Integer rolId;
     private LocalDateTime fechaCreacion;
 
   
@@ -117,13 +117,13 @@ public class UsuariosDTO {
     }
 
 
-    public Integer getRollId() {
-        return rollId;
+    public Integer getRolId() {
+        return rolId;
     }
 
 
-    public void setRollId(Integer rollId) {
-        this.rollId = rollId;
+    public void setRolId(Integer rolId) {
+        this.rolId = rolId;
     }
 
 

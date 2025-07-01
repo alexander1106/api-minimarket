@@ -40,16 +40,25 @@ public class UnidadDeMedidaService implements IUnidadDeMedidaService {
     }
 
     @Override
-    public UnidadDeMedida modificar(UnidadDeMedida unidad) {
-        Optional<UnidadDeMedida> dup = unidadRepo.findByNombreIgnoreCase(unidad.getNombre());
-        if (dup.isPresent() && !dup.get().getIdunidadmedida().equals(unidad.getIdunidadmedida())) {
-            throw new ResponseStatusException(
-                HttpStatus.CONFLICT,
-                "Ya existe una unidad de medida con ese nombre"
-            );
-        }
-        return unidadRepo.save(unidad);
+public UnidadDeMedida modificar(UnidadDeMedida unidad) {
+    // ① Validar uso en Productos: si existe, lanzamos 400
+    if (prodRepo.existsByUnidadMedida_Idunidadmedida(unidad.getIdunidadmedida())) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "No se puede modificar: la unidad está en uso por productos"
+        );
     }
+    // ② Luego validamos duplicados de nombre (409)
+    Optional<UnidadDeMedida> dup = unidadRepo.findByNombreIgnoreCase(unidad.getNombre());
+    if (dup.isPresent() && !dup.get().getIdunidadmedida().equals(unidad.getIdunidadmedida())) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Ya existe una unidad de medida con ese nombre"
+        );
+    }
+    // ③ Si pasa ambas, actualizamos
+    return unidadRepo.save(unidad);
+}
 
     @Override
     public Optional<UnidadDeMedida> buscarId(Integer id) {

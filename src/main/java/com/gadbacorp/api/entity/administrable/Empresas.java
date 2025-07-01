@@ -37,6 +37,7 @@ public class Empresas {
     private Integer cant_trabajadores;
     private Integer limit_inventario;
     private String correo;
+    @JsonIgnore 
     private Blob logo;
     private Integer estado = 1;
 

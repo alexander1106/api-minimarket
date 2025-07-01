@@ -57,9 +57,9 @@ public class UsuariosController {
             return ResponseEntity.badRequest().body("sucursal no encontrado con ID: " + dto.getIdSucursal());
         }
 
-        Rol rol = rolRepository.findById(dto.getRollId()).orElse(null);
+        Rol rol = rolRepository.findById(dto.getRolId()).orElse(null);
         if (rol == null) {
-            return ResponseEntity.badRequest().body("rol no encontrado con ID: " + dto.getRollId());
+            return ResponseEntity.badRequest().body("rol no encontrado con ID: " + dto.getRolId());
         }
 
         Usuarios usuarios= new Usuarios();

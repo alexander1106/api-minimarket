@@ -47,7 +47,14 @@ public class CategoriasService implements ICategoriasService {
 
     @Override
     public Categorias modificar(Categorias c) {
-        // duplicado en otra entidad?
+        // ① NO permitir editar si ya está en uso
+        if ( prodRepo.existsByCategoria_Idcategoria(c.getIdcategoria()) ) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No se puede modificar: la categoría está en uso por productos"
+            );
+        }
+        // ② duplicado en otra entidad?
         Optional<Categorias> dup = repo.findByNombreIgnoreCase(c.getNombre());
         if (dup.isPresent() && !dup.get().getIdcategoria().equals(c.getIdcategoria())) {
             throw new ResponseStatusException(
@@ -55,6 +62,7 @@ public class CategoriasService implements ICategoriasService {
                 "Ya existe una categoría con ese nombre"
             );
         }
+        // ③ todo ok → guardamos
         return repo.save(c);
     }
 

@@ -7,6 +7,7 @@ public class SucursalDTO {
     private String direccion;
     private Integer estado=1;
     private Integer id_empresa; 
+    private String empresaNombre; 
 
     // Constructores
     public SucursalDTO() {}
@@ -58,4 +59,14 @@ public class SucursalDTO {
     public void setId_empresa(Integer id_empresa) {
         this.id_empresa = id_empresa;
     }
+
+    public String getEmpresaNombre() {
+        return empresaNombre;
+    }
+
+    public void setEmpresaNombre(String empresaNombre) {
+        this.empresaNombre = empresaNombre;
+    }
+
+    
 }
