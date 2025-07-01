@@ -33,12 +33,12 @@ public class Caja {
     private String estadoCaja;
 
     @OneToMany(mappedBy = "caja")
+    
     private List<AperturaCaja> aperturaCajas;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idSucursal")
-    @JsonIgnore
-    private Sucursales sucursales;
+        private Sucursales sucursales;
     
 public Caja() {
     }

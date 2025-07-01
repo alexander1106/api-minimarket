@@ -41,7 +41,7 @@ public class Usuarios implements UserDetails {
     private String apellidos;
     private String email;
     private String dni;
-    private boolean enable = true; 
+    private boolean enable = true;
 
     private String password;
     private Integer estado=1;
@@ -75,7 +75,6 @@ public class Usuarios implements UserDetails {
 
     @ManyToOne
     @JoinColumn(name = "id_sucursal", referencedColumnName = "id_sucursal")
-    @JsonIgnore
     private Sucursales sucursal;
     
     public String getNombre() {

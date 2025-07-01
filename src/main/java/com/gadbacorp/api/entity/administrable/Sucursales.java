@@ -45,6 +45,7 @@ public class Sucursales {
     private Empresas empresa;
 
     @OneToMany(mappedBy = "sucursales")
+    @JsonIgnore
     private List<Caja> cajas;
     
     @OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL)

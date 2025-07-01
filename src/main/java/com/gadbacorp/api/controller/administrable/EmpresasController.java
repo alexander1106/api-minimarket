@@ -27,7 +27,7 @@ import com.gadbacorp.api.service.administrable.IEmpresasService;
 
 @RestController
 @RequestMapping("/api/minimarket/empresas")
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:4200")
 public class EmpresasController {
 
     @Autowired
