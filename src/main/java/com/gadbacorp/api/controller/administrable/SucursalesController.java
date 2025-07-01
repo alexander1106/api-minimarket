@@ -55,10 +55,10 @@ public class SucursalesController {
     @PostMapping
     public ResponseEntity<?> guardar(@RequestBody SucursalDTO dto) {
         // validar empresa
-        Optional<Empresas> empOpt = empresasRepository.findById(dto.getId_empresa());
+        Optional<Empresas> empOpt = empresasRepository.findById(dto.getIdEmpresa());
         if (empOpt.isEmpty()) {
             return ResponseEntity.badRequest()
-                .body("Empresa no encontrada con ID: " + dto.getId_empresa());
+                .body("Empresa no encontrada con ID: " + dto.getIdEmpresa());
         }
         // mapear y guardar
         Sucursales s = new Sucursales();
@@ -77,10 +77,10 @@ public class SucursalesController {
         if (dto.getIdSucursal() == null) {
             return ResponseEntity.badRequest().body("IdSucursal es obligatorio");
         }
-        Optional<Empresas> empOpt = empresasRepository.findById(dto.getId_empresa());
+        Optional<Empresas> empOpt = empresasRepository.findById(dto.getIdEmpresa());
         if (empOpt.isEmpty()) {
             return ResponseEntity.badRequest()
-                .body("Empresa no encontrada con ID: " + dto.getId_empresa());
+                .body("Empresa no encontrada con ID: " + dto.getIdEmpresa());
         }
         Sucursales s = new Sucursales();
         s.setIdSucursal(dto.getIdSucursal());
@@ -108,7 +108,7 @@ public class SucursalesController {
         dto.setContacto(s.getContacto());
         dto.setDireccion(s.getDireccion());
         dto.setEstado(s.getEstado());
-        dto.setId_empresa(s.getEmpresa().getIdempresa());
+        dto.setIdEmpresa(s.getEmpresa().getIdempresa());
         dto.setEmpresaNombre(s.getEmpresa().getRazonsocial());
         return dto;
     }

@@ -1,17 +1,20 @@
 package com.gadbacorp.api.entity.administrable;
 
 public class SucursalDTO {
+
     private Integer idSucursal;
     private String nombreSucursal;
     private String contacto;
     private String direccion;
-    private Integer estado=1;
-    private Integer id_empresa; 
-    private String empresaNombre; 
+    private Integer estado = 1;
 
-    // Constructores
+    private Integer idEmpresa;      // id de la empresa asociada
+    private String empresaNombre;   // nombre de la empresa (opcional para mostrar en vistas)
+
+    // Constructor vacío
     public SucursalDTO() {}
 
+    // Getters y Setters
     public Integer getIdSucursal() {
         return idSucursal;
     }
@@ -52,12 +55,12 @@ public class SucursalDTO {
         this.estado = estado;
     }
 
-    public Integer getId_empresa() {
-        return id_empresa;
+    public Integer getIdEmpresa() {
+        return idEmpresa;
     }
 
-    public void setId_empresa(Integer id_empresa) {
-        this.id_empresa = id_empresa;
+    public void setIdEmpresa(Integer idEmpresa) {
+        this.idEmpresa = idEmpresa;
     }
 
     public String getEmpresaNombre() {
@@ -67,6 +70,4 @@ public class SucursalDTO {
     public void setEmpresaNombre(String empresaNombre) {
         this.empresaNombre = empresaNombre;
     }
-
-    
 }
