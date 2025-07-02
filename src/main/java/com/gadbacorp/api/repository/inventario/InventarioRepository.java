@@ -1,5 +1,6 @@
 package com.gadbacorp.api.repository.inventario;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,5 +12,7 @@ public interface InventarioRepository extends JpaRepository<Inventario, Integer>
         Integer idAlmacen,
         String nombre
     );
- 
+    boolean existsByAlmacen_Idalmacen(Integer idAlmacen);
+    boolean existsByAlmacen_IdalmacenAndEstado(Integer idalmacen, Integer estado);
+    List<Inventario> findByAlmacen_Idalmacen(Integer idAlmacen);
 }

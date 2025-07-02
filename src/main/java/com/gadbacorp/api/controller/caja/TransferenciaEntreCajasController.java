@@ -20,23 +20,26 @@ import com.gadbacorp.api.entity.caja.Caja;
 import com.gadbacorp.api.entity.caja.TransaccionesCaja;
 import com.gadbacorp.api.entity.caja.TransferenciaEntreCajasDTO;
 import com.gadbacorp.api.entity.caja.TransferenciasEntreCajas;
+import com.gadbacorp.api.entity.ventas.MetodosPago;
 import com.gadbacorp.api.repository.caja.AperturaCajaRepository;
 import com.gadbacorp.api.repository.caja.CajaRepository;
 import com.gadbacorp.api.repository.caja.TransaccionesCajaRepository;
+import com.gadbacorp.api.repository.ventas.MetodosPagoRepository;
 import com.gadbacorp.api.service.caja.ITransferenciaEntreCajasService;
 
 import jakarta.transaction.Transactional;
 
 @RestController
-@RequestMapping("/api/minimarket")
 @CrossOrigin("*")
+@RequestMapping("/api/minimarket")
 public class TransferenciaEntreCajasController {
     
     @Autowired
     private ITransferenciaEntreCajasService transferenciaEntreCajasService;
     @Autowired
     private AperturaCajaRepository aperturaCajaRepository;
-
+    @Autowired
+    private MetodosPagoRepository metodosPagoRepository;
     @Autowired
     private TransaccionesCajaRepository transaccionCajaRepository;
     @Autowired
@@ -50,7 +53,7 @@ public class TransferenciaEntreCajasController {
         return transferenciaEntreCajasService.buscarTranseferenciaEntreCajas(id);
     }
 
-@PostMapping("/transferencia-entre-caja")
+@PostMapping("/transferencias-entre-cajas")
 @Transactional
 public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody TransferenciaEntreCajasDTO dto) {
     // Buscar cajas
@@ -62,8 +65,8 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
     }
 
     // Buscar aperturas activas
-    Optional<AperturaCaja> aperturaOrigenOpt = aperturaCajaRepository.findByCaja_IdCajaAndCaja_EstadoCaja(dto.getId_caja_origen(), "ABIERTO");
-    Optional<AperturaCaja> aperturaDestinoOpt = aperturaCajaRepository.findByCaja_IdCajaAndCaja_EstadoCaja(dto.getId_caja_destino(), "ABIERTO");
+    Optional<AperturaCaja> aperturaOrigenOpt = aperturaCajaRepository.findByCaja_IdCajaAndCaja_EstadoCaja(dto.getId_caja_origen(), "OCUPADA");
+    Optional<AperturaCaja> aperturaDestinoOpt = aperturaCajaRepository.findByCaja_IdCajaAndCaja_EstadoCaja(dto.getId_caja_destino(), "OCUPADA");
 
     if (aperturaOrigenOpt.isEmpty() || aperturaDestinoOpt.isEmpty()) {
         return ResponseEntity.badRequest().body("Ambas cajas deben tener una apertura activa para realizar la transferencia.");
@@ -71,7 +74,10 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
 
     AperturaCaja aperturaOrigen = aperturaOrigenOpt.get();
     AperturaCaja aperturaDestino = aperturaDestinoOpt.get();
-
+   MetodosPago metodosPago = metodosPagoRepository.findById(dto.getIdMetodoPago()).orElse(null);
+    if (metodosPago == null) {
+        return ResponseEntity.badRequest().body("No existe el metodo de pago con id: " + dto.getIdMetodoPago());
+    }
     // ✅ Validar que haya saldo suficiente
     if (aperturaOrigen.getSaldoFinal() < dto.getMonto()) {
         return ResponseEntity.badRequest().body("La caja origen no tiene suficiente saldo para realizar la transferencia.");
@@ -83,7 +89,6 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
     transferencia.setCajaDestino(cajaDestino);
     transferencia.setFecha(dto.getFecha());
     transferencia.setMonto(dto.getMonto());
-    transferencia.setMotivo(dto.getMotivo());
     transferencia.setObservaciones(dto.getObservaciones());
 
     TransferenciasEntreCajas transferenciaGuardada = transferenciaEntreCajasService.guardarTransferenciasEntreCajas(transferencia);
@@ -93,6 +98,10 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
     transaccionSalida.setAperturaCaja(aperturaOrigen);
     transaccionSalida.setTipoMovimiento("SALIDA");
     transaccionSalida.setMonto(dto.getMonto());
+    transaccionSalida.setFecha(dto.getFecha());
+
+    transaccionSalida.setMetodoPago(metodosPago);
+
     transaccionSalida.setObservaciones("Transferencia a caja " + cajaDestino.getNombreCaja());
     transaccionCajaRepository.save(transaccionSalida);
 
@@ -101,6 +110,8 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
     transaccionEntrada.setAperturaCaja(aperturaDestino);
     transaccionEntrada.setTipoMovimiento("ENTRADA");
     transaccionEntrada.setMonto(dto.getMonto());
+    transaccionEntrada.setFecha(dto.getFecha());
+    transaccionEntrada.setMetodoPago(metodosPago);
     transaccionEntrada.setObservaciones("Transferencia desde caja " + cajaOrigen.getNombreCaja());
     transaccionCajaRepository.save(transaccionEntrada);
 
@@ -113,6 +124,8 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
 
     return ResponseEntity.ok(transferenciaGuardada);
 }
+
+
 
 @PutMapping("/transferencia-entre-caja")
 @Transactional
@@ -210,7 +223,6 @@ public ResponseEntity<?> editarTransferencias(@RequestBody TransferenciaEntreCaj
     transferenciaExistente.setCajaDestino(nuevaCajaDestino);
     transferenciaExistente.setFecha(dto.getFecha());
     transferenciaExistente.setMonto(dto.getMonto());
-    transferenciaExistente.setMotivo(dto.getMotivo());
     transferenciaExistente.setObservaciones(dto.getObservaciones());
 
     transferenciaEntreCajasService.guardarTransferenciasEntreCajas(transferenciaExistente);

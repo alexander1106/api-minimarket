@@ -3,10 +3,12 @@ package com.gadbacorp.api.entity.inventario;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 @Entity
@@ -19,7 +21,9 @@ public class Categorias {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idcategoria;
     private String nombre;
-    private String imagen;
+    @Lob
+  @Column(columnDefinition = "TEXT")       // o LONGTEXT si usas MySQL
+  private String imagen;
     private Integer estado = 1;
 
     public Categorias(){}

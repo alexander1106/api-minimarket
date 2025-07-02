@@ -19,7 +19,7 @@ import com.gadbacorp.api.service.seguridad.IRolService;
 
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin(origins = "*") // Puedes restringirlo según tu frontend
+@CrossOrigin(origins = "http://localhost:4200")
 public class RolController {
 
     @Autowired

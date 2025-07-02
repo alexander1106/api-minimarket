@@ -34,15 +34,14 @@ public class Delivery {
     private BigDecimal costoEnvio;
     private String observaciones;
     private Integer estado = 1;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idventa")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private Ventas venta;
+    
+@ManyToOne(fetch = FetchType.EAGER)
+@JoinColumn(name = "idventa")
+@JsonIgnoreProperties({"cliente", "cotizaciones", "detallesVentas", "pagos", "devoluciones"})
+private Ventas venta;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idvehiculo")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Vehiculo vehiculo;
 
     public Delivery() {

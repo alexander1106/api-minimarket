@@ -30,7 +30,7 @@ public class Almacenes {
 
     // ← NUEVO: referencia a la sucursal
     @ManyToOne
-    @JoinColumn(name = "id_sucursal", nullable = false)
+    @JoinColumn(name = "id_sucursal")
     private Sucursales sucursal;
 
     public Almacenes() { }

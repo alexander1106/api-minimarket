@@ -56,8 +56,8 @@ public class ClientesController {
     public Optional<Clientes> buscarId(@PathVariable("id") Integer id){
         return clientesService.obtenerCliente(id);
     }
-    
     @DeleteMapping("/clientes/{id}")
+
     public String eliminar(@PathVariable Integer id) {
         clientesService.eliminarCliente(id);
         return "El cliente fue eliminado";

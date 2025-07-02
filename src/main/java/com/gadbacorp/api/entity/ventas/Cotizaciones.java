@@ -6,8 +6,6 @@ import java.util.List;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,6 +26,7 @@ public class Cotizaciones {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idCotizaciones;
     private LocalDate fechaCotizacion;
+    private LocalDate fechaVencimiento;
     private String numeroCotizacion;
     private String estadoCotizacion;
     private double totalCotizacion;
@@ -35,12 +34,9 @@ public class Cotizaciones {
     
     @ManyToOne
     @JoinColumn(name = "id_cliente", referencedColumnName = "id_cliente")
-    @JsonIgnore // evita ciclos infinitos si usas JSON
     private Clientes cliente;
 
-    @OneToMany(mappedBy = "cotizaciones", cascade = CascadeType.ALL)
-    private List<Ventas> ventas;
-    
+
     @OneToMany(mappedBy = "cotizaciones", cascade = CascadeType.ALL)
     private List<DetallesCotizaciones> detallesCotizaciones;
     
@@ -95,14 +91,6 @@ public class Cotizaciones {
     public Cotizaciones() {
     }
 
-    public List<Ventas> getVentas() {
-        return ventas;
-    }
-
-    public void setVentas(List<Ventas> ventas) {
-        this.ventas = ventas;
-    }
-
     public List<DetallesCotizaciones> getDetallesCotizaciones() {
         return detallesCotizaciones;
     }
@@ -117,5 +105,13 @@ public class Cotizaciones {
 
     public void setTotalCotizacion(double totalCotizacion) {
         this.totalCotizacion = totalCotizacion;
+    }
+
+    public LocalDate getFechaVencimiento() {
+        return fechaVencimiento;
+    }
+
+    public void setFechaVencimiento(LocalDate fechaVencimiento) {
+        this.fechaVencimiento = fechaVencimiento;
     }
 }

@@ -15,6 +15,7 @@ import com.gadbacorp.api.entity.ventas.DetallesDevolucion;
 import com.gadbacorp.api.entity.ventas.DetallesVentas;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -41,7 +42,8 @@ public class Productos {
     private BigDecimal costoCompra;
     private BigDecimal costoVenta;
     private BigDecimal costoMayor;
-    private String imagen;
+    @Column(columnDefinition = "TEXT")       // o LONGTEXT si usas MySQL
+  private String imagen;
     private Integer estado = 1;
 
     @ManyToOne(fetch = FetchType.LAZY)

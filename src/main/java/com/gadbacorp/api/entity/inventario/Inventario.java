@@ -34,6 +34,7 @@ public class Inventario {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idalmacen", nullable = false)
+    @JsonIgnore
     private Almacenes almacen;
 
     @OneToMany(mappedBy = "inventario",

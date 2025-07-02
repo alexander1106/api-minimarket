@@ -1,3 +1,4 @@
+// src/main/java/com/gadbacorp/api/controller/inventario/AlmacenesController.java
 package com.gadbacorp.api.controller.inventario;
 
 import java.util.List;
@@ -6,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,14 +21,19 @@ import org.springframework.web.server.ResponseStatusException;
 import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.inventario.Almacenes;
 import com.gadbacorp.api.entity.inventario.AlmacenesDTO;
+import com.gadbacorp.api.entity.inventario.Inventario;
+import com.gadbacorp.api.repository.inventario.InventarioRepository;
 import com.gadbacorp.api.service.administrable.ISucursalesService;
 import com.gadbacorp.api.service.inventario.IAlmacenesService;
 
 @RestController
 @RequestMapping("/api/minimarket")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AlmacenesController {
 
     @Autowired private IAlmacenesService service;
+        @Autowired private InventarioRepository inventarioRepository;
+
     @Autowired private ISucursalesService sucursalesService;
 
     @GetMapping("/almacenes")
@@ -39,49 +46,63 @@ public class AlmacenesController {
 
     @GetMapping("/almacenes/{id}")
     public AlmacenesDTO obtener(@PathVariable Integer id) {
-        Almacenes entidad = service.buscarId(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Almacén no encontrado id=" + id));
-        return toDTO(entidad);
+        Almacenes e = service.buscarId(id)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Almacén no encontrado id=" + id
+            ));
+        return toDTO(e);
     }
+
+ @GetMapping("/almacenes/{idAlmacen}/inventarios")
+public ResponseEntity<List<Inventario>> listarInventariosPorAlmacen(@PathVariable Integer idAlmacen) {
+    List<Inventario> inventarios = inventarioRepository.findByAlmacen_Idalmacen(idAlmacen);
+    if (inventarios.isEmpty()) {
+        return ResponseEntity.noContent().build();
+    }
+    return ResponseEntity.ok(inventarios);
+}
+
 
     @PostMapping("/almacenes")
     public ResponseEntity<AlmacenesDTO> crear(@RequestBody AlmacenesDTO dto) {
-        Sucursales sucursal = sucursalesService.buscarId(dto.getIdSucursal())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "Sucursal no encontrada con ID: " + dto.getIdSucursal()));
+        // Validar sucursal
+        Sucursales suc = sucursalesService.buscarId(dto.getIdSucursal())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Sucursal no encontrada id=" + dto.getIdSucursal()
+            ));
 
-        Almacenes entidad = new Almacenes();
-        entidad.setIdalmacen(dto.getIdalmacen());
-        entidad.setNombre(dto.getNombre() != null ? dto.getNombre().trim() : null);
-        entidad.setDescripcion(dto.getDescripcion());
-        entidad.setEncargado(dto.getEncargado() != null? dto.getEncargado().trim() : null);
-        entidad.setDireccion(dto.getDireccion() != null ? dto.getDireccion().trim() : null);
-        entidad.setEstado(dto.getEstado());
-        entidad.setSucursal(sucursal);
+        Almacenes a = new Almacenes();
+        a.setNombre(dto.getNombre());
+        a.setDescripcion(dto.getDescripcion());
+        a.setDireccion(dto.getDireccion());
+        a.setEncargado(dto.getEncargado());
+        a.setEstado(dto.getEstado());
+        a.setSucursal(suc);
 
-        Almacenes almacenGuardado = service.guardar(entidad);
-        return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(almacenGuardado));
+        Almacenes creado = service.guardar(a);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(creado));
     }
 
     @PutMapping("/almacenes")
     public AlmacenesDTO actualizar(@RequestBody AlmacenesDTO dto) {
-        Almacenes existente = service.buscarId(dto.getIdalmacen())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Almacén no encontrado id=" + dto.getIdalmacen()));
+        // Se validará existencia y duplicados en el service
+        Almacenes a = new Almacenes();
+        a.setIdalmacen(dto.getIdalmacen());
+        a.setNombre(dto.getNombre());
+        a.setDescripcion(dto.getDescripcion());
+        a.setDireccion(dto.getDireccion());
+        a.setEncargado(dto.getEncargado());
+        a.setEstado(dto.getEstado());
+        // Referencia a sucursal
+        Sucursales suc = sucursalesService.buscarId(dto.getIdSucursal())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Sucursal no encontrada id=" + dto.getIdSucursal()
+            ));
+        a.setSucursal(suc);
 
-        Sucursales sucursal = sucursalesService.buscarId(dto.getIdSucursal())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "Sucursal no encontrada con ID: " + dto.getIdSucursal()));
-
-        existente.setNombre(dto.getNombre() != null ? dto.getNombre().trim() : null);
-        existente.setDescripcion(dto.getDescripcion());
-        existente.setEncargado(dto.getEncargado()!= null? dto.getEncargado().trim() : null);
-        existente.setDireccion(dto.getDireccion() != null ? dto.getDireccion().trim() : null);
-        existente.setEstado(dto.getEstado());
-        existente.setSucursal(sucursal);
-
-        return toDTO(service.modificar(existente));
+        return toDTO(service.modificar(a));
     }
 
     @DeleteMapping("/almacenes/{id}")

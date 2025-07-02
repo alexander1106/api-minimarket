@@ -1,5 +1,6 @@
 package com.gadbacorp.api.controller.seguridad;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,9 +58,9 @@ public class UsuariosController {
             return ResponseEntity.badRequest().body("sucursal no encontrado con ID: " + dto.getIdSucursal());
         }
 
-        Rol rol = rolRepository.findById(dto.getRollId()).orElse(null);
+        Rol rol = rolRepository.findById(dto.getRolId()).orElse(null);
         if (rol == null) {
-            return ResponseEntity.badRequest().body("rol no encontrado con ID: " + dto.getRollId());
+            return ResponseEntity.badRequest().body("rol no encontrado con ID: " + dto.getRolId());
         }
 
         Usuarios usuarios= new Usuarios();
@@ -68,13 +69,12 @@ public class UsuariosController {
         usuarios.setApellidos(dto.getApellidos());
         usuarios.setEmail(dto.getEmail());
         usuarios.setPassword(passwordEncoder.encode(dto.getPassword()));
-        usuarios.setFechaCreacion(dto.getFechaCreacion());
+        usuarios.setFechaCreacion(LocalDateTime.now());
         usuarios.setDni(dto.getDni());
         usuarios.setTurno(dto.getTurno());
         usuarios.setSucursal(sucursales);
         usuarios.setFechaCreacion(dto.getFechaCreacion());
         usuarios.setRol(rol);
-        usuarios.setSucursal(sucursales);
         return ResponseEntity.ok(usuariosService.guardar(usuarios));
     }
     
@@ -95,5 +95,4 @@ public class UsuariosController {
         usuariosService.eliminar(id);
         return "Usuario elimnado";
     }
-    
 }

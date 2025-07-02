@@ -3,6 +3,8 @@ package com.gadbacorp.api.entity.delivery;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import com.gadbacorp.api.entity.ventas.Ventas;
+
 public class DeliveryDTO {
     private Integer iddelivery;
     private String direccion;
@@ -12,14 +14,14 @@ public class DeliveryDTO {
     private BigDecimal costoEnvio;
     private String observaciones;
     private Integer estado;
-    private Integer idventa;
+    private Ventas venta; // en vez de Integer idventa
     private Integer idvehiculo;
 
     public DeliveryDTO() { }
 
-    public DeliveryDTO(Integer iddelivery, String direccion, Date fechaEnvio, Date fechaEntrega,
-                       String encargado, BigDecimal costoEnvio, String observaciones,
-                       Integer estado, Integer idventa, Integer idvehiculo) {
+   
+    public DeliveryDTO(Integer iddelivery, String direccion, Date fechaEnvio, Date fechaEntrega, String encargado,
+            BigDecimal costoEnvio, String observaciones, Integer estado, Ventas venta, Integer idvehiculo) {
         this.iddelivery = iddelivery;
         this.direccion = direccion;
         this.fechaEnvio = fechaEnvio;
@@ -28,9 +30,10 @@ public class DeliveryDTO {
         this.costoEnvio = costoEnvio;
         this.observaciones = observaciones;
         this.estado = estado;
-        this.idventa = idventa;
+        this.venta = venta;
         this.idvehiculo = idvehiculo;
     }
+
 
     public Integer getIddelivery() {
         return iddelivery;
@@ -96,13 +99,6 @@ public class DeliveryDTO {
         this.estado = estado;
     }
 
-    public Integer getIdventa() {
-        return idventa;
-    }
-
-    public void setIdventa(Integer idventa) {
-        this.idventa = idventa;
-    }
 
     public Integer getIdvehiculo() {
         return idvehiculo;
@@ -112,12 +108,12 @@ public class DeliveryDTO {
         this.idvehiculo = idvehiculo;
     }
 
-    @Override
-    public String toString() {
-        return "DeliveryDTO [iddelivery=" + iddelivery + ", direccion=" + direccion + ", fechaEnvio=" + fechaEnvio
-                + ", fechaEntrega=" + fechaEntrega + ", encargado=" + encargado + ", costoEnvio=" + costoEnvio
-                + ", observaciones=" + observaciones + ", estado=" + estado + ", idventa=" + idventa + ", idvehiculo="
-                + idvehiculo + "]";
+    public Ventas getVenta() {
+        return venta;
+    }
+
+    public void setVenta(Ventas venta) {
+        this.venta = venta;
     }
 
     

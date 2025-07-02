@@ -5,6 +5,8 @@ import java.util.Date;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.gadbacorp.api.entity.ventas.MetodosPago;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -23,15 +25,21 @@ public class TransaccionesCaja {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idTransaccionesCaja;
     private String tipoMovimiento; 
-    private String concepto; 
     private Double monto; 
     private Integer estado=1;
     private Date fecha; 
     private String observaciones; 
 
+ 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idAperturaCaja")
     private AperturaCaja aperturaCaja;
+     // Aquí agregas la relación al método de pago
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "idMetodoPago")
+    private MetodosPago metodoPago;
+
+    
 
     public Integer getIdTransaccionesCaja() {
         return idTransaccionesCaja;
@@ -49,13 +57,6 @@ public class TransaccionesCaja {
         this.tipoMovimiento = tipoMovimiento;
     }
 
-    public String getConcepto() {
-        return concepto;
-    }
-
-    public void setConcepto(String concepto) {
-        this.concepto = concepto;
-    }
 
     public Double getMonto() {
         return monto;
@@ -95,6 +96,14 @@ public class TransaccionesCaja {
 
     public void setEstado(Integer estado) {
         this.estado = estado;
+    }
+
+    public MetodosPago getMetodoPago() {
+        return metodoPago;
+    }
+
+    public void setMetodoPago(MetodosPago metodoPago) {
+        this.metodoPago = metodoPago;
     }
 
   

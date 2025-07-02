@@ -7,7 +7,6 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.gadbacorp.api.entity.empleados.Usuarios;
 
 import jakarta.persistence.Entity;
@@ -31,12 +30,12 @@ public class Rol {
     private Integer estado = 1; // 1 activo, 0 inactivo}
 
     @OneToMany(mappedBy = "rol")
-@JsonIgnore
-private Set<Usuarios> usuarios;
+    @JsonIgnore
+    private Set<Usuarios> usuarios;
 
 
     @OneToMany(mappedBy = "rol")
-    @JsonIgnore // Agrega esta línea
+    @JsonIgnore 
     private Set<RolModulo> rolModulos;
     // getters y setters
     public Set<RolModulo> getRolModulos() { return rolModulos; }
