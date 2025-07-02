@@ -11,4 +11,6 @@ public interface ISucursalesService {
     Sucursales modificar(Sucursales sucursal);
     Optional<Sucursales> buscarId(Integer id);
     void eliminar(Integer id);
+        List<Sucursales> buscarPorEmpresa(Integer idEmpresa);
+
 }

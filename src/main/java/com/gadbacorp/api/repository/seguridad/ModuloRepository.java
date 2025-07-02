@@ -7,4 +7,5 @@ import com.gadbacorp.api.entity.seguridad.Modulo;
 @Repository
 public interface ModuloRepository extends JpaRepository<Modulo, Integer> {
     
+
 }

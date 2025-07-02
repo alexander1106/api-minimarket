@@ -13,4 +13,5 @@ public interface UsuarioRepository extends JpaRepository<Usuarios, Integer> {
     Optional<Usuarios> findByEmail(String email);
         // Aquí puedes agregar métodos personalizados si es necesario
     public List<Usuarios> findBySucursal_IdSucursal(Integer idSucursal);
+    Optional<Usuarios> findOptionalByUsername(String username);
 }

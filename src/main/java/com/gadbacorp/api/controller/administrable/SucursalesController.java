@@ -54,7 +54,6 @@ public class SucursalesController {
     private InventarioProductoRepository inventarioProductoRepository;
     
 
-    /** Listado mapeado a DTO */
     @GetMapping
     public List<SucursalDTO> buscarTodos() {
         return sucursalesService.buscarTodos().stream()
@@ -69,6 +68,7 @@ public class SucursalesController {
         }
         return ResponseEntity.ok(almacenes);
     }
+    
 
     @GetMapping("/{idSucursal}/empresa")
 public ResponseEntity<Empresas> obtenerEmpresaPorSucursal(@PathVariable Integer idSucursal) {
