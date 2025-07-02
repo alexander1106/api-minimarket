@@ -1,7 +1,6 @@
 package com.gadbacorp.api.entity.ventas;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,6 +13,8 @@ public class CotizacionesDTO {
     private String numeroCotizacion;
     private String estadoCotizacion;
     private LocalDate fechaCotizacion;
+        private LocalDate fechaVencimiento;
+
     private Integer estado=1;
     private Integer id_cliente;
     private double totalCotizacion;
@@ -64,6 +65,12 @@ public class CotizacionesDTO {
     }
     public void setTotalCotizacion(double totalCotizacion) {
         this.totalCotizacion = totalCotizacion;
+    }
+    public LocalDate getFechaVencimiento() {
+        return fechaVencimiento;
+    }
+    public void setFechaVencimiento(LocalDate fechaVencimiento) {
+        this.fechaVencimiento = fechaVencimiento;
     }
     
 }

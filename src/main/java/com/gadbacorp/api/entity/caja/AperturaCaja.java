@@ -31,7 +31,10 @@ public class AperturaCaja {
     private Integer idAperturaCaja; 
     private Date fechaApertura;
     private Date fechaCierre; 
+    private String estadoCaja;
     private Double saldoInicial; 
+    private Double saldoEfectivo; 
+
     private Double saldoFinal; 
     private Integer estado=1; // 1 activo, 0 inactivo
 
@@ -51,14 +54,12 @@ public class AperturaCaja {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idUsuario")
-    @JsonIgnore
     private Usuarios usuarios;
 
-
     @OneToMany(mappedBy = "aperturaCaja", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @JsonIgnoreProperties("aperturaCaja") // opcional, para evitar ciclos
     private List<TransaccionesCaja> transaccionesCajas;
-    
+
     @OneToMany(mappedBy = "aperturaCaja", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<ArqueoCaja> arqueoCaja;
@@ -71,8 +72,6 @@ public class AperturaCaja {
     public void setCaja(Caja caja) {
         this.caja = caja;
     }
-
-
 
     public List<TransaccionesCaja> getTransaccionesCajas() {
         return transaccionesCajas;
@@ -144,6 +143,22 @@ public class AperturaCaja {
 
     public void setUsuarios(Usuarios usuarios) {
         this.usuarios = usuarios;
+    }
+
+    public String getEstadoCaja() {
+        return estadoCaja;
+    }
+
+    public void setEstadoCaja(String estadoCaja) {
+        this.estadoCaja = estadoCaja;
+    }
+
+    public Double getSaldoEfectivo() {
+        return saldoEfectivo;
+    }
+
+    public void setSaldoEfectivo(Double saldoEfectivo) {
+        this.saldoEfectivo = saldoEfectivo;
     }
 
 

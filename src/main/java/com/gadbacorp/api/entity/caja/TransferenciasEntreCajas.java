@@ -24,7 +24,6 @@ public class TransferenciasEntreCajas {
     private Integer idTransferenciaEntreCajas; 
     private Double monto;
     private Date fecha;
-    private String motivo; 
     private Integer estado=1;
     private String observaciones; 
     
@@ -61,13 +60,6 @@ public class TransferenciasEntreCajas {
         this.fecha = fecha;
     }
 
-    public String getMotivo() {
-        return motivo;
-    }
-
-    public void setMotivo(String motivo) {
-        this.motivo = motivo;
-    }
 
     public String getObservaciones() {
         return observaciones;

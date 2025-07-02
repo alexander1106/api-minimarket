@@ -40,6 +40,7 @@ public class Empresas {
     @JsonIgnore 
     private Blob logo;
     private Integer estado = 1;
+    
 
     // NUEVO: Relación con sucursales
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)

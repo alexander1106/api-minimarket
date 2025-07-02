@@ -1,5 +1,6 @@
     package com.gadbacorp.api.controller.caja;
 
+import java.util.Collections;
     import java.util.List;
     import java.util.Optional;
 
@@ -19,13 +20,14 @@
     import com.gadbacorp.api.entity.caja.AperturaCajaDTO;
     import com.gadbacorp.api.entity.caja.Caja;
     import com.gadbacorp.api.entity.empleados.Usuarios;
+    import com.gadbacorp.api.repository.caja.AperturaCajaRepository;
     import com.gadbacorp.api.repository.caja.CajaRepository;
     import com.gadbacorp.api.repository.empleados.UsuarioRepository;
     import com.gadbacorp.api.service.caja.IAperturaCajaService;
 
     @RestController
+    @CrossOrigin("*")    
     @RequestMapping("/api/minimarket")
-    @CrossOrigin    
     public class AperturaCajaController {
 
         @Autowired
@@ -34,6 +36,10 @@
         @Autowired
         private UsuarioRepository empleadosRepository;
 
+    
+        @Autowired
+        private AperturaCajaRepository aperturaCajaRepository;
+
         @Autowired
         private CajaRepository cajaRepository;
         @GetMapping("/aperturas-cajas")
@@ -41,12 +47,19 @@
             return aperturaCajaService.listarAperturaCajas();
         }
         
-        @GetMapping("/apertura-caja/{id}")
+        @GetMapping("/aperturas-cajas/{id}")
         public Optional<AperturaCaja> buscarCaja(@PathVariable Integer id) {
             return aperturaCajaService.buscarAperturaCaja(id);
         }
         
-     @PostMapping("/apertura-caja")
+     @GetMapping("/aperturas-cajas/{idAperturaCaja}/caja")
+    public ResponseEntity<Caja> obtenerCajaPorApertura(@PathVariable Integer idAperturaCaja) {
+        return aperturaCajaRepository.findById(idAperturaCaja)
+                .map(apertura -> ResponseEntity.ok(apertura.getCaja()))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+     @PostMapping("/aperturas-cajas")
 public ResponseEntity<?> guardarAperturaCaja(@RequestBody AperturaCajaDTO dto) {
     // Validaciones previas
     if (dto.getId_caja() == null) {
@@ -76,7 +89,7 @@ public ResponseEntity<?> guardarAperturaCaja(@RequestBody AperturaCajaDTO dto) {
     Caja caja = cajaOptional.get();
 
     // Cambiar estado de la caja a "abierto"
-    caja.setEstadoCaja("abierto");  // Ajusta el nombre del campo y valor según tu modelo
+    caja.setEstadoCaja("OCUPADA");  // Ajusta el nombre del campo y valor según tu modelo
     cajaRepository.save(caja);   // Guardar el cambio en la base de datos
 
     // Crear apertura de caja
@@ -84,15 +97,17 @@ public ResponseEntity<?> guardarAperturaCaja(@RequestBody AperturaCajaDTO dto) {
     aperturaCaja.setFechaApertura(dto.getFechaApertura());
     aperturaCaja.setFechaCierre(dto.getFechaCierre());
     aperturaCaja.setSaldoInicial(dto.getSaldoInicial());
+    aperturaCaja.setEstadoCaja(dto.getEstadoCaja());
     aperturaCaja.setSaldoFinal(dto.getSaldoFinal());
     aperturaCaja.setUsuarios(empleadoOptional.get());
+    aperturaCaja.setSaldoEfectivo(0.0);
     aperturaCaja.setCaja(caja);
 
     return ResponseEntity.ok(aperturaCajaService.guardarAperturaCaja(aperturaCaja));
 }
 
 
-@PutMapping("/apertura-caja")
+@PutMapping("/aperturas-cajas")
 public ResponseEntity<?> modificarAperturaCaja(@RequestBody AperturaCajaDTO dto) {
     // Validar campos nulos
     if(dto.getIdAperturaCaja() == null){
@@ -142,9 +157,44 @@ public ResponseEntity<?> modificarAperturaCaja(@RequestBody AperturaCajaDTO dto)
     return ResponseEntity.ok(aperturaCajaService.editarAperturaCaja(aperturaCaja));
 }
 
-        @DeleteMapping("/apertura-caja/{id}")
+        @DeleteMapping("/aperturas-cajas/{id}")
         public String eliminarAperturaCaja(@PathVariable Integer id){
             aperturaCajaService.eliminarAperturaCaja(id);
             return "La apertura de caja  a sido eliminad con exito";    
         }
+
+
+@PostMapping("/aperturas-cajas/{id}/cerrar")
+public ResponseEntity<?>  cerrarAperturaCaja(@PathVariable Integer id) {
+    // Buscar la apertura
+    Optional<AperturaCaja> aperturaOptional = aperturaCajaRepository.findById(id);
+    if (aperturaOptional.isEmpty()) {
+        return ResponseEntity.badRequest().body("No se encontró la apertura de caja con el ID proporcionado.");
+    }
+
+    AperturaCaja apertura = aperturaOptional.get();
+
+    // Validar que la caja esté ABIERTO
+if (!"OCUPADA".equalsIgnoreCase(apertura.getCaja().getEstadoCaja())) {
+    return ResponseEntity.badRequest().body("La caja no está en estado OCUPADA, no se puede cerrar.");
+}
+
+
+    // Registrar fecha de cierre
+    apertura.setFechaCierre(new java.util.Date());
+
+    // Cambiar estado de la apertura a CERRADO
+    apertura.setEstadoCaja("CERRADO");
+
+    // Cambiar estado de la caja a LIBRE
+    Caja caja = apertura.getCaja();
+    caja.setEstadoCaja("LIBRE");
+
+    // Guardar cambios
+    aperturaCajaRepository.save(apertura);
+    cajaRepository.save(caja);
+
+    return ResponseEntity.ok(Collections.singletonMap("mensaje", "Caja cerrada correctamente"));
+}
+
     }

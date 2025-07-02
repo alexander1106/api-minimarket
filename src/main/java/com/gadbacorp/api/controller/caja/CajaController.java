@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +15,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gadbacorp.api.entity.administrable.Empresas;
+import com.gadbacorp.api.entity.administrable.SucursalDTO;
+import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.caja.Caja;
+import com.gadbacorp.api.entity.caja.CajaDTO;
+import com.gadbacorp.api.repository.administrable.SucursalesRepository;
+import com.gadbacorp.api.repository.caja.CajaRepository;
 import com.gadbacorp.api.service.caja.ICajaService;
 
 @RestController
@@ -23,27 +30,80 @@ import com.gadbacorp.api.service.caja.ICajaService;
 public class CajaController {
     @Autowired
     private ICajaService cajaService;
+    @Autowired
+    private SucursalesRepository sucursalesRepository;
+      @Autowired
+    private CajaRepository cajaRepository;
     
     @GetMapping("/cajas")
     public List<Caja> listarCajas() {
         return cajaService.listarCaja();
     }
     
-    @GetMapping("/caja/{id}")
+    @GetMapping("/cajas/{id}")
     public Optional<Caja> buscarCaja(@PathVariable Integer id) {
         return cajaService.buscarCaja(id);
     }
-    @PostMapping("/caja")
-    public Caja guardaarCaja(@RequestBody Caja caja) {
-        return cajaService.guardarCaja(caja);
+
+    @GetMapping("/cajas/{idCaja}/sucursal")
+    public ResponseEntity<Sucursales> obtenerSucursalPorCaja(@PathVariable Integer idCaja) {
+        return cajaRepository.findById(idCaja)
+                .map(caja -> ResponseEntity.ok(caja.getSucursales()))
+                .orElse(ResponseEntity.notFound().build());
     }
-    @PutMapping("/caja")
-    public Caja actualizarCaja(@RequestBody Caja caja) {
-        return cajaService.editarCaja(caja);
+    @PutMapping("/cajas")
+    public ResponseEntity<?> actualizar( @RequestBody CajaDTO dto) {
+    Sucursales sucursales = sucursalesRepository.findById(dto.getIdSucursal()).orElse(null);
+         if (sucursales == null) {
+            return ResponseEntity.badRequest().body("Sucursal no encontrado con ID: " + dto.getIdSucursal());
+        }
+        
+        Caja caja = new Caja();
+        caja.setIdCaja(dto.getIdCaja());
+        caja.setEstadoCaja(dto.getEstadoCaja());
+        caja.setNombreCaja(dto.getNombreCaja());
+        caja.setSaldoActual(dto.getSaldoActual());
+        caja.setSucursales(sucursales);
+        caja.setEstado(dto.getEstado());
+        
+        return ResponseEntity.ok(cajaService.guardarCaja(caja));
     }
-    @DeleteMapping("/caja/{id}")
-    public String elimianrCaja(@PathVariable Integer id){
-         cajaService.eliminarCaja(id);
-         return "La caja a sido eliminad con exito";    
+
+    @PostMapping("/cajas")
+    public ResponseEntity<?> guardaarCaja(@RequestBody CajaDTO dto) {
+        Sucursales sucursales = sucursalesRepository.findById(dto.getIdSucursal()).orElse(null);
+         if (sucursales == null) {
+            return ResponseEntity.badRequest().body("Sucursal no encontrado con ID: " + dto.getIdSucursal());
+        }
+        
+        Caja caja = new Caja();
+        caja.setEstadoCaja(dto.getEstadoCaja());
+        caja.setNombreCaja(dto.getNombreCaja());
+        caja.setSaldoActual(dto.getSaldoActual());
+        caja.setSucursales(sucursales);
+        caja.setEstado(dto.getEstado());
+        
+        return ResponseEntity.ok(cajaService.guardarCaja(caja));
     }
+    
+   @DeleteMapping("/cajas/{id}")
+public ResponseEntity<?> eliminarCaja(@PathVariable Integer id) {
+    Optional<Caja> optionalCaja = cajaRepository.findById(id);
+    if (!optionalCaja.isPresent()) {
+        return ResponseEntity.notFound().build();
+    }
+
+    Caja caja = optionalCaja.get();
+
+    // Validar si tiene aperturas relacionadas
+    if (caja.getAperturaCajas() != null && !caja.getAperturaCajas().isEmpty()) {
+        return ResponseEntity
+                .badRequest()
+                .body("No se puede eliminar la caja porque tiene aperturas relacionadas.");
+    }
+
+    cajaService.eliminarCaja(id);
+    return ResponseEntity.ok("La caja ha sido eliminada con éxito.");
+}
+
 }

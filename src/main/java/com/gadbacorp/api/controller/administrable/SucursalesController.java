@@ -23,8 +23,8 @@ import com.gadbacorp.api.repository.administrable.EmpresasRepository;
 import com.gadbacorp.api.service.administrable.ISucursalesService;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/minimarket/sucursales")
-@CrossOrigin(origins = "http://localhost:4200")
 public class SucursalesController {
 
     @Autowired
@@ -40,6 +40,8 @@ public class SucursalesController {
             .map(this::toDto)
             .collect(Collectors.toList());
     }
+
+    
 
     /** Busqueda por id mapeada a DTO */
     @GetMapping("/{id}")

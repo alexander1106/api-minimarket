@@ -12,6 +12,7 @@ public class AperturaCajaDTO {
     private Integer idAperturaCaja; 
     private Date fechaApertura;
     private Date fechaCierre; 
+    private String estadoCaja;
     private Double saldoInicial; 
     private Double saldoFinal;
     private Integer id_empleado; 
@@ -63,7 +64,13 @@ public class AperturaCajaDTO {
     }
     public void setId_caja(Integer id_caja) {
         this.id_caja = id_caja;
+    }
+    public String getEstadoCaja() {
+        return estadoCaja;
+    }
+    public void setEstadoCaja(String estadoCaja) {
+        this.estadoCaja = estadoCaja;
     } 
-     
+    
 
 }
