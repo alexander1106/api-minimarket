@@ -1,6 +1,5 @@
 package com.gadbacorp.api.entity.administrable;
 
-import java.sql.Blob;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,13 +7,13 @@ import java.util.List;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -37,8 +36,9 @@ public class Empresas {
     private Integer cant_trabajadores;
     private Integer limit_inventario;
     private String correo;
-    @JsonIgnore 
-    private Blob logo;
+    @Lob
+    @Column(name="logo", columnDefinition="LONGTEXT")
+    private String logo;
     private Integer estado = 1;
     
 
@@ -142,14 +142,7 @@ public class Empresas {
         this.correo = correo;
     }
 
-    public Blob getLogo() {
-        return logo;
-    }
-
-    public void setLogo(Blob logo) {
-        this.logo = logo;
-    }
-
+  
     public Integer getEstado() {
         return estado;
     }
@@ -172,6 +165,12 @@ public class Empresas {
                 + ", direccion=" + direccion + ", cant_sucursales=" + cant_sucursales + ", cant_trabajadores="
                 + cant_trabajadores + ", limit_inventario=" + limit_inventario + ", correo=" + correo + ", logo=" + logo
                 + ", estado=" + estado + "]";
+    }
+    public String getLogo() {
+        return logo;
+    }
+    public void setLogo(String logo) {
+        this.logo = logo;
     }
 
 }

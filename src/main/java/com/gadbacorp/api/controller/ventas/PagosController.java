@@ -1,11 +1,13 @@
 package com.gadbacorp.api.controller.ventas;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +27,7 @@ import com.gadbacorp.api.repository.ventas.VentasRepository;
 import com.gadbacorp.api.service.ventas.IPagosService;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/minimarket")
 public class PagosController {
 
@@ -43,35 +46,43 @@ public class PagosController {
     public List<Pagos> listarPagos() {
         return pagosService.listarPagos();
     }
+@PostMapping("/pagos")
+public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
+    Pagos pago = new Pagos();
+    pago.setEstadoPago(dto.getEstadoPago());
+    pago.setObservaciones(dto.getObservaciones());
+    pago.setReferenciaPago(dto.getReferenciaPago());
+    pago.setFechaPago(dto.getFechaPago());
+    pago.setMontoPagado(dto.getMontoPagado());
 
-    @PostMapping("/pagos")
-    public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
-        Pagos pago = new Pagos();
-        pago.setEstadoPago(dto.getEstadoPago());
-        pago.setObservaciones(dto.getObservaciones());
-        pago.setReferenciaPago(dto.getReferenciaPago());
-        pago.setFechaPago(dto.getFechaPago());
-        pago.setMontoPagado(dto.getMontoPagado());
+    MetodosPago metodo = metodosPagoRepository.findById(dto.getId_metodo_pago()).orElse(null);
 
-        MetodosPago metodo = metodosPagoRepository.findById(dto.getId_metodo_pago()).orElse(null);
-        Ventas venta = ventasRepository.findById(dto.getId_venta()).orElse(null);
-        
-        if (venta == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Venta no encontrada.");
-        }
-        
-        if (metodo == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Metodo no encontrada.");
-        }
-        pago.setVentas(venta);
-        pago.setMetodosPago(metodo);
-
-        // Cambiar estado de la venta a "PAGADO"
-        venta.setEstado_venta("PAGADO"); // Asegúrate que "estado" sea un campo de la entidad Ventas
-        ventasRepository.save(venta); // Guardar la venta actualizada
-
-        return ResponseEntity.ok(pagosService.guardarPago(pago));
+    if (metodo == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Metodo no encontrado.");
     }
+
+    Ventas venta = ventasRepository.findById(dto.getId_venta()).orElse(null);
+    if (venta == null) {
+        // Si no existe, crear una nueva venta
+        venta = new Ventas();
+        venta.setEstado_venta("PAGADO");
+        venta.setFecha_venta(LocalDate.now());
+        // venta.setCliente(cliente);
+        // venta.setFechaVenta(new Date());
+        venta.setTotal_venta(pago.getMontoPagado());
+        venta = ventasRepository.save(venta);
+    } else {
+        // Si existe, actualizar el estado
+        venta.setEstado_venta("PAGADO");
+        ventasRepository.save(venta);
+    }
+
+    pago.setVentas(venta);
+    pago.setMetodosPago(metodo);
+
+    return ResponseEntity.ok(pagosService.guardarPago(pago));
+}
+
 
      @GetMapping("/pagos/{id}")
     public Optional<Pagos> buscarId(@PathVariable("id") Integer id){

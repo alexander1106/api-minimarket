@@ -20,4 +20,6 @@ boolean existsByProducto_Idproducto(Integer idProducto);
 
 boolean existsByInventario_Idinventario(Integer idinventario);
 boolean existsByInventarioIdinventario(Integer idinventario);
+List<InventarioProducto> findByInventario_Idinventario(Integer idinventario);
+
 }

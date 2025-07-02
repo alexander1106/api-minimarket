@@ -24,6 +24,7 @@ public class UsuarioService implements IUsuariosService {
    public Usuarios guardar(Usuarios empleado) {
       return usuariosRepository.save(empleado);
    }
+   
 
    @Override
    public Usuarios modificar(Usuarios empleado) {
@@ -44,5 +45,11 @@ public class UsuarioService implements IUsuariosService {
     public Usuarios obtenerUsuario(String username) {
         return usuariosRepository.findByUsername(username);
     }
+    @Override
+    public Optional<Usuarios> buscarPorUsername(String username) {
+        // Llama al nuevo método del repo
+        return usuariosRepository.findOptionalByUsername(username);
+    }
+
 
 }

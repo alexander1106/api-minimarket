@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.gadbacorp.api.entity.administrable.Empresas;
 import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.caja.AperturaCaja;
 import com.gadbacorp.api.entity.seguridad.Authority;
@@ -37,55 +36,47 @@ public class Usuarios implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idUsuario;
-
     private String nombre;
-    private String apellidos;
     private String username;
+    private String apellidos;
     private String email;
     private String dni;
-    private String password;
-    private String turno;
-    private String token;
-
     private boolean enable = true;
-    private Integer estado = 1;
-    private LocalDateTime fechaCreacion;
 
-    // Relaciones
+    private String password;
+    private Integer estado=1;
+    private LocalDateTime fechaCreacion;
+    private String turno;
+        private String token;
+
     @ManyToOne
     @JoinColumn(name = "rol_id", referencedColumnName = "id") // 'id' es el PK de Rol
     private Rol rol;
 
-    @ManyToOne
-    @JoinColumn(name = "id_empresa", referencedColumnName = "idempresa")
-    @JsonIgnore
-    private Empresas empresa;
+    
+    public String getToken() {
+        return token;
+    }
 
-    @ManyToOne
-    @JoinColumn(name = "id_sucursal", referencedColumnName = "id_sucursal")
-    @JsonIgnore
-    private Sucursales sucursal;
-
-    @OneToMany(mappedBy = "usuarios", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<AperturaCaja> aperturaCaja;
-
-    // Constructores
-    public Usuarios() {}
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     public Usuarios(Integer idUsuario) {
         this.idUsuario = idUsuario;
     }
 
-    // Getters y Setters
-    public Integer getIdUsuario() {
-        return idUsuario;
+    public Usuarios( ) {
     }
 
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
-    }
+    @OneToMany(mappedBy = "usuarios", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<AperturaCaja> aperturaCaja;
 
+    @ManyToOne
+    @JoinColumn(name = "id_sucursal", referencedColumnName = "id_sucursal")
+    private Sucursales sucursal;
+    
     public String getNombre() {
         return nombre;
     }
@@ -102,12 +93,82 @@ public class Usuarios implements UserDetails {
         this.apellidos = apellidos;
     }
 
+    public String getDni() {
+        return dni;
+    }
+
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
+
+
+    
     public String getUsername() {
         return username;
     }
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+ BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        this.password = encoder.encode(password);
+        this.password = password;    }
+
+    public Integer getEstado() {
+        return estado;
+    }
+
+    public void setEstado(Integer estado) {
+        this.estado = estado;
+    }
+
+
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    
+    public String getTurno() {
+        return turno;
+    }
+    public void setTurno(String turno) {
+        this.turno = turno;
+    }
+
+    public List<AperturaCaja> getAperturaCaja() {
+        return aperturaCaja;
+    }
+
+
+    public void setAperturaCaja(List<AperturaCaja> aperturaCaja) {
+        this.aperturaCaja = aperturaCaja;
+    }
+
+    public Integer getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(Integer idUsuario) {
+        this.idUsuario = idUsuario;
+    }
+    
+
+    public Sucursales getSucursal() {
+        return sucursal;
+    }
+
+    public void setSucursal(Sucursales sucursal) {
+        this.sucursal = sucursal;
     }
 
     public String getEmail() {
@@ -118,65 +179,6 @@ public class Usuarios implements UserDetails {
         this.email = email;
     }
 
-    public String getDni() {
-        return dni;
-    }
-
-    public void setDni(String dni) {
-        this.dni = dni;
-    }
-
-    public String getTurno() {
-        return turno;
-    }
-
-    public void setTurno(String turno) {
-        this.turno = turno;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public boolean getEnable() {
-        return enable;
-    }
-
-    public void setEnable(boolean enable) {
-        this.enable = enable;
-    }
-
-    public Integer getEstado() {
-        return estado;
-    }
-
-    public void setEstado(Integer estado) {
-        this.estado = estado;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        this.password = encoder.encode(password);
-        // Si deseas mantener el plano, remueve la línea de abajo
-        this.password = password;
-    }
-
     public Rol getRol() {
         return rol;
     }
@@ -185,36 +187,10 @@ public class Usuarios implements UserDetails {
         this.rol = rol;
     }
 
-    public Empresas getEmpresa() {
-        return empresa;
-    }
-
-    public void setEmpresa(Empresas empresa) {
-        this.empresa = empresa;
-    }
-
-    public Sucursales getSucursal() {
-        return sucursal;
-    }
-
-    public void setSucursal(Sucursales sucursal) {
-        this.sucursal = sucursal;
-    }
-
-    public List<AperturaCaja> getAperturaCaja() {
-        return aperturaCaja;
-    }
-
-    public void setAperturaCaja(List<AperturaCaja> aperturaCaja) {
-        this.aperturaCaja = aperturaCaja;
-    }
-
     public boolean isEmpty() {
-        return false;
+        return false; // o alguna lógica válida según tu modelo
     }
-
-    // Implementación de UserDetails
-    @Override
+  @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         HashSet<Authority> authorities = new HashSet<>();
@@ -222,26 +198,14 @@ public class Usuarios implements UserDetails {
         return authorities;
     }
 
-    @Override
-    @JsonIgnore
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+  public boolean getEnable() {
+    return enable;
+  }
 
-    @Override
-    @JsonIgnore
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+  public void setEnable(boolean enable) {
+    this.enable = enable;
+  }
 
-    @Override
-    @JsonIgnore
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+  
 
-    @Override
-    public boolean isEnabled() {
-        return enable;
-    }
 }
