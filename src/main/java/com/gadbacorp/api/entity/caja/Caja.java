@@ -33,7 +33,6 @@ public class Caja {
     private String estadoCaja;
 
     @OneToMany(mappedBy = "caja")
-    
     private List<AperturaCaja> aperturaCajas;
 
     @ManyToOne(fetch = FetchType.EAGER)

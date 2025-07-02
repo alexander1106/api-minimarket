@@ -1,4 +1,5 @@
 package com.gadbacorp.api.entity.ventas;
+import java.time.LocalDate;
 import java.util.Date;
 
 import org.hibernate.annotations.SQLDelete;
@@ -25,7 +26,7 @@ public class Pagos {
     @Column(name="id_pago")
     private Integer idPago;
     private String observaciones;
-    private Date fechaPago; 
+    private LocalDate fechaPago; 
     private Double montoPagado;
     private String referenciaPago; //hace referencia al numero de tarjeta si es el caso
     private String estadoPago;
@@ -60,13 +61,7 @@ public class Pagos {
          this.observaciones = observaciones;
      }
 
-     public Date getFechaPago() {
-         return fechaPago;
-     }
-
-     public void setFechaPago(Date fechaPago) {
-         this.fechaPago = fechaPago;
-     }
+    
 
      public Double getMontoPagado() {
          return montoPagado;
@@ -121,6 +116,14 @@ public class Pagos {
         return "Pagos [idPago=" + idPago + ", observaciones=" + observaciones + ", fechaPago=" + fechaPago
                 + ", montoPagado=" + montoPagado + ", referenciaPago=" + referenciaPago + ", estadoPago=" + estadoPago
                 + ", estado=" + estado + ", ventas=" + ventas + ", metodosPago=" + metodosPago + "]";
+     }
+
+     public LocalDate getFechaPago() {
+         return fechaPago;
+     }
+
+     public void setFechaPago(LocalDate fechaPago) {
+         this.fechaPago = fechaPago;
      }
      
 

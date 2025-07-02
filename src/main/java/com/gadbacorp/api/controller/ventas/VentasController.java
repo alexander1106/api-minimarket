@@ -1,5 +1,6 @@
 package com.gadbacorp.api.controller.ventas;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -17,34 +18,53 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gadbacorp.api.entity.inventario.AjusteInventario;
+import com.gadbacorp.api.entity.inventario.Almacenes;
+import com.gadbacorp.api.entity.inventario.Inventario;
 import com.gadbacorp.api.entity.inventario.InventarioProducto;
+import com.gadbacorp.api.entity.inventario.Productos;
 import com.gadbacorp.api.entity.ventas.Clientes;
 import com.gadbacorp.api.entity.ventas.Cotizaciones;
 import com.gadbacorp.api.entity.ventas.DetallesVentas;
+import com.gadbacorp.api.entity.ventas.DetallesVentasDTO;
+import com.gadbacorp.api.entity.ventas.MetodosPago;
+import com.gadbacorp.api.entity.ventas.Pagos;
+import com.gadbacorp.api.entity.ventas.VentaCompletaDTO;
 import com.gadbacorp.api.entity.ventas.Ventas;
 import com.gadbacorp.api.entity.ventas.VentasDTO;
 import com.gadbacorp.api.repository.inventario.AjusteInventarioRepository;
+import com.gadbacorp.api.repository.inventario.AlmacenesRepository;
 import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
-import com.gadbacorp.api.repository.ventas.ClientesRepository;
-import com.gadbacorp.api.repository.ventas.CotizacionesRepository;
-import com.gadbacorp.api.repository.ventas.VentasRepository;
+import com.gadbacorp.api.repository.inventario.InventarioRepository;
+import com.gadbacorp.api.repository.inventario.ProductosRepository;
+import com.gadbacorp.api.repository.ventas.*;
 import com.gadbacorp.api.service.ventas.IDetallesVentasService;
 import com.gadbacorp.api.service.ventas.IVentasService;
+
+import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("/api/minimarket")
 @CrossOrigin("*")
 public class VentasController {
+    @Autowired
+    private  PagosRepository pagosRepository;
 
     @Autowired
     private IVentasService ventasService;
 
     @Autowired
     private VentasRepository ventasRepository;
-@Autowired
-private CotizacionesRepository cotizacionesRepository;
+
     @Autowired
     private ClientesRepository clientesRepository;
+@Autowired
+private InventarioRepository inventarioRepository;
+
+    @Autowired
+    private MetodosPagoRepository metodosPagoRepo;
+
+    @Autowired
+    private ProductosRepository productoRepo;
 
     @Autowired
     private IDetallesVentasService detallesVentasService;
@@ -53,7 +73,14 @@ private CotizacionesRepository cotizacionesRepository;
     private InventarioProductoRepository inventarioProductoRepository;
 
     @Autowired
+    private DetallesVentasRepository detallesVentasRepository;
+    @Autowired
     private AjusteInventarioRepository ajusteInventarioRepository;
+@Autowired
+private AlmacenesRepository almacenRepository;
+    VentasController(PagosRepository pagosRepository) {
+        this.pagosRepository = pagosRepository;
+    }
 
     @GetMapping("/ventas")
     public List<Ventas> buscarTodos() {
@@ -65,27 +92,137 @@ private CotizacionesRepository cotizacionesRepository;
         return ventasService.buscarVenta(id);
     }
 
-    @PostMapping("/ventas")
-    public ResponseEntity<?> guardarVenta(@RequestBody VentasDTO dto) {
-        Clientes cliente = clientesRepository.findById(dto.getId_cliente()).orElse(null);
-        if (cliente == null) {
-            return ResponseEntity.badRequest().body("Cliente no encontrado con ID: " + dto.getId_cliente());
-        }
-        Cotizaciones cotizaciones = cotizacionesRepository.findById(dto.getId_cotizacion()).orElse(null);
-
-        Ventas venta = new Ventas();
-        venta.setTotal_venta(dto.getTotal_venta());
-        venta.setTipo_comprobante(dto.getTipo_comprobante());
-        venta.setNro_comrprobante(dto.getNro_comrprobante());
-        venta.setEstado_venta(dto.getEstado_venta());
-        venta.setFecha_venta(dto.getFecha_venta());
-        venta.setEstado_venta(dto.getEstado_venta());
-
-        venta.setEstado(dto.getEstado());
-        venta.setCliente(cliente);
-
-        return ResponseEntity.ok(ventasService.guardarVenta(venta));
+@Transactional
+@PostMapping("/ventas")
+public void guardarVentaCompleta(@RequestBody VentaCompletaDTO dto) {
+    // Validaciones mínimas
+    if (dto.getId_cliente() == null) {
+        throw new IllegalArgumentException("El id_cliente es obligatorio");
     }
+    if (dto.getId_metodo_pago() == null) {
+        throw new IllegalArgumentException("El id_metodo_pago es obligatorio");
+    }
+    if (dto.getIdSucursal() == null) {
+        throw new IllegalArgumentException("La sucursal es obligatoria");
+    }
+
+    Clientes cliente = clientesRepository.findById(dto.getId_cliente())
+            .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
+
+    MetodosPago metodoPago = metodosPagoRepo.findById(dto.getId_metodo_pago())
+            .orElseThrow(() -> new IllegalArgumentException("Método de pago no encontrado"));
+
+    // Crear venta
+    Ventas venta = new Ventas();
+    venta.setTotal_venta(dto.getTotal_venta());
+    venta.setTipo_comprobante(dto.getTipo_comprobante());
+    venta.setFecha_venta(LocalDate.now());
+    venta.setEstado_venta("PAGADA");
+    venta.setEstado(dto.getEstado());
+    venta.setCliente(cliente);
+
+    // Guardar venta inicial
+    venta = ventasRepository.save(venta);
+
+    // Generar comprobante correlativo
+    String tipoComprobante = dto.getTipo_comprobante();
+    String prefijo = tipoComprobante.equalsIgnoreCase("FACTURA") ? "F" : "B";
+    List<String> lista = ventasRepository.findUltimosComprobantesPorTipo(tipoComprobante);
+    String ultimoNro = lista.isEmpty() ? null : lista.get(0);
+
+    int nuevoNumero = 1;
+    if (ultimoNro != null && !ultimoNro.isEmpty()) {
+        String[] partes = ultimoNro.split("-");
+        if (partes.length == 2) {
+            nuevoNumero = Integer.parseInt(partes[1]) + 1;
+        }
+    }
+    String numeroFormateado = String.format("%s-%06d", prefijo, nuevoNumero);
+    venta.setNro_comrprobante(numeroFormateado);
+    ventasRepository.save(venta);
+
+    // Preparar descuento de stock
+    Integer idSucursal = dto.getIdSucursal();
+
+    for (DetallesVentasDTO detalleDTO : dto.getDetalles()) {
+        if (detalleDTO.getId_producto() == null) {
+            throw new IllegalArgumentException("El id_producto en detalle es obligatorio");
+        }
+
+        Productos producto = productoRepo.findById(detalleDTO.getId_producto())
+                .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
+
+        // Crear detalle
+        DetallesVentas detalle = new DetallesVentas();
+        detalle.setVentas(venta);
+        detalle.setProductos(producto);
+        detalle.setFechaVenta(LocalDate.now());
+        detalle.setPecioUnitario(detalleDTO.getPecioUnitario());
+        detalle.setCantidad(detalleDTO.getCantidad());
+        detalle.setSubTotal(detalleDTO.getSubTotal());
+        detalle.setEstado(detalleDTO.getEstado());
+
+        detallesVentasRepository.save(detalle);
+
+        // Descontar stock del producto en los inventarios de la sucursal
+        int cantidadPorDescontar = detalleDTO.getCantidad();
+        List<Almacenes> almacenes = almacenRepository.findBySucursalIdSucursal(idSucursal);
+
+        boolean stockCubierto = false;
+
+        for (Almacenes almacen : almacenes) {
+            List<Inventario> inventarios = inventarioRepository.findByAlmacen_Idalmacen(almacen.getIdalmacen());
+
+         for (Inventario inventario : inventarios) {
+    Optional<InventarioProducto> inventarioProductoOpt = inventarioProductoRepository
+        .findByProductoIdproductoAndInventarioIdinventario(
+            detalleDTO.getId_producto(),
+            inventario.getIdinventario()
+        );
+
+    if (inventarioProductoOpt.isPresent()) {
+        InventarioProducto invProd = inventarioProductoOpt.get();
+        int stockDisponible = invProd.getStockactual();
+
+        if (stockDisponible >= cantidadPorDescontar) {
+            invProd.setStockactual(stockDisponible - cantidadPorDescontar);
+            inventarioProductoRepository.save(invProd);
+            cantidadPorDescontar = 0;
+            stockCubierto = true;
+            break;
+        } else if (stockDisponible > 0) {
+            cantidadPorDescontar -= stockDisponible;
+            invProd.setStockactual(0);
+            inventarioProductoRepository.save(invProd);
+        }
+    } else {
+        System.out.println("No se encontró InventarioProducto para producto " +
+                           detalleDTO.getId_producto() + " en inventario " +
+                           inventario.getIdinventario());
+    }
+}
+
+            if (cantidadPorDescontar == 0) {
+                break; // Salimos de almacenes
+            }
+        }
+
+        if (cantidadPorDescontar > 0) {
+            throw new RuntimeException("Stock insuficiente para producto ID " + detalleDTO.getId_producto());
+        }
+    }
+
+    // Crear pago
+    Pagos pago = new Pagos();
+    pago.setVentas(venta);
+    pago.setEstadoPago(dto.getEstadoPago());
+    pago.setFechaPago(LocalDate.now());
+    pago.setMontoPagado(dto.getMontoPagado());
+    pago.setObservaciones(dto.getObservaciones());
+    pago.setMetodosPago(metodoPago);
+
+    pagosRepository.save(pago);
+}
 
     @PutMapping("/ventas")
     public ResponseEntity<?> modificar(@RequestBody VentasDTO dto) {
