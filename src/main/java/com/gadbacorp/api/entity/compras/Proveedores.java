@@ -5,6 +5,7 @@ import java.sql.Date;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,20 +20,21 @@ import jakarta.persistence.Table;
 public class Proveedores {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer Id_Proveedor;
+   @Column(name = "Id_Proveedor") // nombre real en la base de datos
+    private Integer idProveedor; // nombre estándar para Java
     private String nombre;
     private String ruc;
     private String regimen;
-    private String telefono;
+    private String telefono;    
     private String gmail;
     private String direccion;
     private Date fecha_registro;
     private Integer estado = 1;
-    public Integer getId_Proveedor() {
-        return Id_Proveedor;
+    public Integer getIdProveedor() {
+        return idProveedor;
     }
-    public void setId_Proveedor(Integer id_Proveedor) {
-        Id_Proveedor = id_Proveedor;
+    public void setIdProveedor(Integer idProveedor) {
+        this.idProveedor = idProveedor;
     }
     public String getNombre() {
         return nombre;
@@ -84,9 +86,10 @@ public class Proveedores {
     }
     @Override
     public String toString() {
-        return "Proveedores [Id_Proveedor=" + Id_Proveedor + ", nombre=" + nombre + ", ruc=" + ruc + ", regimen="
+        return "Proveedores [idProveedor=" + idProveedor + ", nombre=" + nombre + ", ruc=" + ruc + ", regimen="
                 + regimen + ", telefono=" + telefono + ", gmail=" + gmail + ", direccion=" + direccion
                 + ", fecha_registro=" + fecha_registro + ", estado=" + estado + "]";
     }
+    
 
 }

@@ -8,40 +8,38 @@ import java.util.List;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.gadbacorp.api.entity.ventas.MetodosPago;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "Compras")
-@SQLDelete(sql = "UPDATE Compras SET estado=0 WHERE Id_compra = ?")
+@SQLDelete(sql = "UPDATE Compras SET estado=0 WHERE id_compra = ?")
 @Where(clause = "estado=1")
 public class Compras {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id_compra")
+    @Column(name = "id_compra")
     private Integer idCompra;
 
     @ManyToOne
     @JoinColumn(name = "Id_Proveedor")
     private Proveedores proveedor;
 
-    @ManyToOne
-    @JoinColumn(name = "idMetodoPago")
-    private MetodosPago metodoPago;
-
     private BigDecimal total;
-
     private String descripcion;
 
     @Column(name = "fecha_compra")
     private LocalDateTime fechaCompra;
-
-    private Integer estado =1;
+    private Integer estado = 1;
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
-    
+   
     private List<DetallesCompras> detalles;
 
+    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
+    private List<DevolucionesCompra> devoluciones;
+
+    // Getters y Setters
     public Integer getIdCompra() {
         return idCompra;
     }
@@ -56,14 +54,6 @@ public class Compras {
 
     public void setProveedor(Proveedores proveedor) {
         this.proveedor = proveedor;
-    }
-
-    public MetodosPago getMetodoPago() {
-        return metodoPago;
-    }
-
-    public void setMetodoPago(MetodosPago metodoPago) {
-        this.metodoPago = metodoPago;
     }
 
     public BigDecimal getTotal() {
@@ -106,13 +96,11 @@ public class Compras {
         this.detalles = detalles;
     }
 
-    @Override
-    public String toString() {
-        return "Compra [idCompra=" + idCompra + ", proveedor=" + proveedor + ", metodoPago=" + metodoPago + ", total="
-                + total + ", descripcion=" + descripcion + ", fechaCompra=" + fechaCompra + ", estado=" + estado
-                + ", detalles=" + detalles + "]";
+    public List<DevolucionesCompra> getDevoluciones() {
+        return devoluciones;
     }
 
-   
-    
+    public void setDevoluciones(List<DevolucionesCompra> devoluciones) {
+        this.devoluciones = devoluciones;
+    }
 }

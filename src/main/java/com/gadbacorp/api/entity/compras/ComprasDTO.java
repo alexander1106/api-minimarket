@@ -2,15 +2,16 @@ package com.gadbacorp.api.entity.compras;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ComprasDTO {
     private Integer idCompra;
     private Integer idProveedor;
-    private Integer idMetodoPago;
     private BigDecimal total;
     private String descripcion;
     private LocalDateTime fechaCompra;
-    private Integer estado =1;
+     private Integer estado = 1;
+    private List<DetallesComprasDTO> detalles;
     public Integer getIdCompra() {
         return idCompra;
     }
@@ -22,12 +23,6 @@ public class ComprasDTO {
     }
     public void setIdProveedor(Integer idProveedor) {
         this.idProveedor = idProveedor;
-    }
-    public Integer getIdMetodoPago() {
-        return idMetodoPago;
-    }
-    public void setIdMetodoPago(Integer idMetodoPago) {
-        this.idMetodoPago = idMetodoPago;
     }
     public BigDecimal getTotal() {
         return total;
@@ -53,6 +48,14 @@ public class ComprasDTO {
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
-
+    public List<DetallesComprasDTO> getDetalles() {
+        return detalles;
+    }
+    public void setDetalles(List<DetallesComprasDTO> detalles) {
+        this.detalles = detalles;
+    }
+    
+    // Getters y Setters
+    
     
 }
