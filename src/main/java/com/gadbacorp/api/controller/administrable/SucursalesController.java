@@ -20,11 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gadbacorp.api.entity.administrable.Empresas;
 import com.gadbacorp.api.entity.administrable.SucursalDTO;
 import com.gadbacorp.api.entity.administrable.Sucursales;
+import com.gadbacorp.api.entity.caja.Caja;
 import com.gadbacorp.api.entity.empleados.Usuarios;
 import com.gadbacorp.api.entity.inventario.Almacenes;
 import com.gadbacorp.api.entity.inventario.Inventario;
 import com.gadbacorp.api.entity.inventario.InventarioProducto;
 import com.gadbacorp.api.repository.administrable.EmpresasRepository;
+import com.gadbacorp.api.repository.administrable.SucursalesRepository;
 import com.gadbacorp.api.repository.empleados.UsuarioRepository;
 import com.gadbacorp.api.repository.inventario.AlmacenesRepository;
 import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
@@ -45,12 +47,13 @@ public class SucursalesController {
     private EmpresasRepository empresasRepository;
     @Autowired
     private UsuarioRepository usuariosRepo;
+        @Autowired
+    private SucursalesRepository sucursalesRepository;
     
     @Autowired
     private InventarioProductoRepository inventarioProductoRepository;
     
 
-    /** Listado mapeado a DTO */
     @GetMapping
     public List<SucursalDTO> buscarTodos() {
         return sucursalesService.buscarTodos().stream()
@@ -65,6 +68,7 @@ public class SucursalesController {
         }
         return ResponseEntity.ok(almacenes);
     }
+    
 
     @GetMapping("/{idSucursal}/empresa")
 public ResponseEntity<Empresas> obtenerEmpresaPorSucursal(@PathVariable Integer idSucursal) {
@@ -94,6 +98,22 @@ public ResponseEntity<List<Usuarios>> listarUsuariosPorSucursal(@PathVariable In
 }
   
     
+@GetMapping("/{idSucursal}/cajas")
+public ResponseEntity<?> listarCajasPorSucursal(@PathVariable Integer idSucursal) {
+    // Buscar la sucursal
+    Optional<Sucursales> optionalSucursal = sucursalesRepository.findById(idSucursal);
+    if (!optionalSucursal.isPresent()) {
+        return ResponseEntity.badRequest().body("Sucursal no encontrada con ID: " + idSucursal);
+    }
+
+    Sucursales sucursal = optionalSucursal.get();
+
+    // Obtener sus cajas
+    List<Caja> cajas = sucursal.getCajas();
+
+    return ResponseEntity.ok(cajas);
+}
+
 @GetMapping("/{idSucursal}/productos")
 public ResponseEntity<List<InventarioProducto>> listarProductosPorSucursal(@PathVariable Integer idSucursal) {
 

@@ -13,5 +13,6 @@ public interface SucursalesRepository extends JpaRepository<Sucursales, Integer>
     List<Sucursales> findAllWithEmpresaAndAlmacenes();
 
     List<Sucursales> findByEmpresaIdempresa(Integer idEmpresa);
+    List<Sucursales> findAllByEmpresa_Idempresa(Integer idEmpresa);
 
 }

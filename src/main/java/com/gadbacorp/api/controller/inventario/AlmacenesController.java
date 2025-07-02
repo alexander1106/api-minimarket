@@ -21,8 +21,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.inventario.Almacenes;
 import com.gadbacorp.api.entity.inventario.AlmacenesDTO;
-import com.gadbacorp.api.entity.inventario.Inventario;
-import com.gadbacorp.api.repository.inventario.InventarioRepository;
 import com.gadbacorp.api.service.administrable.ISucursalesService;
 import com.gadbacorp.api.service.inventario.IAlmacenesService;
 
@@ -32,8 +30,6 @@ import com.gadbacorp.api.service.inventario.IAlmacenesService;
 public class AlmacenesController {
 
     @Autowired private IAlmacenesService service;
-        @Autowired private InventarioRepository inventarioRepository;
-
     @Autowired private ISucursalesService sucursalesService;
 
     @GetMapping("/almacenes")
@@ -52,16 +48,6 @@ public class AlmacenesController {
             ));
         return toDTO(e);
     }
-
- @GetMapping("/almacenes/{idAlmacen}/inventarios")
-public ResponseEntity<List<Inventario>> listarInventariosPorAlmacen(@PathVariable Integer idAlmacen) {
-    List<Inventario> inventarios = inventarioRepository.findByAlmacen_Idalmacen(idAlmacen);
-    if (inventarios.isEmpty()) {
-        return ResponseEntity.noContent().build();
-    }
-    return ResponseEntity.ok(inventarios);
-}
-
 
     @PostMapping("/almacenes")
     public ResponseEntity<AlmacenesDTO> crear(@RequestBody AlmacenesDTO dto) {

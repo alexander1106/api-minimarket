@@ -1,7 +1,6 @@
 // src/main/java/com/gadbacorp/api/controller/inventario/InventarioController.java
 package com.gadbacorp.api.controller.inventario;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,10 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.gadbacorp.api.entity.inventario.Almacenes;
 import com.gadbacorp.api.entity.inventario.Inventario;
 import com.gadbacorp.api.entity.inventario.InventarioDTO;
-import com.gadbacorp.api.entity.inventario.InventarioProducto;
 import com.gadbacorp.api.repository.inventario.AlmacenesRepository;
-import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
-import com.gadbacorp.api.repository.inventario.InventarioRepository;
 import com.gadbacorp.api.service.inventario.IInventarioService;
 
 @RestController
@@ -34,11 +30,7 @@ import com.gadbacorp.api.service.inventario.IInventarioService;
 public class InventarioController {
 
     @Autowired private IInventarioService inventarioService;
-        @Autowired private InventarioRepository inventarioRepository;
-
     @Autowired private AlmacenesRepository     almacenesRepo;
-        @Autowired private InventarioProductoRepository     inventarioProductoRepository;
-
 
     private InventarioDTO toDTO(Inventario inv) {
         InventarioDTO dto = new InventarioDTO();
@@ -72,17 +64,6 @@ public class InventarioController {
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
-
-     @GetMapping("/inventario/{idInventario}/inventarioProductos")
-public ResponseEntity<List<InventarioProducto>> listarInventariosPorAlmacen(@PathVariable Integer idInventario) {
-    List<InventarioProducto> inventarios = inventarioProductoRepository.findByInventario_Idinventario(idInventario);
-    if (inventarios.isEmpty()) {
-        return ResponseEntity.noContent().build();
-    }
-    return ResponseEntity.ok(inventarios);
-}
-
-
 
     @GetMapping("/inventario/{id}")
     public ResponseEntity<InventarioDTO> obtener(@PathVariable Integer id) {

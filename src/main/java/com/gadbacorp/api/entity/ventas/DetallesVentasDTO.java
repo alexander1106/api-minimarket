@@ -11,10 +11,10 @@ public class DetallesVentasDTO {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idDetallesVenta;
 
-    private double pecioUnitario;
+    private Double pecioUnitario;
     private LocalDate fechaVenta;
     private Integer cantidad;
-    private double subTotal;      
+    private Double subTotal;      
     private Integer estado=1;
     private Integer id_producto;
     private Integer id_venta;
@@ -44,10 +44,17 @@ public class DetallesVentasDTO {
         this.cantidad = cantidad;
     }
 
-    public double getSubTotal() {
+    
+    public Double getPecioUnitario() {
+        return pecioUnitario;
+    }
+    public void setPecioUnitario(Double pecioUnitario) {
+        this.pecioUnitario = pecioUnitario;
+    }
+    public Double getSubTotal() {
         return subTotal;
     }
-    public void setSubTotal(double subTotal) {
+    public void setSubTotal(Double subTotal) {
         this.subTotal = subTotal;
     }
     public Integer getEstado() {
@@ -69,10 +76,5 @@ public class DetallesVentasDTO {
         this.id_venta = id_venta;
     }
  
-    public double getPecioUnitario() {
-        return pecioUnitario;
-    }
-    public void setPecioUnitario(double pecioUnitario) {
-        this.pecioUnitario = pecioUnitario;
-    }
+  
 }

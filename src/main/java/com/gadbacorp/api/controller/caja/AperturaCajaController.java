@@ -51,6 +51,17 @@ import java.util.Collections;
         public Optional<AperturaCaja> buscarCaja(@PathVariable Integer id) {
             return aperturaCajaService.buscarAperturaCaja(id);
         }
+
+        @GetMapping("/aperturas-cajas/sucursal/{idSucursal}")
+public ResponseEntity<?> listarAperturasPorSucursal(@PathVariable Integer idSucursal) {
+    List<AperturaCaja> aperturas = aperturaCajaRepository.findByCajaSucursalesIdSucursal(idSucursal);
+
+    if (aperturas.isEmpty()) {
+        return ResponseEntity.ok(Collections.singletonMap("mensaje", "No se encontraron aperturas para esta sucursal."));
+    }
+    return ResponseEntity.ok(aperturas);
+}
+
         
      @GetMapping("/aperturas-cajas/{idAperturaCaja}/caja")
     public ResponseEntity<Caja> obtenerCajaPorApertura(@PathVariable Integer idAperturaCaja) {

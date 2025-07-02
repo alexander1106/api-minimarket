@@ -52,7 +52,7 @@ public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
     pago.setEstadoPago(dto.getEstadoPago());
     pago.setObservaciones(dto.getObservaciones());
     pago.setReferenciaPago(dto.getReferenciaPago());
-    pago.setFechaPago(dto.getFechaPago());
+    pago.setFechaPago(LocalDate.now());
     pago.setMontoPagado(dto.getMontoPagado());
 
     MetodosPago metodo = metodosPagoRepository.findById(dto.getId_metodo_pago()).orElse(null);
@@ -104,7 +104,7 @@ public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
         pago.setEstadoPago(dto.getEstadoPago());
         pago.setObservaciones(dto.getObservaciones());
         pago.setReferenciaPago(dto.getReferenciaPago());
-        pago.setFechaPago(dto.getFechaPago());
+        pago.setFechaPago(LocalDate.now());
         pago.setMontoPagado(dto.getMontoPagado());
 
         // Relaciones

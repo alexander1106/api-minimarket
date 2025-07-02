@@ -1,10 +1,12 @@
 package com.gadbacorp.api.controller.seguridad;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -50,6 +52,39 @@ public class UsuariosController {
     public List<Usuarios> buscarTodos() {
         return usuariosService.buscarTodos();
     }
+
+    @GetMapping("/usuarios/logged")
+public ResponseEntity<UsuariosDTO> getLoggedUser(Principal principal) {
+    // 1) Buscar la entidad por username
+    Optional<Usuarios> opt = usuariosService.buscarPorUsername(principal.getName());
+    if (opt.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    // 2) Mapear a DTO (asegúrate que UsuariosDTO tiene idEmpresa e idSucursal)
+    Usuarios u = opt.get();
+    UsuariosDTO dto = new UsuariosDTO();
+    dto.setIdUsuario(u.getIdUsuario());
+    dto.setNombre(u.getNombre());
+    dto.setUsername(u.getUsername());
+    dto.setApellidos(u.getApellidos());
+    dto.setEmail(u.getEmail());
+    dto.setDni(u.getDni());
+    dto.setTurno(u.getTurno());
+    dto.setEstado(u.getEstado());
+    // aquí añadimos:
+    dto.setIdEmpresa(u.getSucursal() != null 
+        ? u.getSucursal().getEmpresa().getIdempresa() 
+        : null);
+    dto.setIdSucursal(u.getSucursal() != null 
+        ? u.getSucursal().getIdSucursal() 
+        : null);
+    dto.setRolId(u.getRol() != null 
+        ? u.getRol().getId() 
+        : null);
+    dto.setFechaCreacion(u.getFechaCreacion());
+    // 3) devolvemos
+    return ResponseEntity.ok(dto);
+}
     @PostMapping("/usuarios")
     public ResponseEntity<?> guardar(@RequestBody UsuariosDTO dto) {
 

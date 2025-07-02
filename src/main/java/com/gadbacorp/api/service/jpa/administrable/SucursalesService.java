@@ -40,4 +40,8 @@ public class SucursalesService implements ISucursalesService {
     public void eliminar(Integer id) {
         sucursalesRepository.deleteById(id);
     }
+    @Override
+    public List<Sucursales> buscarPorEmpresa(Integer idEmpresa) {
+        return sucursalesRepository.findAllByEmpresa_Idempresa(idEmpresa);
+    }
 }
