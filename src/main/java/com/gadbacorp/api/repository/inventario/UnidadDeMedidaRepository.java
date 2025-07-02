@@ -8,4 +8,5 @@ import com.gadbacorp.api.entity.inventario.UnidadDeMedida;
 
 public interface UnidadDeMedidaRepository extends JpaRepository<UnidadDeMedida, Integer>{
     Optional<UnidadDeMedida> findByNombreIgnoreCase(String nombre);
+    
 }

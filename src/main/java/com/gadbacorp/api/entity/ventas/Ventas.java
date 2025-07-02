@@ -23,7 +23,7 @@ public class Ventas {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idVenta;
-    private double total_venta; 
+    private Double total_venta; 
     private String tipo_comprobante; 
     private String nro_comrprobante; 
     private LocalDate  fecha_venta;
@@ -60,14 +60,7 @@ public class Ventas {
         this.idVenta = idVenta;
     }
 
-    public double getTotal_venta() {
-        return total_venta;
-    }
-
-    public void setTotal_venta(double total_venta) {
-        this.total_venta = total_venta;
-    }
-
+   
     public String getTipo_comprobante() {
         return tipo_comprobante;
     }
@@ -139,6 +132,14 @@ public class Ventas {
 
     public void setDevoluciones(List<Devoluciones> devoluciones) {
         this.devoluciones = devoluciones;
+    }
+
+    public Double getTotal_venta() {
+        return total_venta;
+    }
+
+    public void setTotal_venta(Double total_venta) {
+        this.total_venta = total_venta;
     }
 
    

@@ -22,8 +22,8 @@ import com.gadbacorp.api.repository.inventario.ProductosRepository;
 import com.gadbacorp.api.service.inventario.ICategoriasService;
 
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/api/minimarket")
+@CrossOrigin(origins = "http://localhost:4200")
 public class CategoriasController {
 
     @Autowired

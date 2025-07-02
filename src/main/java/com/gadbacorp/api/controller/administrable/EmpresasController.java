@@ -1,11 +1,12 @@
 package com.gadbacorp.api.controller.administrable;
 
-import java.sql.Blob;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
-import javax.sql.rowset.serial.SerialBlob;
+import java.io.File;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,16 +24,20 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.gadbacorp.api.entity.administrable.Empresas;
+import com.gadbacorp.api.entity.administrable.Sucursales;
+import com.gadbacorp.api.repository.administrable.SucursalesRepository;
 import com.gadbacorp.api.service.administrable.IEmpresasService;
 
 @RestController
 @RequestMapping("/api/minimarket/empresas")
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:4200")
 public class EmpresasController {
 
     @Autowired
     private IEmpresasService serviceEmpresas;
 
+      @Autowired
+    private SucursalesRepository sucursalesRepository;
     @GetMapping
     public List<Empresas> buscarTodos() {
         return serviceEmpresas.buscarTodos();
@@ -46,42 +51,61 @@ public class EmpresasController {
     @PostMapping(
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
-    public ResponseEntity<Void> guardar(
-        @RequestParam String razonsocial,
-        @RequestParam String ciudad,
-        @RequestParam String direccion,
-        @RequestParam String ruc,
-        @RequestParam String correo,
-        @RequestParam(required = false, defaultValue = "0") Integer cant_sucursales,
-        @RequestParam(required = false, defaultValue = "0") Integer cant_cajas,
-        @RequestParam(required = false, defaultValue = "0") Integer cant_trabajadores,
-        @RequestParam(required = false, defaultValue = "0") Integer limit_inventario,
-        @RequestParam String fechaRegistro,                // "YYYY-MM-DD"
-        @RequestParam Integer estado,
-        @RequestParam(required = false) MultipartFile logo  // <--- aquí
-    ) throws Exception {
-        Empresas e = new Empresas();
-        e.setRazonsocial(razonsocial);
-        e.setCiudad(ciudad);
-        e.setDireccion(direccion);
-        e.setRuc(ruc);
-        e.setCorreo(correo);
-        e.setCant_sucursales(cant_sucursales);
-        e.setCant_cajas(cant_cajas);
-        e.setCant_trabajadores(cant_trabajadores);
-        e.setLimit_inventario(limit_inventario);
-        e.setFechaRegistro(LocalDate.parse(fechaRegistro));
-        e.setEstado(estado);
-
-        if (logo != null && !logo.isEmpty()) {
-            // convierte MultipartFile a java.sql.Blob
-            Blob blob = new SerialBlob(logo.getBytes());
-            e.setLogo(blob);
-        }
-
-        serviceEmpresas.guardar(e);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+  public ResponseEntity<Void> guardar(
+    @RequestParam String razonsocial,
+    @RequestParam String ciudad,
+    @RequestParam String direccion,
+    @RequestParam String ruc,
+    @RequestParam String correo,
+    @RequestParam(required = false, defaultValue = "0") Integer cant_sucursales,
+    @RequestParam(required = false, defaultValue = "0") Integer cant_cajas,
+    @RequestParam(required = false, defaultValue = "0") Integer cant_trabajadores,
+    @RequestParam(required = false, defaultValue = "0") Integer limit_inventario,
+    @RequestParam String fechaRegistro,
+    @RequestParam Integer estado,
+    @RequestParam(required = false) MultipartFile logo
+) throws Exception {
+    Empresas e = new Empresas();
+    e.setRazonsocial(razonsocial);
+    e.setCiudad(ciudad);
+    e.setDireccion(direccion);
+    e.setRuc(ruc);
+    e.setCorreo(correo);
+    e.setCant_sucursales(cant_sucursales);
+    e.setCant_cajas(cant_cajas);
+    e.setCant_trabajadores(cant_trabajadores);
+    e.setLimit_inventario(limit_inventario);
+    e.setFechaRegistro(LocalDate.parse(fechaRegistro));
+    e.setEstado(estado);
+if (logo != null && !logo.isEmpty()) {
+    // Generar un nombre único
+    String fileName = "empresa_" + System.currentTimeMillis() + "_" + logo.getOriginalFilename();
+    
+    // Ruta donde lo vas a guardar
+    String uploadDir = "C:\\Users\\gasla\\OneDrive\\Desktop\\minimarket-frontend\\src\\assets\\img";
+    
+    // Crear el directorio si no existe
+    File dir = new File(uploadDir);
+    if (!dir.exists()) {
+        dir.mkdirs();
     }
+
+    // Construir la ruta completa correctamente
+    Path filePath = Paths.get(uploadDir, fileName);
+
+    // Guardar físicamente
+    logo.transferTo(filePath);
+
+    // Guardar nombre en la base
+    e.setLogo(fileName);
+} else {
+    e.setLogo(null); // O algún default
+}
+
+    serviceEmpresas.guardar(e);
+    return ResponseEntity.status(HttpStatus.CREATED).build();
+}
+
 
     @PutMapping(
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -117,9 +141,7 @@ public class EmpresasController {
         e.setFechaRegistro(LocalDate.parse(fechaRegistro));
         e.setEstado(estado);
 
-        if (logo != null && !logo.isEmpty()) {
-            e.setLogo(new SerialBlob(logo.getBytes()));
-        }
+     
 
         serviceEmpresas.modificar(e);
         return ResponseEntity.ok(e);
@@ -130,4 +152,14 @@ public class EmpresasController {
         serviceEmpresas.eliminar(id);
         return ResponseEntity.ok().build();
     }
+@GetMapping("/{idEmpresa}/sucursales")
+public ResponseEntity<List<Sucursales>> listarSucursalesPorEmpresa(@PathVariable Integer idEmpresa) {
+    List<Sucursales> sucursales = sucursalesRepository.findByEmpresaIdempresa(idEmpresa);
+    if (sucursales.isEmpty()) {
+        return ResponseEntity.noContent().build();
+    }
+    return ResponseEntity.ok(sucursales);
+}
+
+
 }

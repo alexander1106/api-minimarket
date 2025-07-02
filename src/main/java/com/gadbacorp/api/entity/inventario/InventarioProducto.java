@@ -9,6 +9,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -37,10 +38,10 @@ public class InventarioProducto {
     private LocalDateTime fechaingreso;
     private Integer estado = 1;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "idproducto", nullable = false)
-    @JsonIgnore
-    private Productos producto;
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+@JoinColumn(name = "idproducto", nullable = false)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "inventarioProductos", "detallesVentas", "detallesCotizacioneses", "detallesDevoluciones"})
+private Productos producto;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idinventario", nullable = false)

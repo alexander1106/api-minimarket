@@ -48,7 +48,6 @@ public class AuthController {
     @Autowired
     private UsuarioService serviceUsuario;
 
-  
 @PostMapping("/login")
 public ResponseEntity<?> generarToken(@RequestBody LoginRequest jwtRequest) throws Exception {
     // Autenticar
@@ -66,11 +65,12 @@ public ResponseEntity<?> generarToken(@RequestBody LoginRequest jwtRequest) thro
     // Guardar token si quieres
     usuario.setToken(token);
     serviceUsuario.guardar(usuario);
-// Obtener el rol (puedes sacarlo de tu entidad Usuarios)
+
+    // Obtener el rol
     String rol = usuario.getRol().getNombre();
 
-    // Devolver respuesta con token y rol
-    return ResponseEntity.ok(new AuthResponse(token, rol));
+    // Retornar respuesta con token, rol y username
+return ResponseEntity.ok(new AuthResponse(token, rol, usuario));
 }
 
 

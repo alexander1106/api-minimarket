@@ -10,6 +10,7 @@ public class UsuariosDTO {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idUsuario;
+    private Integer idEmpresa;
     private Integer idSucursal;
     private String nombre;
     private String username; 
@@ -19,7 +20,7 @@ public class UsuariosDTO {
     private String dni;
     private String turno; 
     private Integer estado=1;
-    private Integer rollId;
+    private Integer rolId;
     private LocalDateTime fechaCreacion;
 
     public UsuariosDTO() {
@@ -115,13 +116,13 @@ public class UsuariosDTO {
     }
 
 
-    public Integer getRollId() {
-        return rollId;
+    public Integer getRolId() {
+        return rolId;
     }
 
 
-    public void setRollId(Integer rollId) {
-        this.rollId = rollId;
+    public void setRolId(Integer rolId) {
+        this.rolId = rolId;
     }
 
 
@@ -142,6 +143,14 @@ public class UsuariosDTO {
 
     public void setDni(String dni) {
         this.dni = dni;
+    }
+
+    public Integer getIdEmpresa() {
+        return idEmpresa;
+    }
+
+    public void setIdEmpresa(Integer idEmpresa) {
+        this.idEmpresa = idEmpresa;
     }
 
     

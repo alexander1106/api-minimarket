@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.gadbacorp.api.entity.inventario.TipoProducto;
+import com.gadbacorp.api.repository.inventario.ProductosRepository;
 import com.gadbacorp.api.repository.inventario.TipoProductoRepository;
 import com.gadbacorp.api.service.inventario.ITipoProductoService;
 
@@ -16,20 +19,50 @@ public class TipoProductoService implements ITipoProductoService {
     @Autowired
     private TipoProductoRepository repoTipoProducto;
 
+    @Autowired
+    private ProductosRepository prodRepo;
+
     @Override
     public List<TipoProducto> buscarTodos() {
         return repoTipoProducto.findAll();
     }
 
     @Override
-    public TipoProducto guardar(TipoProducto tipoproducto) {
-        return repoTipoProducto.save(tipoproducto);
+    public TipoProducto guardar(TipoProducto tipo) {
+        // Validación de nombre duplicado (ignore case)
+        repoTipoProducto.findByNombreIgnoreCase(tipo.getNombre())
+            .ifPresent(t -> {
+                throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya existe un tipo de producto con ese nombre"
+                );
+            });
+        return repoTipoProducto.save(tipo);
     }
 
     @Override
-    public TipoProducto modificar(TipoProducto tipoproducto) {
-        return repoTipoProducto.save(tipoproducto);
+public TipoProducto modificar(TipoProducto tipo) {
+    // 0) Validar que no esté siendo usado por ningún producto
+    boolean enUso = prodRepo.existsByTipoProducto_Idtipoproducto(tipo.getIdtipoproducto());
+    if (enUso) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "No se puede editar: este tipo está siendo usado en productos"
+        );
     }
+
+    // 1) Validar duplicado excluyendo la misma entidad
+    Optional<TipoProducto> dup = repoTipoProducto.findByNombreIgnoreCase(tipo.getNombre());
+    if (dup.isPresent() && !dup.get().getIdtipoproducto().equals(tipo.getIdtipoproducto())) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Ya existe un tipo de producto con ese nombre"
+        );
+    }
+
+    // 2) Guardar
+    return repoTipoProducto.save(tipo);
+}
 
     @Override
     public Optional<TipoProducto> buscarId(Integer id) {
@@ -38,8 +71,13 @@ public class TipoProductoService implements ITipoProductoService {
 
     @Override
     public void eliminar(Integer id) {
+        // Validar que no esté en uso por productos
+        if (prodRepo.existsByTipoProducto_Idtipoproducto(id)) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No se puede eliminar: el tipo de producto está en uso por productos"
+            );
+        }
         repoTipoProducto.deleteById(id);
     }
-
-
 }

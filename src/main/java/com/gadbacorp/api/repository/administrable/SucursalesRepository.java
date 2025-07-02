@@ -12,4 +12,6 @@ public interface SucursalesRepository extends JpaRepository<Sucursales, Integer>
     @Query("SELECT DISTINCT s FROM Sucursales s LEFT JOIN FETCH s.empresa LEFT JOIN FETCH s.almacenes")
     List<Sucursales> findAllWithEmpresaAndAlmacenes();
 
+    List<Sucursales> findByEmpresaIdempresa(Integer idEmpresa);
+
 }
