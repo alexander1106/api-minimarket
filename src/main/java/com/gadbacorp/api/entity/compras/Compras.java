@@ -9,6 +9,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.gadbacorp.api.entity.ventas.MetodosPago;
 
 @Entity
 @Table(name = "Compras")
@@ -25,7 +26,18 @@ public class Compras {
     @JoinColumn(name = "Id_Proveedor")
     private Proveedores proveedor;
 
+    @ManyToOne
+    @JoinColumn(name = "id_metodo_pago")
+    private MetodosPago metodoPago;
+
     private BigDecimal total;
+    
+    @Column(name = "precio_compra")
+    private BigDecimal precioCompra;
+    
+    @Column(name = "precio_venta")
+    private BigDecimal precioVenta;
+    
     private String descripcion;
 
     @Column(name = "fecha_compra")
@@ -33,7 +45,7 @@ public class Compras {
     private Integer estado = 1;
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
-   
+    @JsonManagedReference
     private List<DetallesCompras> detalles;
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
@@ -56,12 +68,36 @@ public class Compras {
         this.proveedor = proveedor;
     }
 
+    public MetodosPago getMetodoPago() {
+        return metodoPago;
+    }
+
+    public void setMetodoPago(MetodosPago metodoPago) {
+        this.metodoPago = metodoPago;
+    }
+
     public BigDecimal getTotal() {
         return total;
     }
 
     public void setTotal(BigDecimal total) {
         this.total = total;
+    }
+
+    public BigDecimal getPrecioCompra() {
+        return precioCompra;
+    }
+
+    public void setPrecioCompra(BigDecimal precioCompra) {
+        this.precioCompra = precioCompra;
+    }
+
+    public BigDecimal getPrecioVenta() {
+        return precioVenta;
+    }
+
+    public void setPrecioVenta(BigDecimal precioVenta) {
+        this.precioVenta = precioVenta;
     }
 
     public String getDescripcion() {
