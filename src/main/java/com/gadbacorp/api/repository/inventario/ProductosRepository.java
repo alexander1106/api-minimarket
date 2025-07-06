@@ -13,4 +13,5 @@ public interface ProductosRepository extends JpaRepository<Productos, Integer>{
     boolean existsByUnidadMedida_Idunidadmedida(Integer idunidadmedida);
     boolean existsByTipoProducto_Idtipoproducto(Integer idtipoproducto);
     boolean existsByCategoria_Idcategoria(Integer idcategoria);
+    
 }
