@@ -6,14 +6,10 @@ import java.util.Optional;
 import com.gadbacorp.api.entity.compras.Compras;
 
 public interface IComprasService {
-  List<Compras> buscarTodos();
-    // Guarda los proveedores
-    void guardar(Compras compra);
-    
-    void modificar(Compras compra);
-
-    Optional<Compras> buscarId(Integer id);
-
-    void eliminar(Integer id);
-
+    Compras guardarCompra(Compras compra);
+    Compras editarCompra(Compras compra);
+    void eliminarCompra(Integer idCompra);
+    Optional<Compras> buscarCompra(Integer idCompra);
+    List<Compras> listarCompras();
+    List<Compras> obtenerComprasPorProveedor(Integer idProveedor);
 }

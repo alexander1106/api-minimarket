@@ -1,10 +1,12 @@
 package com.gadbacorp.api.repository.compras;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import com.gadbacorp.api.entity.compras.DevolucionesCompra;
 
-@Repository
 public interface DevolucionesCompraRepository extends JpaRepository<DevolucionesCompra, Integer> {
+    // Puedes agregar métodos personalizados aquí si es necesario
+    // En DevolucionesCompraRepository
+List<DevolucionesCompra> findByCompraIdCompra(Integer idCompra);
 }

@@ -67,7 +67,6 @@ public class ClientesController {
         return clientesService.obtenerCliente(id);
     }
 
-    // Eliminar cliente (borrado lógico)
     @DeleteMapping("/clientes/{id}")
     public String eliminar(@PathVariable Integer id) {
         clientesService.eliminarCliente(id);

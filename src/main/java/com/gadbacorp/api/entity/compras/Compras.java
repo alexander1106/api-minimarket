@@ -8,17 +8,18 @@ import java.util.List;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.gadbacorp.api.entity.ventas.MetodosPago;
 
 @Entity
 @Table(name = "Compras")
-@SQLDelete(sql = "UPDATE Compras SET estado=0 WHERE Id_compra = ?")
+@SQLDelete(sql = "UPDATE Compras SET estado=0 WHERE id_compra = ?")
 @Where(clause = "estado=1")
 public class Compras {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id_compra")
+    @Column(name = "id_compra")
     private Integer idCompra;
 
     @ManyToOne
@@ -26,22 +27,31 @@ public class Compras {
     private Proveedores proveedor;
 
     @ManyToOne
-    @JoinColumn(name = "idMetodoPago")
+    @JoinColumn(name = "id_metodo_pago")
     private MetodosPago metodoPago;
 
     private BigDecimal total;
-
+    
+    @Column(name = "precio_compra")
+    private BigDecimal precioCompra;
+    
+    @Column(name = "precio_venta")
+    private BigDecimal precioVenta;
+    
     private String descripcion;
 
     @Column(name = "fecha_compra")
     private LocalDateTime fechaCompra;
-
-    private Integer estado =1;
+    private Integer estado = 1;
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
-    
+    @JsonManagedReference
     private List<DetallesCompras> detalles;
 
+    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
+    private List<DevolucionesCompra> devoluciones;
+
+    // Getters y Setters
     public Integer getIdCompra() {
         return idCompra;
     }
@@ -72,6 +82,22 @@ public class Compras {
 
     public void setTotal(BigDecimal total) {
         this.total = total;
+    }
+
+    public BigDecimal getPrecioCompra() {
+        return precioCompra;
+    }
+
+    public void setPrecioCompra(BigDecimal precioCompra) {
+        this.precioCompra = precioCompra;
+    }
+
+    public BigDecimal getPrecioVenta() {
+        return precioVenta;
+    }
+
+    public void setPrecioVenta(BigDecimal precioVenta) {
+        this.precioVenta = precioVenta;
     }
 
     public String getDescripcion() {
@@ -106,13 +132,11 @@ public class Compras {
         this.detalles = detalles;
     }
 
-    @Override
-    public String toString() {
-        return "Compra [idCompra=" + idCompra + ", proveedor=" + proveedor + ", metodoPago=" + metodoPago + ", total="
-                + total + ", descripcion=" + descripcion + ", fechaCompra=" + fechaCompra + ", estado=" + estado
-                + ", detalles=" + detalles + "]";
+    public List<DevolucionesCompra> getDevoluciones() {
+        return devoluciones;
     }
 
-   
-    
+    public void setDevoluciones(List<DevolucionesCompra> devoluciones) {
+        this.devoluciones = devoluciones;
+    }
 }

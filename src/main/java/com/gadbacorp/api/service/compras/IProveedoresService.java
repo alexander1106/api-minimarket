@@ -6,18 +6,10 @@ import java.util.Optional;
 import com.gadbacorp.api.entity.compras.Proveedores;
 
 public interface IProveedoresService {
-      // Listar todos los proveedores de la tabla
     List<Proveedores> buscarTodos();
-    // Guarda los proveedores
-    void guardar(Proveedores proveedor);
-    
-    void modificar(Proveedores proveedor);
-
+    Proveedores guardar(Proveedores proveedor);  // Cambiado de void a Proveedores
+    Proveedores modificar(Proveedores proveedor); // Cambiado de void a Proveedores
     Optional<Proveedores> buscarId(Integer id);
-
     void eliminar(Integer id);
-
+    List<Proveedores> buscarPorEmpresa(Integer idEmpresa);
 }
-
-
-
