@@ -29,6 +29,8 @@ public class CajaTransaccionesService implements ITransaccionesCajaServices {
         transaccionesCajaRepository.deleteById(id);
     }
 
+    
+
     @Override
     public List<TransaccionesCaja> listarTransaccionesCajas() {
         return transaccionesCajaRepository.findAll();
@@ -38,5 +40,22 @@ public class CajaTransaccionesService implements ITransaccionesCajaServices {
     public Optional<TransaccionesCaja> buscarTransaccion(Integer id) {
         return transaccionesCajaRepository.findById(id);
     }
-    
+
+  @Override
+public List<TransaccionesCaja> listarPorAperturaCaja(Integer idAperturaCaja) {
+    return transaccionesCajaRepository.findByAperturaCajaIdAperturaCaja(idAperturaCaja);
+}
+
+  public TransaccionesCajaRepository getTransaccionesCajaRepository() {
+    return transaccionesCajaRepository;
+  }
+
+  public void setTransaccionesCajaRepository(TransaccionesCajaRepository transaccionesCajaRepository) {
+    this.transaccionesCajaRepository = transaccionesCajaRepository;
+  }
+
+  @Override
+  public List<TransaccionesCaja> obtenerPorApertura(Integer idApertura) {
+        return transaccionesCajaRepository.findByAperturaCajaIdAperturaCaja(idApertura);
+  }
 }

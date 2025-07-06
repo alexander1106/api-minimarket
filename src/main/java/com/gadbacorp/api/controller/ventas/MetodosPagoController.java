@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.ventas.MetodosPago;
 import com.gadbacorp.api.service.ventas.IMetodosPagoService;
 @RestController
@@ -52,4 +53,31 @@ public class MetodosPagoController {
         metodosPagoService.eliminarMetodoPago(id);
         return "Método de pago eliminado";
     }
+    @GetMapping("/sucursales/{idSucursal}/metodos-pago")
+public List<MetodosPago> listarPorSucursal(@PathVariable Integer idSucursal) {
+    return metodosPagoService.listarPorSucursal(idSucursal);
+}
+
+
+@PostMapping("/sucursales/{idSucursal}/metodos-pago")
+public ResponseEntity<?> guardarMetodoPagoEnSucursal(
+        @PathVariable Integer idSucursal,
+        @RequestBody MetodosPago metodoPago) {
+
+    // Asignar la sucursal al método
+    Sucursales sucursal = new Sucursales();
+    sucursal.setIdSucursal(idSucursal);
+    metodoPago.setSucursal(sucursal);
+
+    try {
+        MetodosPago guardado = metodosPagoService.guardarMetodoPago(metodoPago);
+        return ResponseEntity.ok(guardado);
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error inesperado al guardar el método de pago.");
+    }
+}
+
+
 }

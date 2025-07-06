@@ -95,9 +95,9 @@ public class DetallesCotizacionesController {
 		DetallesCotizaciones detalle = new DetallesCotizaciones();
 		detalle.setProductos(producto);
 		detalle.setCotizaciones(cotizacion);
-		detalle.setCantidad(dto.getCantidad());
-		detalle.setSubTotal(dto.getSubTotal());
+		detalle.setCantidad(dto.getCantidad());		
 		detalle.setPrecioUnitario(dto.getPrecioUnitario());
+		detalle.setSubTotal(dto.getSubTotal());
 		detalle.setFechaCotizacion(dto.getFechaCotizaciones());
 
 		return ResponseEntity.ok(detallesCotizacionesService.guardarDetallesCotizaciones(detalle));

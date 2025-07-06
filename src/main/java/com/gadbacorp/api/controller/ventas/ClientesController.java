@@ -23,41 +23,52 @@ import com.gadbacorp.api.service.ventas.IClientesService;
 @CrossOrigin("*")
 @RequestMapping("/api/minimarket")
 public class ClientesController {
-    
+
     @Autowired
     private IClientesService clientesService;
 
     @Autowired
     private ApiCliente apiCliente;
 
+    // Consultar datos del cliente por API externa (RENIEC)
     @GetMapping("/clientes/reniec/{dni}")
     public String obtenerDatosReniec(@PathVariable String dni) {
-            System.out.println("Se recibió el DNI: " + dni);
-
+        System.out.println("Se recibió el DNI: " + dni);
         return apiCliente.consumirApi(dni);
     }
 
+    // Listar todos los clientes
     @GetMapping("/clientes")
     public List<Clientes> listarClientes() {
         return clientesService.obetenrTodosClientes();
     }
 
-    @PostMapping("/clientes")
-    public ResponseEntity<?> guardarCliente(@RequestBody Clientes cliente) {
-        return ResponseEntity.ok( clientesService.crearCliente(cliente));
+    // Listar clientes por sucursal
+    @GetMapping("/clientes/sucursal/{idSucursal}")
+    public List<Clientes> listarClientesPorSucursal(@PathVariable Integer idSucursal) {
+        return clientesService.obtenerClientesPorSucursal(idSucursal);
     }
 
+    // Guardar cliente
+    @PostMapping("/clientes")
+    public ResponseEntity<?> guardarCliente(@RequestBody Clientes cliente) {
+        return ResponseEntity.ok(clientesService.crearCliente(cliente));
+    }
+
+    // Modificar cliente
     @PutMapping("/clientes")
-    public Clientes modificar(@RequestBody Clientes cliente) {  
+    public Clientes modificar(@RequestBody Clientes cliente) {
         return clientesService.crearCliente(cliente);
     }
 
-    @GetMapping("clientes/{id}")
-    public Optional<Clientes> buscarId(@PathVariable("id") Integer id){
+    // Buscar cliente por ID
+    @GetMapping("/clientes/{id}")
+    public Optional<Clientes> buscarId(@PathVariable("id") Integer id) {
         return clientesService.obtenerCliente(id);
     }
-    
-    @DeleteMapping("clientes/{id}")
+
+    // Eliminar cliente (borrado lógico)
+    @DeleteMapping("/clientes/{id}")
     public String eliminar(@PathVariable Integer id) {
         clientesService.eliminarCliente(id);
         return "El cliente fue eliminado";

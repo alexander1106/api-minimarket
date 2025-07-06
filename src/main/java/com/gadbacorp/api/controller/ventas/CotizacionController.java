@@ -49,10 +49,9 @@ public class CotizacionController {
     }
     
     @GetMapping("/cotizaciones/{id}")
-    public Optional<Cotizaciones> buscarCotizaciones(@PathVariable Integer id) {
-        return cotizacionesService.buscarCotizacion(id);
-    }
-
+  public List<Cotizaciones> listarCotizacionesPendientesPorSucursal(@PathVariable Integer idSucursal) {
+    return cotizacionesService.listarCotizacionesPendientesPorSucursal(idSucursal);
+}
     @PostMapping("/cotizaciones")
     public ResponseEntity<?> guardarCotizacion(@RequestBody CotizacionesDTO dto) {
         Clientes cliente = clientesRepository.findById(dto.getId_cliente()).orElse(null);
@@ -69,6 +68,8 @@ public class CotizacionController {
         cotizaciones.setCliente(cliente); // Primero asigna el cliente
         return ResponseEntity.ok(cotizacionesService.guardarCotizacion(cotizaciones));
     }
+
+    
     @PutMapping("/cotizaciones")
     public ResponseEntity<?> actualizarCotizacion(@RequestBody CotizacionesDTO dto) {
         if (dto.getIdCotizaciones() == null) {
@@ -136,5 +137,10 @@ public class CotizacionController {
         cotizacionesService.eliminarCotizaciones(id);
         return ResponseEntity.ok("Cotización eliminada correctamente y stock revertido.");
     }
+@GetMapping("/cotizaciones/sucursal/{idSucursal}")
+public ResponseEntity<List<Cotizaciones>> listarPorSucursal(@PathVariable Integer idSucursal) {
+    List<Cotizaciones> cotizaciones = cotizacionesService.findByClienteSucursal(idSucursal);
+    return ResponseEntity.ok(cotizaciones);
+}
 
 }

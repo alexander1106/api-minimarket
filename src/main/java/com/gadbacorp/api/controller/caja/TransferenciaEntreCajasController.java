@@ -17,12 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gadbacorp.api.entity.caja.AperturaCaja;
 import com.gadbacorp.api.entity.caja.Caja;
+import com.gadbacorp.api.entity.caja.SaldoMetodoPago;
 import com.gadbacorp.api.entity.caja.TransaccionesCaja;
 import com.gadbacorp.api.entity.caja.TransferenciaEntreCajasDTO;
 import com.gadbacorp.api.entity.caja.TransferenciasEntreCajas;
 import com.gadbacorp.api.entity.ventas.MetodosPago;
 import com.gadbacorp.api.repository.caja.AperturaCajaRepository;
 import com.gadbacorp.api.repository.caja.CajaRepository;
+import com.gadbacorp.api.repository.caja.SaldoMetodoPagoRepository;
 import com.gadbacorp.api.repository.caja.TransaccionesCajaRepository;
 import com.gadbacorp.api.repository.ventas.MetodosPagoRepository;
 import com.gadbacorp.api.service.caja.ITransferenciaEntreCajasService;
@@ -40,6 +42,9 @@ public class TransferenciaEntreCajasController {
     private AperturaCajaRepository aperturaCajaRepository;
     @Autowired
     private MetodosPagoRepository metodosPagoRepository;
+
+    @Autowired
+    private SaldoMetodoPagoRepository saldoMetodoPagoRepository;
     @Autowired
     private TransaccionesCajaRepository transaccionCajaRepository;
     @Autowired
@@ -52,11 +57,9 @@ public class TransferenciaEntreCajasController {
     public Optional<TransferenciasEntreCajas> buscarTransferencia(@PathVariable Integer id){
         return transferenciaEntreCajasService.buscarTranseferenciaEntreCajas(id);
     }
-
 @PostMapping("/transferencias-entre-cajas")
 @Transactional
 public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody TransferenciaEntreCajasDTO dto) {
-    // Buscar cajas
     Caja cajaOrigen = cajaRepository.findById(dto.getId_caja_origen()).orElse(null);
     Caja cajaDestino = cajaRepository.findById(dto.getId_caja_destino()).orElse(null);
 
@@ -64,7 +67,6 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
         return ResponseEntity.badRequest().body("Una o ambas cajas no existen.");
     }
 
-    // Buscar aperturas activas
     Optional<AperturaCaja> aperturaOrigenOpt = aperturaCajaRepository.findByCaja_IdCajaAndCaja_EstadoCaja(dto.getId_caja_origen(), "OCUPADA");
     Optional<AperturaCaja> aperturaDestinoOpt = aperturaCajaRepository.findByCaja_IdCajaAndCaja_EstadoCaja(dto.getId_caja_destino(), "OCUPADA");
 
@@ -74,16 +76,38 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
 
     AperturaCaja aperturaOrigen = aperturaOrigenOpt.get();
     AperturaCaja aperturaDestino = aperturaDestinoOpt.get();
-   MetodosPago metodosPago = metodosPagoRepository.findById(dto.getIdMetodoPago()).orElse(null);
-    if (metodosPago == null) {
-        return ResponseEntity.badRequest().body("No existe el metodo de pago con id: " + dto.getIdMetodoPago());
+
+    List<MetodosPago> metodos = metodosPagoRepository.findByNombreIgnoreCaseAndSucursal_IdSucursal("EFECTIVO", cajaOrigen.getSucursales().getIdSucursal());
+
+    if (metodos.isEmpty()) {
+        return ResponseEntity.badRequest().body("No existe método de pago EFECTIVO.");
     }
-    // ✅ Validar que haya saldo suficiente
+    if (metodos.size() > 1) {
+        return ResponseEntity.badRequest().body("Hay múltiples métodos de pago EFECTIVO configurados en esta sucursal. Corrija la configuración.");
+    }
+    MetodosPago metodoPago = metodos.get(0);
+
+    // Validar saldo final de la apertura
     if (aperturaOrigen.getSaldoFinal() < dto.getMonto()) {
         return ResponseEntity.badRequest().body("La caja origen no tiene suficiente saldo para realizar la transferencia.");
     }
 
-    // Crear y guardar la transferencia
+    // Buscar el saldo de EFECTIVO de la apertura de la caja origen
+    Optional<SaldoMetodoPago> saldoOrigenOpt = saldoMetodoPagoRepository.findByAperturaCajaAndMetodoPago(aperturaOrigen, metodoPago);
+    Optional<SaldoMetodoPago> saldoDestinoOpt = saldoMetodoPagoRepository.findByAperturaCajaAndMetodoPago(aperturaDestino, metodoPago);
+
+    if (saldoOrigenOpt.isEmpty() || saldoDestinoOpt.isEmpty()) {
+        return ResponseEntity.badRequest().body("No se encontró el saldo del método de pago EFECTIVO en alguna de las aperturas.");
+    }
+
+    SaldoMetodoPago saldoOrigen = saldoOrigenOpt.get();
+    SaldoMetodoPago saldoDestino = saldoDestinoOpt.get();
+
+    if (saldoOrigen.getSaldo() < dto.getMonto()) {
+        return ResponseEntity.badRequest().body("El método de pago EFECTIVO de la caja origen no tiene saldo suficiente.");
+    }
+
+    // Registrar transferencia
     TransferenciasEntreCajas transferencia = new TransferenciasEntreCajas();
     transferencia.setCajaOrigen(cajaOrigen);
     transferencia.setCajaDestino(cajaDestino);
@@ -93,39 +117,39 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
 
     TransferenciasEntreCajas transferenciaGuardada = transferenciaEntreCajasService.guardarTransferenciasEntreCajas(transferencia);
 
-    // Registrar transacción salida
+    // Crear transacciones
     TransaccionesCaja transaccionSalida = new TransaccionesCaja();
     transaccionSalida.setAperturaCaja(aperturaOrigen);
     transaccionSalida.setTipoMovimiento("SALIDA");
     transaccionSalida.setMonto(dto.getMonto());
     transaccionSalida.setFecha(dto.getFecha());
-
-    transaccionSalida.setMetodoPago(metodosPago);
-
+    transaccionSalida.setMetodoPago(metodoPago);
     transaccionSalida.setObservaciones("Transferencia a caja " + cajaDestino.getNombreCaja());
     transaccionCajaRepository.save(transaccionSalida);
 
-    // Registrar transacción entrada
     TransaccionesCaja transaccionEntrada = new TransaccionesCaja();
     transaccionEntrada.setAperturaCaja(aperturaDestino);
     transaccionEntrada.setTipoMovimiento("ENTRADA");
     transaccionEntrada.setMonto(dto.getMonto());
     transaccionEntrada.setFecha(dto.getFecha());
-    transaccionEntrada.setMetodoPago(metodosPago);
+    transaccionEntrada.setMetodoPago(metodoPago);
     transaccionEntrada.setObservaciones("Transferencia desde caja " + cajaOrigen.getNombreCaja());
     transaccionCajaRepository.save(transaccionEntrada);
 
-    // Actualizar saldos finales
+    // Actualizar saldo final de aperturas
     aperturaOrigen.setSaldoFinal(aperturaOrigen.getSaldoFinal() - dto.getMonto());
     aperturaDestino.setSaldoFinal(aperturaDestino.getSaldoFinal() + dto.getMonto());
-
     aperturaCajaRepository.save(aperturaOrigen);
     aperturaCajaRepository.save(aperturaDestino);
 
+    // Actualizar saldo del método de pago EFECTIVO
+    saldoOrigen.setSaldo(saldoOrigen.getSaldo() - dto.getMonto());
+    saldoDestino.setSaldo(saldoDestino.getSaldo() + dto.getMonto());
+    saldoMetodoPagoRepository.save(saldoOrigen);
+    saldoMetodoPagoRepository.save(saldoDestino);
+
     return ResponseEntity.ok(transferenciaGuardada);
 }
-
-
 
 @PutMapping("/transferencia-entre-caja")
 @Transactional

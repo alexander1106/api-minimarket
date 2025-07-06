@@ -48,4 +48,9 @@ public class ClientesService implements IClientesService{
     public List<Clientes> buscarPorDocumento(String documento) {
         return clientesRepository.findByDocumento(documento);
     }
+
+    @Override
+    public List<Clientes> obtenerClientesPorSucursal(Integer idSucursal) {
+        return clientesRepository.findBySucursal_IdSucursal(idSucursal);
+    }
 }

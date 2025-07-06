@@ -20,15 +20,21 @@ public class MetodosPagoService implements  IMetodosPagoService{
 
     @Autowired
     private PagosRepository pagosRepository;
-
-    @Override
-    public MetodosPago guardarMetodoPago(MetodosPago metodoPago) {
-        if (existeMetodoConNombre(metodoPago.getNombre())) {
-            return null; // O puedes devolver un MetodosPago vacío, o manejar en el controlador
-        }
-        return metodosPagoRepository.save(metodoPago);
+@Override
+public MetodosPago guardarMetodoPago(MetodosPago metodoPago) {
+    // Validar que venga bien seteada la sucursal
+    if (metodoPago.getSucursal() == null || metodoPago.getSucursal().getIdSucursal() == null) {
+        throw new IllegalArgumentException("La sucursal es obligatoria.");
     }
 
+    if (metodosPagoRepository.existsByNombreAndSucursal_IdSucursal(
+            metodoPago.getNombre(),
+            metodoPago.getSucursal().getIdSucursal())) {
+        throw new IllegalArgumentException("Ya existe un método de pago con ese nombre en esta sucursal.");
+    }
+
+    return metodosPagoRepository.save(metodoPago);
+}
 
     @Override
     public List<MetodosPago> listarMetodosPago() {
@@ -59,4 +65,10 @@ public class MetodosPagoService implements  IMetodosPagoService{
         }
     
 }
+
+    @Override
+    public List<MetodosPago> listarPorSucursal(Integer idSucursal) {
+        return metodosPagoRepository.findBySucursalIdSucursal(idSucursal);
+    }
+
 }
