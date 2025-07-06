@@ -9,9 +9,9 @@ public class DetallesDevolucionDTO {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idDetallesDevoluciones; 
-    private double pecioUnitario;
+    private Double pecioUnitario;
     private Integer cantidad;
-    private double subTotal;  
+    private Double subTotal;  
     private Integer estado=1; 
     private Integer id_producto; 
     private Integer id_devolucion;
@@ -21,10 +21,10 @@ public class DetallesDevolucionDTO {
     public void setIdDetallesDevoluciones(Integer idDetallesDevoluciones) {
         this.idDetallesDevoluciones = idDetallesDevoluciones;
     }
-    public double getPecioUnitario() {
+    public Double getPecioUnitario() {
         return pecioUnitario;
     }
-    public void setPecioUnitario(double pecioUnitario) {
+    public void setPecioUnitario(Double pecioUnitario) {
         this.pecioUnitario = pecioUnitario;
     }
 
@@ -34,10 +34,10 @@ public class DetallesDevolucionDTO {
     public void setCantidad(Integer cantidad) {
         this.cantidad = cantidad;
     }
-    public double getSubTotal() {
+    public Double getSubTotal() {
         return subTotal;
     }
-    public void setSubTotal(double subTotal) {
+    public void setSubTotal(Double subTotal) {
         this.subTotal = subTotal;
     }
     public Integer getEstado() {

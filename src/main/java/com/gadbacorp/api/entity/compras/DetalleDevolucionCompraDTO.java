@@ -2,32 +2,13 @@ package com.gadbacorp.api.entity.compras;
 
 import java.math.BigDecimal;
 
-public class DetallesComprasDTO {
-    private Integer idDetalleCompra;
-    private Integer idCompra;
+public class DetalleDevolucionCompraDTO {
     private Integer idProducto;
     private Integer cantidad;
     private BigDecimal precioUnitario;
     private BigDecimal subTotal;
-    private Integer estado = 1;
 
-    // Getters and Setters
-    public Integer getIdDetalleCompra() {
-        return idDetalleCompra;
-    }
-
-    public void setIdDetalleCompra(Integer idDetalleCompra) {
-        this.idDetalleCompra = idDetalleCompra;
-    }
-
-    public Integer getIdCompra() {
-        return idCompra;
-    }
-
-    public void setIdCompra(Integer idCompra) {
-        this.idCompra = idCompra;
-    }
-
+    // Getters y Setters
     public Integer getIdProducto() {
         return idProducto;
     }
@@ -58,13 +39,5 @@ public class DetallesComprasDTO {
 
     public void setSubTotal(BigDecimal subTotal) {
         this.subTotal = subTotal;
-    }
-
-    public Integer getEstado() {
-        return estado;
-    }
-
-    public void setEstado(Integer estado) {
-        this.estado = estado;
     }
 }

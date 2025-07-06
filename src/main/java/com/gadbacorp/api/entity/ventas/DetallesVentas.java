@@ -1,10 +1,13 @@
 package com.gadbacorp.api.entity.ventas;
 
 import java.time.LocalDate;
+
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gadbacorp.api.entity.inventario.Productos;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,7 +24,7 @@ public class DetallesVentas {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idDetallesVenta;
-    private Double pecioUnitario;
+    private Double precioUnitario;
     private LocalDate fechaVenta;
     private Integer cantidad;
     private Double subTotal;  
@@ -62,14 +65,6 @@ public class DetallesVentas {
 
     
 
-    public Double getPecioUnitario() {
-        return pecioUnitario;
-    }
-
-    public void setPecioUnitario(Double pecioUnitario) {
-        this.pecioUnitario = pecioUnitario;
-    }
-
     public Double getSubTotal() {
         return subTotal;
     }
@@ -100,6 +95,14 @@ public class DetallesVentas {
 
     public void setProductos(Productos productos) {
         this.productos = productos;
+    }
+
+    public Double getPrecioUnitario() {
+        return precioUnitario;
+    }
+
+    public void setPrecioUnitario(Double precioUnitario) {
+        this.precioUnitario = precioUnitario;
     }
 
    

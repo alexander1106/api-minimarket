@@ -11,27 +11,38 @@ import com.gadbacorp.api.repository.compras.ProveedoresRepository;
 import com.gadbacorp.api.service.compras.IProveedoresService;
 
 @Service
-public class ProveedoresService implements IProveedoresService{
+public class ProveedoresService implements IProveedoresService {
+    
     @Autowired
     private ProveedoresRepository repoProveedores;
-    public List<Proveedores> buscarTodos(){
+    
+    @Override
+    public List<Proveedores> buscarTodos() {
         return repoProveedores.findAll();
     }
-    public void guardar(Proveedores proveedor){
-        repoProveedores.save(proveedor);
+    
+    @Override
+    public Proveedores guardar(Proveedores proveedor) {
+        return repoProveedores.save(proveedor); // Ahora retorna el objeto guardado
     }
 
-    public void modificar(Proveedores proveedor){
-        repoProveedores.save(proveedor);
+    @Override
+    public Proveedores modificar(Proveedores proveedor) {
+        return repoProveedores.save(proveedor); // Ahora retorna el objeto modificado
     }
 
-    public Optional<Proveedores> buscarId(Integer id){
+    @Override
+    public Optional<Proveedores> buscarId(Integer id) {
         return repoProveedores.findById(id);
     }
 
-    public void eliminar(Integer id){
+    @Override
+    public void eliminar(Integer id) {
         repoProveedores.deleteById(id);
     }
-
-
+    
+    @Override
+    public List<Proveedores> buscarPorEmpresa(Integer idEmpresa) {
+        return repoProveedores.findByEmpresaIdempresa(idEmpresa);
+    }
 }

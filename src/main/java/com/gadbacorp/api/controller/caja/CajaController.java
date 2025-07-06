@@ -1,9 +1,12 @@
 package com.gadbacorp.api.controller.caja;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gadbacorp.api.entity.administrable.Empresas;
-import com.gadbacorp.api.entity.administrable.SucursalDTO;
 import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.caja.Caja;
 import com.gadbacorp.api.entity.caja.CajaDTO;
@@ -51,6 +52,20 @@ public class CajaController {
                 .map(caja -> ResponseEntity.ok(caja.getSucursales()))
                 .orElse(ResponseEntity.notFound().build());
     }
+    @GetMapping("/cajas/{idCaja}/sucursal-cajas-abiertas")
+public ResponseEntity<List<Caja>> obtenerCajasAbiertasMismaSucursal(@PathVariable Integer idCaja) {
+    return cajaRepository.findById(idCaja)
+        .map(caja -> {
+            Sucursales sucursal = caja.getSucursales();
+            List<Caja> cajasAbiertas = cajaRepository.findBySucursalesAndEstadoCaja(sucursal, "OCUPADA");
+            return ResponseEntity.ok(cajasAbiertas);
+        })
+        .orElse(ResponseEntity.notFound().build());
+}
+
+
+
+
     @PutMapping("/cajas")
     public ResponseEntity<?> actualizar( @RequestBody CajaDTO dto) {
     Sucursales sucursales = sucursalesRepository.findById(dto.getIdSucursal()).orElse(null);
@@ -69,23 +84,35 @@ public class CajaController {
         return ResponseEntity.ok(cajaService.guardarCaja(caja));
     }
 
-    @PostMapping("/cajas")
-    public ResponseEntity<?> guardaarCaja(@RequestBody CajaDTO dto) {
-        Sucursales sucursales = sucursalesRepository.findById(dto.getIdSucursal()).orElse(null);
-         if (sucursales == null) {
-            return ResponseEntity.badRequest().body("Sucursal no encontrado con ID: " + dto.getIdSucursal());
-        }
-        
-        Caja caja = new Caja();
-        caja.setEstadoCaja(dto.getEstadoCaja());
-        caja.setNombreCaja(dto.getNombreCaja());
-        caja.setSaldoActual(dto.getSaldoActual());
-        caja.setSucursales(sucursales);
-        caja.setEstado(dto.getEstado());
-        
-        return ResponseEntity.ok(cajaService.guardarCaja(caja));
+@PostMapping("/cajas")
+public ResponseEntity<?> guardarCaja(@RequestBody CajaDTO dto) {
+    Sucursales sucursales = sucursalesRepository.findById(dto.getIdSucursal()).orElse(null);
+    if (sucursales == null) {
+        return ResponseEntity.badRequest().body("Sucursal no encontrada con ID: " + dto.getIdSucursal());
     }
-    
+
+    // Verificar duplicado
+    boolean existe = cajaRepository.existsByNombreCajaAndSucursales_IdSucursal(
+        dto.getNombreCaja().trim(),
+        dto.getIdSucursal()
+    );
+    if (existe) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "CAJA_DUPLICADA");
+        response.put("mensaje", "Ya existe una caja con ese nombre en esta sucursal.");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    Caja caja = new Caja();
+    caja.setEstadoCaja(dto.getEstadoCaja());
+    caja.setNombreCaja(dto.getNombreCaja());
+    caja.setSaldoActual(dto.getSaldoActual());
+    caja.setSucursales(sucursales);
+    caja.setEstado(dto.getEstado());
+
+    return ResponseEntity.ok(cajaService.guardarCaja(caja));
+}
+ 
    @DeleteMapping("/cajas/{id}")
 public ResponseEntity<?> eliminarCaja(@PathVariable Integer id) {
     Optional<Caja> optionalCaja = cajaRepository.findById(id);

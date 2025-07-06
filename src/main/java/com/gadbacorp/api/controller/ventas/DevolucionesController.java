@@ -88,7 +88,6 @@ public class DevolucionesController {
             nuevoDetalleDev.setDevoluciones(devolucionGuardada);
             nuevoDetalleDev.setProductos(detalle.getProductos());
             nuevoDetalleDev.setCantidad(detalle.getCantidad());
-            nuevoDetalleDev.setPecioUnitario(detalle.getPecioUnitario());
             detallesDevolucionesService.guardarDetallesDevolucion(nuevoDetalleDev);
         }
 

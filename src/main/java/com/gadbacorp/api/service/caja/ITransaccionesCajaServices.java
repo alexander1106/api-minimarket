@@ -11,6 +11,8 @@ public interface ITransaccionesCajaServices {
     void eliminarTransacciones(Integer id);
     List<TransaccionesCaja> listarTransaccionesCajas();
     Optional<TransaccionesCaja> buscarTransaccion(Integer id); 
-        
+    List<TransaccionesCaja> listarPorAperturaCaja(Integer idAperturaCaja);
+    List<TransaccionesCaja> obtenerPorApertura(Integer idApertura);
+
 
 }

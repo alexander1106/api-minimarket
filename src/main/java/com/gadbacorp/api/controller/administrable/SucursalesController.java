@@ -67,7 +67,7 @@ public class SucursalesController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(almacenes);
-    }
+    }   
     
 
     @GetMapping("/{idSucursal}/empresa")

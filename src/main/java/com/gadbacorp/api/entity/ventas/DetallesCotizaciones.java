@@ -26,10 +26,10 @@ public class DetallesCotizaciones {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idDetallesCotizaciones;
-    private Integer precioUnitario;
+    private Double precioUnitario;
     private LocalDate fechaCotizacion;
     private Integer cantidad;
-    private double subTotal;  
+    private Double subTotal;  
     private Integer estado=1;
 
     @ManyToOne
@@ -64,11 +64,11 @@ public class DetallesCotizaciones {
         this.cantidad = cantidad;
     }
 
-    public double getSubTotal() {
+    public Double getSubTotal() {
         return subTotal;
     }
 
-    public void setSubTotal(double subTotal) {
+    public void setSubTotal(Double subTotal) {
         this.subTotal = subTotal;
     }
 
@@ -104,11 +104,12 @@ public class DetallesCotizaciones {
         this.fechaCotizacion = fechaCotizacion;
     }
 
-    public Integer getPrecioUnitario() {
+    public Double getPrecioUnitario() {
         return precioUnitario;
     }
 
-    public void setPrecioUnitario(Integer precioUnitario) {
+    public void setPrecioUnitario(Double precioUnitario) {
         this.precioUnitario = precioUnitario;
     }
+
 }

@@ -12,5 +12,6 @@ public interface IMetodosPagoService {
     void eliminarMetodoPago(Integer id);
     MetodosPago editarMetodosPago (MetodosPago metodoPago);
     boolean existeMetodoConNombre(String nombre);
+    List<MetodosPago> listarPorSucursal(Integer idSucursal);
 
 }

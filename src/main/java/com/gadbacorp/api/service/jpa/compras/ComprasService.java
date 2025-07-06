@@ -1,5 +1,6 @@
 package com.gadbacorp.api.service.jpa.compras;
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -11,25 +12,38 @@ import com.gadbacorp.api.repository.compras.ComprasRepository;
 import com.gadbacorp.api.service.compras.IComprasService;
 
 @Service
-public class ComprasService implements IComprasService{
+public class ComprasService implements IComprasService {
+
     @Autowired
-    private ComprasRepository repoCompras;
-    public List<Compras> buscarTodos(){
-        return repoCompras.findAll();
-    }
-    public void guardar(Compras compra){
-        repoCompras.save(compra);
+    private ComprasRepository comprasRepository;
+
+    @Override
+    public Compras guardarCompra(Compras compra) {
+        return comprasRepository.save(compra);
     }
 
-    public void modificar(Compras compra){
-        repoCompras.save(compra);
+    @Override
+    public Compras editarCompra(Compras compra) {
+        return comprasRepository.save(compra);
     }
 
-    public Optional<Compras> buscarId(Integer id){
-        return repoCompras.findById(id);
+    @Override
+    public void eliminarCompra(Integer idCompra) {
+        comprasRepository.deleteById(idCompra);
     }
 
-    public void eliminar(Integer id){
-        repoCompras.deleteById(id);
+    @Override
+    public Optional<Compras> buscarCompra(Integer idCompra) {
+        return comprasRepository.findById(idCompra);
+    }
+
+    @Override
+    public List<Compras> listarCompras() {
+        return comprasRepository.findAll();
+    }
+
+    @Override
+    public List<Compras> obtenerComprasPorProveedor(Integer idProveedor) {
+        return comprasRepository.findByProveedorIdProveedor(idProveedor);
     }
 }

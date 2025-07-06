@@ -1,102 +1,52 @@
 package com.gadbacorp.api.entity.compras;
 
+import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.gadbacorp.api.entity.inventario.Productos;
-import com.gadbacorp.api.entity.ventas.MetodosPago;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
 @Entity
-@Table(name = "devoluciones_compra")
-@SQLDelete(sql = "UPDATE devoluciones_compra SET estado = 0 WHERE Id_devolucion = ?")
-@Where(clause = "estado = 1")
+@Table(name = "devolucionesCompras")
+@SQLDelete(sql = "UPDATE devolucionesCompras SET estado=0 WHERE id_devolucionCompras = ?")
+@Where(clause = "estado=1")
 public class DevolucionesCompra {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id_devolucion")
-    private Integer idDevolucion;
-
-    @ManyToOne
-    @JoinColumn(name = "Id_compra")
-    private Compras compra;
-
-    @ManyToOne
-    @JoinColumn(name = "id_producto")
-    private Productos producto;
-
-    @ManyToOne
-    @JoinColumn(name = "idMetodoPago")
-    private MetodosPago metodoPago;
-
-    @Column(name = "cantidad_devuelta")
-    private Integer cantidadDevuelta;
-
-    private String motivo;
-
-    @Column(name = "fecha_devolucion")
-    private LocalDateTime fechaDevolucion;
+    @Column(name = "id_devolucionCompras")
+    private Integer idDevolucionCompra;
 
     private Integer estado = 1;
+    private LocalDateTime fechaDevolucion;
+    private BigDecimal montoDerivativo;
+    private String motivoDevolucion;
+    private String observaciones;
 
-    // Getters and Setters
-    public Integer getIdDevolucion() {
-        return idDevolucion;
+    @ManyToOne
+    @JoinColumn(name = "id_compra")
+    private Compras compra;
+
+    @OneToMany(mappedBy = "devolucionCompra", cascade = CascadeType.ALL)
+    private List<DetallesDevolucionCompra> detalles;
+
+    // Getters y Setters
+    public Integer getIdDevolucionCompra() {
+        return idDevolucionCompra;
     }
 
-    public void setIdDevolucion(Integer idDevolucion) {
-        this.idDevolucion = idDevolucion;
+    public void setIdDevolucionCompra(Integer idDevolucionCompra) {
+        this.idDevolucionCompra = idDevolucionCompra;
     }
 
-    public Compras getCompra() {
-        return compra;
+    public Integer getEstado() {
+        return estado;
     }
 
-    public void setCompra(Compras compra) {
-        this.compra = compra;
-    }
-
-    public Productos getProducto() {
-        return producto;
-    }
-
-    public void setProducto(Productos producto) {
-        this.producto = producto;
-    }
-
-    public MetodosPago getMetodoPago() {
-        return metodoPago;
-    }
-
-    public void setMetodoPago(MetodosPago metodoPago) {
-        this.metodoPago = metodoPago;
-    }
-
-    public Integer getCantidadDevuelta() {
-        return cantidadDevuelta;
-    }
-
-    public void setCantidadDevuelta(Integer cantidadDevuelta) {
-        this.cantidadDevuelta = cantidadDevuelta;
-    }
-
-    public String getMotivo() {
-        return motivo;
-    }
-
-    public void setMotivo(String motivo) {
-        this.motivo = motivo;
+    public void setEstado(Integer estado) {
+        this.estado = estado;
     }
 
     public LocalDateTime getFechaDevolucion() {
@@ -107,11 +57,43 @@ public class DevolucionesCompra {
         this.fechaDevolucion = fechaDevolucion;
     }
 
-    public Integer getEstado() {
-        return estado;
+    public BigDecimal getMontoDerivativo() {
+        return montoDerivativo;
     }
 
-    public void setEstado(Integer estado) {
-        this.estado = estado;
+    public void setMontoDerivativo(BigDecimal montoDerivativo) {
+        this.montoDerivativo = montoDerivativo;
+    }
+
+    public String getMotivoDevolucion() {
+        return motivoDevolucion;
+    }
+
+    public void setMotivoDevolucion(String motivoDevolucion) {
+        this.motivoDevolucion = motivoDevolucion;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
+    }
+
+    public Compras getCompra() {
+        return compra;
+    }
+
+    public void setCompra(Compras compra) {
+        this.compra = compra;
+    }
+
+    public List<DetallesDevolucionCompra> getDetalles() {
+        return detalles;
+    }
+
+    public void setDetalles(List<DetallesDevolucionCompra> detalles) {
+        this.detalles = detalles;
     }
 }
