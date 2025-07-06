@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ import com.gadbacorp.api.repository.ventas.VentasRepository;
 import com.gadbacorp.api.service.ventas.IDetallesVentasService;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/minimarket")
 public class DetallesVentasController {
 
@@ -55,6 +57,15 @@ public class DetallesVentasController {
     public Optional<DetallesVentas> buscarVenta(@PathVariable Integer id) {
         return detallesVentasService.buscarDetallesVentas(id);
     }
+    @GetMapping("/detalles-ventas/venta/{idVenta}")
+public ResponseEntity<?> buscarDetallesPorIdVenta(@PathVariable Integer idVenta) {
+    List<DetallesVentas> detalles = detallesVentasService.buscarPorIdVenta(idVenta);
+    if (detalles.isEmpty()) {
+        return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok(detalles);
+}
+
 
     @PostMapping("/detalles-ventas")
     public ResponseEntity<?> guardarDetallesVentas(@RequestBody DetallesVentasDTO dto) {
@@ -89,7 +100,7 @@ public class DetallesVentasController {
         ajusteInventarioRepository.save(ajuste);
 
         DetallesVentas detallesVentas = new DetallesVentas();
-        detallesVentas.setPecioUnitario(dto.getPecioUnitario());
+        detallesVentas.setPrecioUnitario(dto.getPecioUnitario());
         detallesVentas.setFechaVenta(dto.getFechaVenta());
         detallesVentas.setCantidad(dto.getCantidad());
         detallesVentas.setSubTotal(dto.getSubTotal());
@@ -178,7 +189,7 @@ public class DetallesVentasController {
         detalleExistente.setCantidad(dto.getCantidad());
         detalleExistente.setSubTotal(dto.getSubTotal());
         detalleExistente.setFechaVenta(dto.getFechaVenta());
-        detalleExistente.setPecioUnitario(dto.getPecioUnitario());
+        detalleExistente.setPrecioUnitario(dto.getPecioUnitario());
 
         return ResponseEntity.ok(detallesVentasService.guardarDetallesVentas(detalleExistente));
     }

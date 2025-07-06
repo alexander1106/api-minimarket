@@ -7,11 +7,11 @@ public class DetallesCotizacionesDTO {
     private Integer idDetallesCotizaciones;
     private LocalDate fechaCotizaciones;
     private Integer cantidad;
-    private double subTotal;  
+    private Double subTotal;  
     private Integer estado=1;
     private Integer id_producto;
     private Integer id_cotizacion;
-    private Integer precioUnitario;
+    private Double precioUnitario;
 
     public Integer getIdDetallesCotizaciones() {
         return idDetallesCotizaciones;
@@ -25,10 +25,10 @@ public class DetallesCotizacionesDTO {
     public void setCantidad(Integer cantidad) {
         this.cantidad = cantidad;
     }
-    public double getSubTotal() {
+    public Double getSubTotal() {
         return subTotal;
     }
-    public void setSubTotal(double subTotal) {
+    public void setSubTotal(Double subTotal) {
         this.subTotal = subTotal;
     }
     public Integer getEstado() {
@@ -55,10 +55,10 @@ public class DetallesCotizacionesDTO {
     public void setFechaCotizaciones(LocalDate fechaCotizaciones) {
         this.fechaCotizaciones = fechaCotizaciones;
     }
-    public Integer getPrecioUnitario() {
+    public Double getPrecioUnitario() {
         return precioUnitario;
     }
-    public void setPrecioUnitario(Integer precioUnitario) {
+    public void setPrecioUnitario(Double precioUnitario) {
         this.precioUnitario = precioUnitario;
     }
 }

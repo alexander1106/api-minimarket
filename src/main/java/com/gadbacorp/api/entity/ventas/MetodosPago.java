@@ -5,11 +5,16 @@ import java.util.List;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.gadbacorp.api.entity.administrable.Sucursales;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -24,7 +29,11 @@ public class MetodosPago {
     private Integer idMetodoPago; 
     private String nombre; 
     private Integer estado =1;
-
+    @ManyToOne
+    @JoinColumn(name = "id_sucursal", referencedColumnName = "id_sucursal")
+    @JsonBackReference   // ⬅️ ESTA ANOTACIÓN CORTA EL CICLO
+    private Sucursales sucursal;
+        
     public Integer getIdMetodoPago() {
         return idMetodoPago;
     }
@@ -53,5 +62,10 @@ public class MetodosPago {
     public void setPagos(List<Pagos> pagos) {
       this.pagos = pagos;
     }
- 
+    public Sucursales getSucursal() {
+        return sucursal;
+    }
+    public void setSucursal(Sucursales sucursal) {
+        this.sucursal = sucursal;
+    }
 }

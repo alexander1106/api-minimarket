@@ -121,24 +121,25 @@ public void guardarVentaCompleta(@RequestBody VentaCompletaDTO dto) {
     venta.setEstado(dto.getEstado());
     venta.setCliente(cliente);
 
-    // Guardar venta inicial
-    venta = ventasRepository.save(venta);
-
     // Generar comprobante correlativo
     String tipoComprobante = dto.getTipo_comprobante();
     String prefijo = tipoComprobante.equalsIgnoreCase("FACTURA") ? "F" : "B";
-    List<String> lista = ventasRepository.findUltimosComprobantesPorTipo(tipoComprobante);
-    String ultimoNro = lista.isEmpty() ? null : lista.get(0);
+   List<String> lista = ventasRepository.findUltimoComprobantePorTipo(tipoComprobante);
+String ultimoNro = (lista == null || lista.isEmpty()) ? null : lista.get(0);
 
-    int nuevoNumero = 1;
-    if (ultimoNro != null && !ultimoNro.isEmpty()) {
-        String[] partes = ultimoNro.split("-");
-        if (partes.length == 2) {
-            nuevoNumero = Integer.parseInt(partes[1]) + 1;
-        }
+int nuevoNumero = 1;
+if (ultimoNro != null && !ultimoNro.isEmpty()) {
+    String[] partes = ultimoNro.split("-");
+    if (partes.length == 2) {
+        nuevoNumero = Integer.parseInt(partes[1]) + 1;
     }
-    String numeroFormateado = String.format("%s-%06d", prefijo, nuevoNumero);
-    venta.setNro_comrprobante(numeroFormateado);
+}
+String numeroFormateado = String.format("%s-%06d", prefijo, nuevoNumero);
+venta.setNro_comrprobante(numeroFormateado);
+    // Guardar venta inicial
+    venta = ventasRepository.save(venta);
+
+
     ventasRepository.save(venta);
 
     // Preparar descuento de stock
@@ -157,7 +158,7 @@ public void guardarVentaCompleta(@RequestBody VentaCompletaDTO dto) {
         detalle.setVentas(venta);
         detalle.setProductos(producto);
         detalle.setFechaVenta(LocalDate.now());
-        detalle.setPecioUnitario(detalleDTO.getPecioUnitario());
+        detalle.setPrecioUnitario(detalleDTO.getPecioUnitario());
         detalle.setCantidad(detalleDTO.getCantidad());
         detalle.setSubTotal(detalleDTO.getSubTotal());
         detalle.setEstado(detalleDTO.getEstado());
@@ -277,4 +278,14 @@ public void guardarVentaCompleta(@RequestBody VentaCompletaDTO dto) {
         ventasService.eliminarVenta(id);
         return ResponseEntity.ok().body("Venta eliminada y stock restaurado correctamente.");
     }
+
+    @GetMapping("/ventas/sucursal/{idSucursal}")
+public ResponseEntity<List<Ventas>> obtenerVentasPorSucursal(@PathVariable Integer idSucursal) {
+    List<Ventas> ventas = ventasRepository.findByCliente_Sucursal_IdSucursal(idSucursal);
+    if (ventas.isEmpty()) {
+        return ResponseEntity.noContent().build();
+    }
+    return ResponseEntity.ok(ventas);
+}
+
 }

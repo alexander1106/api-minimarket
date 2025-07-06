@@ -7,9 +7,12 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.gadbacorp.api.entity.caja.Caja;
 import com.gadbacorp.api.entity.empleados.Usuarios;
 import com.gadbacorp.api.entity.inventario.Almacenes;
+import com.gadbacorp.api.entity.ventas.Clientes;
+import com.gadbacorp.api.entity.ventas.MetodosPago;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -38,7 +41,9 @@ public class Sucursales {
     private String contacto;
     private String direccion;
     private Integer estado = 1;
-
+@OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL)
+@JsonManagedReference
+private List<MetodosPago> metodosPago;
     @ManyToOne
     @JoinColumn(name = "idempresa", referencedColumnName = "idempresa")
     @JsonIgnore
@@ -55,6 +60,10 @@ public class Sucursales {
     @OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Almacenes> almacenes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL)
+@JsonIgnore
+private List<Clientes> clientes = new ArrayList<>();
 
     // Getters y Setters
     public Integer getIdSucursal() {
@@ -141,5 +150,21 @@ public class Sucursales {
 
     public void setCajas(List<Caja> cajas) {
         this.cajas = cajas;
+    }
+
+    public List<MetodosPago> getMetodosPago() {
+        return metodosPago;
+    }
+
+    public void setMetodosPago(List<MetodosPago> metodosPago) {
+        this.metodosPago = metodosPago;
+    }
+
+    public List<Clientes> getClientes() {
+        return clientes;
+    }
+
+    public void setClientes(List<Clientes> clientes) {
+        this.clientes = clientes;
     }
 }

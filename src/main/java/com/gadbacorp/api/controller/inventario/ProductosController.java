@@ -1,10 +1,18 @@
 package com.gadbacorp.api.controller.inventario;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,8 +20,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.gadbacorp.api.entity.inventario.ProductosDTO;
 import com.gadbacorp.api.service.jpa.inventario.ProductosService;
@@ -25,6 +35,10 @@ public class ProductosController {
 
     @Autowired
     private ProductosService productosService;
+
+    /*** NUEVO: Inyecta aquí la carpeta donde guardarás las imágenes ***/
+    @Value("${upload.dir}")
+    private String uploadDir;
 
     @GetMapping("/productos")
     public ResponseEntity<List<ProductosDTO>> listar() {
@@ -57,5 +71,37 @@ public class ProductosController {
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         productosService.eliminarProducto(id);
         return ResponseEntity.ok("Producto eliminado correctamente");
+    }
+
+    // ------------------ ENDPOINT PARA SUBIDA DE IMÁGENES ------------------
+
+    /**
+     * Recibe un MultipartFile bajo el campo 'file', lo escribe
+     * en disco dentro de uploadDir y devuelve el nombre del archivo.
+     */
+    @PostMapping(
+      value    = "/productos/upload",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<String> subirImagen(@RequestParam("file") MultipartFile file) {
+        try {
+            // 1) Asegura que exista la carpeta
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // 2) Limpia el nombre y copia el archivo (sobrescribe si existe)
+            String filename = StringUtils.cleanPath(file.getOriginalFilename());
+            Path target = uploadPath.resolve(filename);
+            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+
+            // 3) Devuelve sólo el nombre para que el front lo guarde en el DTO
+            return ResponseEntity.ok(filename);
+
+        } catch (IOException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Error guardando archivo: " + ex.getMessage());
+        }
     }
 }

@@ -5,6 +5,7 @@ import java.util.Date;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gadbacorp.api.entity.ventas.MetodosPago;
 
 import jakarta.persistence.Entity;
@@ -30,16 +31,14 @@ public class TransaccionesCaja {
     private Date fecha; 
     private String observaciones; 
 
- 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idAperturaCaja")
+    @JsonIgnore
     private AperturaCaja aperturaCaja;
      // Aquí agregas la relación al método de pago
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idMetodoPago")
     private MetodosPago metodoPago;
-
-    
 
     public Integer getIdTransaccionesCaja() {
         return idTransaccionesCaja;

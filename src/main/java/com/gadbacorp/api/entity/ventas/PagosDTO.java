@@ -16,6 +16,8 @@ public class PagosDTO {
     private Date fechaPago; 
     private Double montoPagado;
     private String referenciaPago;
+    private String comprobantePago;
+
     private String estadoPago;
     private Integer estado=1;
     private Integer id_metodo_pago;
@@ -26,6 +28,7 @@ public class PagosDTO {
     public void setIdPago(Integer idPago) {
         this.idPago = idPago;
     }
+    
     public String getObservaciones() {
         return observaciones;
     }
@@ -73,5 +76,11 @@ public class PagosDTO {
     }
     public void setId_venta(Integer id_venta) {
         this.id_venta = id_venta;
+    }
+    public String getComprobantePago() {
+        return comprobantePago;
+    }
+    public void setComprobantePago(String comprobantePago) {
+        this.comprobantePago = comprobantePago;
     }
 }

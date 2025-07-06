@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 @Entity
 @Table(name="ventas")
 @SQLDelete(sql="UPDATE ventas SET estado = 0 WHERE id_venta = ?")

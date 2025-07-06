@@ -6,6 +6,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.gadbacorp.api.entity.administrable.Sucursales;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -13,6 +14,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 @Entity
@@ -40,6 +43,9 @@ public class Clientes {
 
     public Clientes() {
     }
+@ManyToOne
+@JoinColumn(name = "id_sucursal", referencedColumnName = "id_sucursal")
+private Sucursales sucursal;
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -152,6 +158,14 @@ public class Clientes {
                  + ", documento=" + documento + ", nombre=" + nombre + ", telefono=" + telefono
                 + ", email=" + email + ", direccion=" + direccion + ", fecha_registro=" + fecha_registro + ", estado="
                 + estado + ", ventas=" + ventas + ", cotizaciones=" + cotizaciones + "]";
+    }
+
+    public Sucursales getSucursal() {
+        return sucursal;
+    }
+
+    public void setSucursal(Sucursales sucursal) {
+        this.sucursal = sucursal;
     }
     
 }

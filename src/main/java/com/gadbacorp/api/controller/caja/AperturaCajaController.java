@@ -19,11 +19,13 @@ import java.util.Collections;
     import com.gadbacorp.api.entity.caja.AperturaCaja;
     import com.gadbacorp.api.entity.caja.AperturaCajaDTO;
     import com.gadbacorp.api.entity.caja.Caja;
+import com.gadbacorp.api.entity.caja.TransaccionesCaja;
     import com.gadbacorp.api.entity.empleados.Usuarios;
     import com.gadbacorp.api.repository.caja.AperturaCajaRepository;
     import com.gadbacorp.api.repository.caja.CajaRepository;
     import com.gadbacorp.api.repository.empleados.UsuarioRepository;
     import com.gadbacorp.api.service.caja.IAperturaCajaService;
+import com.gadbacorp.api.service.caja.ITransaccionesCajaServices;
 
     @RestController
     @CrossOrigin("*")    
@@ -36,7 +38,8 @@ import java.util.Collections;
         @Autowired
         private UsuarioRepository empleadosRepository;
 
-    
+        @Autowired
+        private ITransaccionesCajaServices transaccionesCajaService;
         @Autowired
         private AperturaCajaRepository aperturaCajaRepository;
 
@@ -60,6 +63,11 @@ public ResponseEntity<?> listarAperturasPorSucursal(@PathVariable Integer idSucu
         return ResponseEntity.ok(Collections.singletonMap("mensaje", "No se encontraron aperturas para esta sucursal."));
     }
     return ResponseEntity.ok(aperturas);
+}
+@GetMapping("/aperturas-cajas/{idApertura}/transacciones")
+public ResponseEntity<List<TransaccionesCaja>> listarTransaccionesPorApertura(@PathVariable Integer idApertura) {
+    List<TransaccionesCaja> transacciones = transaccionesCajaService.obtenerPorApertura(idApertura);
+    return ResponseEntity.ok(transacciones);
 }
 
         
@@ -177,30 +185,28 @@ public ResponseEntity<?> modificarAperturaCaja(@RequestBody AperturaCajaDTO dto)
 
 @PostMapping("/aperturas-cajas/{id}/cerrar")
 public ResponseEntity<?>  cerrarAperturaCaja(@PathVariable Integer id) {
-    // Buscar la apertura
     Optional<AperturaCaja> aperturaOptional = aperturaCajaRepository.findById(id);
     if (aperturaOptional.isEmpty()) {
         return ResponseEntity.badRequest().body("No se encontró la apertura de caja con el ID proporcionado.");
     }
 
     AperturaCaja apertura = aperturaOptional.get();
-
-    // Validar que la caja esté ABIERTO
-if (!"OCUPADA".equalsIgnoreCase(apertura.getCaja().getEstadoCaja())) {
-    return ResponseEntity.badRequest().body("La caja no está en estado OCUPADA, no se puede cerrar.");
-}
-
+        // Validar que la caja esté ABIERTO
+    if (!"OCUPADA".equalsIgnoreCase(apertura.getCaja().getEstadoCaja())) {
+        System.out.println(apertura.getCaja().getEstadoCaja());
+        return ResponseEntity.badRequest().body("La caja no está en estado OCUPADA, no se puede cerrar.");
+    }
 
     // Registrar fecha de cierre
     apertura.setFechaCierre(new java.util.Date());
 
     // Cambiar estado de la apertura a CERRADO
     apertura.setEstadoCaja("CERRADO");
-
     // Cambiar estado de la caja a LIBRE
     Caja caja = apertura.getCaja();
+    
     caja.setEstadoCaja("LIBRE");
-
+    caja.setSaldoActual(caja.getSaldoActual()+apertura.getSaldoFinal());
     // Guardar cambios
     aperturaCajaRepository.save(apertura);
     cajaRepository.save(caja);
