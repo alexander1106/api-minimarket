@@ -8,6 +8,8 @@ public class DetallesComprasDTO {
     private Integer idProducto;
     private Integer cantidad;
     private BigDecimal precioUnitario;
+    private BigDecimal precioCompra;
+    private BigDecimal precioVenta;
     private BigDecimal subTotal;
     private Integer estado = 1;
 
@@ -50,6 +52,22 @@ public class DetallesComprasDTO {
 
     public void setPrecioUnitario(BigDecimal precioUnitario) {
         this.precioUnitario = precioUnitario;
+    }
+
+    public BigDecimal getPrecioCompra() {
+        return precioCompra;
+    }
+
+    public void setPrecioCompra(BigDecimal precioCompra) {
+        this.precioCompra = precioCompra;
+    }
+
+    public BigDecimal getPrecioVenta() {
+        return precioVenta;
+    }
+
+    public void setPrecioVenta(BigDecimal precioVenta) {
+        this.precioVenta = precioVenta;
     }
 
     public BigDecimal getSubTotal() {

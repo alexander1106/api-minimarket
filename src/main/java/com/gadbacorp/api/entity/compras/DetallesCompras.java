@@ -35,13 +35,18 @@ public class DetallesCompras {
 
     @ManyToOne
     @JoinColumn(name = "id_producto")
-   
     private Productos producto;
 
     private Integer cantidad;
     
     @Column(name = "precio_unitario")
     private BigDecimal precioUnitario;
+    
+    @Column(name = "precio_compra")
+    private BigDecimal precioCompra;
+    
+    @Column(name = "precio_venta")
+    private BigDecimal precioVenta;
     
     @Column(name = "subtotal")
     private BigDecimal subTotal;
@@ -86,6 +91,22 @@ public class DetallesCompras {
 
     public void setPrecioUnitario(BigDecimal precioUnitario) {
         this.precioUnitario = precioUnitario;
+    }
+
+    public BigDecimal getPrecioCompra() {
+        return precioCompra;
+    }
+
+    public void setPrecioCompra(BigDecimal precioCompra) {
+        this.precioCompra = precioCompra;
+    }
+
+    public BigDecimal getPrecioVenta() {
+        return precioVenta;
+    }
+
+    public void setPrecioVenta(BigDecimal precioVenta) {
+        this.precioVenta = precioVenta;
     }
 
     public BigDecimal getSubTotal() {

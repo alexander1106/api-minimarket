@@ -9,8 +9,6 @@ public class ComprasDTO {
     private Integer idProveedor;
     private Integer idMetodoPago;
     private BigDecimal total;
-    private BigDecimal precioCompra;
-    private BigDecimal precioVenta;
     private String descripcion;
     private LocalDateTime fechaCompra;
     private Integer estado = 1;
@@ -39,18 +37,6 @@ public class ComprasDTO {
     }
     public void setTotal(BigDecimal total) {
         this.total = total;
-    }
-    public BigDecimal getPrecioCompra() {
-        return precioCompra;
-    }
-    public void setPrecioCompra(BigDecimal precioCompra) {
-        this.precioCompra = precioCompra;
-    }
-    public BigDecimal getPrecioVenta() {
-        return precioVenta;
-    }
-    public void setPrecioVenta(BigDecimal precioVenta) {
-        this.precioVenta = precioVenta;
     }
     public String getDescripcion() {
         return descripcion;
