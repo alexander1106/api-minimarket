@@ -6,8 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.compras.*;
 import com.gadbacorp.api.entity.ventas.MetodosPago;
+import com.gadbacorp.api.service.administrable.ISucursalesService;
 import com.gadbacorp.api.service.compras.*;
 import com.gadbacorp.api.service.ventas.IMetodosPagoService;
 
@@ -36,6 +38,9 @@ public class ComprasController {
 
     @Autowired
     private IDetallesComprasService detalleCompraService;
+
+    @Autowired
+    private ISucursalesService sucursalesService;
 
     // Listar todas las compras
     @GetMapping
@@ -102,6 +107,11 @@ public class ComprasController {
             if (proveedor.isEmpty() || proveedor.get().getEstado() == 0) {
                 return ResponseEntity.badRequest().body("Proveedor no encontrado o inactivo");
             }
+
+            Optional<Sucursales> sucursal = sucursalesService.buscarId(compraDTO.getIdSucursal());
+            if (sucursal.isEmpty()) {
+                return ResponseEntity.badRequest().body("Sucursal no encontrada");
+            }
             
             // Validar método de pago
             Optional<MetodosPago> metodoPago = metodosPagoService.obtenerMetodoPago(compraDTO.getIdMetodoPago());
@@ -129,6 +139,7 @@ public class ComprasController {
             Compras compra = new Compras();
             compra.setProveedor(proveedor.get());
             compra.setMetodoPago(metodoPago.get());
+            compra.setSucursal(sucursal.get());
             compra.setFechaCompra(LocalDateTime.now());
             compra.setDescripcion(compraDTO.getDescripcion());
             compra.setEstado(1);
