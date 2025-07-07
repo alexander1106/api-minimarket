@@ -86,23 +86,23 @@ public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
     Ventas venta = cotizacionesService.convertirCotizacionAVenta(dto.getId_venta(), idSucursal);
 
 
-     // Generar comprobante correlativo
-    String tipoComprobante = dto.getComprobantePago();
-    String prefijo = tipoComprobante.equalsIgnoreCase("FACTURA") ? "F" : "B";
-   List<String> lista = ventasRepository.findUltimoComprobantePorTipo(tipoComprobante);
-String ultimoNro = (lista == null || lista.isEmpty()) ? null : lista.get(0);
+          // Generar comprobante correlativo
+        String tipoComprobante = dto.getComprobantePago();
+        String prefijo = tipoComprobante.equalsIgnoreCase("FACTURA") ? "F" : "B";
+        List<String> lista = ventasRepository.findUltimoComprobantePorTipo(tipoComprobante);
+        String ultimoNro = (lista == null || lista.isEmpty()) ? null : lista.get(0);
 
-int nuevoNumero = 1;
-if (ultimoNro != null && !ultimoNro.isEmpty()) {
-    String[] partes = ultimoNro.split("-");
-    if (partes.length == 2) {
-        nuevoNumero = Integer.parseInt(partes[1]) + 1;
-    }
-}
-String numeroFormateado = String.format("%s-%06d", prefijo, nuevoNumero);
-venta.setNro_comrprobante(numeroFormateado);
+        int nuevoNumero = 1;
+        if (ultimoNro != null && !ultimoNro.isEmpty()) {
+            String[] partes = ultimoNro.split("-");
+            if (partes.length == 2) {
+                nuevoNumero = Integer.parseInt(partes[1]) + 1;
+            }
+        }
+        String numeroFormateado = String.format("%s-%06d", prefijo, nuevoNumero);
+        venta.setNro_comrprobante(numeroFormateado);
+        venta = ventasRepository.save(venta);
 
-    venta.setNro_comrprobante("");
     // Registrar pago
     Pagos pago = new Pagos();
     pago.setEstadoPago(dto.getEstadoPago());

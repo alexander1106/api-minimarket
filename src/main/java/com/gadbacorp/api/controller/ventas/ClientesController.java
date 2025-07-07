@@ -1,6 +1,8 @@
 package com.gadbacorp.api.controller.ventas;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,11 +51,18 @@ public class ClientesController {
         return clientesService.obtenerClientesPorSucursal(idSucursal);
     }
 
-    // Guardar cliente
-    @PostMapping("/clientes")
-    public ResponseEntity<?> guardarCliente(@RequestBody Clientes cliente) {
-        return ResponseEntity.ok(clientesService.crearCliente(cliente));
-    }
+   // Guardar cliente
+@PostMapping("/clientes")
+public ResponseEntity<Map<String, Object>> guardarCliente(@RequestBody Clientes cliente) {
+    clientesService.crearCliente(cliente);
+    
+    Map<String, Object> respuesta = new HashMap<>();
+    respuesta.put("status", 200);
+    respuesta.put("Detalle", "Cliente guardado");
+    
+    return ResponseEntity.ok(respuesta);
+}
+
 
     // Modificar cliente
     @PutMapping("/clientes")
@@ -65,11 +74,17 @@ public class ClientesController {
     @GetMapping("/clientes/{id}")
     public Optional<Clientes> buscarId(@PathVariable("id") Integer id) {
         return clientesService.obtenerCliente(id);
-    }
+    }   
 
-    @DeleteMapping("/clientes/{id}")
-    public String eliminar(@PathVariable Integer id) {
-        clientesService.eliminarCliente(id);
-        return "El cliente fue eliminado";
-    }
+   @DeleteMapping("/clientes/{id}")
+public ResponseEntity<Map<String, Object>> eliminar(@PathVariable Integer id) {
+    clientesService.eliminarCliente(id);
+    
+    Map<String, Object> respuesta = new HashMap<>();
+    respuesta.put("status", 200);
+    respuesta.put("Detalle", "El cliente fue eliminado");
+    
+    return ResponseEntity.ok(respuesta);
+}
+
 }

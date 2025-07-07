@@ -1,6 +1,8 @@
 package com.gadbacorp.api.controller.ventas;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,96 +50,125 @@ public class CotizacionController {
         return cotizacionesService.listarCotizacioneses();
     }
     
+    
     @GetMapping("/cotizaciones/{id}")
   public List<Cotizaciones> listarCotizacionesPendientesPorSucursal(@PathVariable Integer idSucursal) {
     return cotizacionesService.listarCotizacionesPendientesPorSucursal(idSucursal);
 }
-    @PostMapping("/cotizaciones")
-    public ResponseEntity<?> guardarCotizacion(@RequestBody CotizacionesDTO dto) {
-        Clientes cliente = clientesRepository.findById(dto.getId_cliente()).orElse(null);
-        if (cliente == null) {
-            return ResponseEntity.badRequest().body("Cliente no encontrado con ID: " + dto.getId_cliente());
-        }
-        Cotizaciones cotizaciones = new Cotizaciones();
-        cotizaciones.setFechaCotizacion(dto.getFechaCotizacion());
-        cotizaciones.setEstadoCotizacion(dto.getEstadoCotizacion());
-        cotizaciones.setNumeroCotizacion(dto.getNumeroCotizacion());
-        cotizaciones.setTotalCotizacion(dto.getTotalCotizacion());
-        cotizaciones.setFechaVencimiento(dto.getFechaVencimiento());
-
-        cotizaciones.setCliente(cliente); // Primero asigna el cliente
-        return ResponseEntity.ok(cotizacionesService.guardarCotizacion(cotizaciones));
-    }
-
     
-    @PutMapping("/cotizaciones")
-    public ResponseEntity<?> actualizarCotizacion(@RequestBody CotizacionesDTO dto) {
-        if (dto.getIdCotizaciones() == null) {
-            return ResponseEntity.badRequest().body("Debe proporcionar el ID de la cotización.");
-        }
+@PostMapping("/cotizaciones")
+public ResponseEntity<Map<String, Object>> guardarCotizacion(@RequestBody CotizacionesDTO dto) {
+    Map<String, Object> respuesta = new HashMap<>();
 
-        Optional<Cotizaciones> optionalCotizacion = cotizacionesService.buscarCotizacion(dto.getIdCotizaciones());
-        if (optionalCotizacion.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Cotizaciones cotizacion = optionalCotizacion.get();
-
-        // Actualizar campos principales
-        cotizacion.setFechaCotizacion(dto.getFechaCotizacion());
-        cotizacion.setEstadoCotizacion(dto.getEstadoCotizacion());
-        cotizacion.setNumeroCotizacion(dto.getNumeroCotizacion());
-        cotizacion.setTotalCotizacion(dto.getTotalCotizacion());
-        // Actualizar cliente si corresponde
-        if (dto.getId_cliente() != null && 
-            (cotizacion.getCliente() == null || !cotizacion.getCliente().getIdCliente().equals(dto.getId_cliente()))) {
-            
-            Optional<Clientes> clienteOpt = clientesRepository.findById(dto.getId_cliente());
-            if (clienteOpt.isEmpty()) {
-                return ResponseEntity.badRequest().body("Cliente no encontrado con ID: " + dto.getId_cliente());
-            }
-            cotizacion.setCliente(clienteOpt.get());
-        }
-
-        Cotizaciones actualizada = cotizacionesService.guardarCotizacion(cotizacion);
-        return ResponseEntity.ok(actualizada);
+    Clientes cliente = clientesRepository.findById(dto.getId_cliente()).orElse(null);
+    if (cliente == null) {
+        respuesta.put("status", 400);
+        respuesta.put("Detalle", "Cliente no encontrado con ID: " + dto.getId_cliente());
+        return ResponseEntity.badRequest().body(respuesta);
     }
 
-    @DeleteMapping("/cotizaciones/{id}")
-    public ResponseEntity<?> eliminarCotizacion(@PathVariable Integer id) {
-        Optional<Cotizaciones> optionalCotizacion = cotizacionesService.buscarCotizacion(id);
-        if (optionalCotizacion.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    Cotizaciones cotizacion = new Cotizaciones();
+    cotizacion.setFechaCotizacion(dto.getFechaCotizacion());
+    cotizacion.setEstadoCotizacion(dto.getEstadoCotizacion());
+    cotizacion.setNumeroCotizacion(dto.getNumeroCotizacion());
+    cotizacion.setTotalCotizacion(dto.getTotalCotizacion());
+    cotizacion.setFechaVencimiento(dto.getFechaVencimiento());
+    cotizacion.setCliente(cliente);
 
-        Cotizaciones cotizacion = optionalCotizacion.get();
-        List<DetallesCotizaciones> detalles = cotizacionesService.buscarDetallesPorCotizacion(id); // Este método debe existir
+    // 🚩 Guardar y obtener la entidad con ID
+    Cotizaciones cotizacionGuardada = cotizacionesService.guardarCotizacion(cotizacion);
 
-        for (DetallesCotizaciones detalle : detalles) {
-            Integer productoId = detalle.getProductos().getIdproducto();
-            Integer cantidad = detalle.getCantidad();
+    respuesta.put("status", 200);
+    respuesta.put("Detalle", "Cotización guardada correctamente.");
+    respuesta.put("idCotizaciones", cotizacionGuardada.getIdCotizaciones());
+    return ResponseEntity.ok(respuesta);
+}
 
-            List<InventarioProducto> inventarios = inventarioProductoRepository.findAllByProducto_Idproducto(productoId);
-            for (InventarioProducto inventario : inventarios) {
-                inventario.setStockactual(inventario.getStockactual() + cantidad); // Se revierte la salida del stock
-                inventarioProductoRepository.save(inventario);
+@PutMapping("/cotizaciones")
+public ResponseEntity<Map<String, Object>> actualizarCotizacion(@RequestBody CotizacionesDTO dto) {
+    Map<String, Object> respuesta = new HashMap<>();
 
-                AjusteInventario ajuste = new AjusteInventario();
-                ajuste.setCantidad(cantidad);
-                ajuste.setDescripcion("REVERTIR ELIMINACIÓN COTIZACIÓN");
-                ajuste.setFechaAjuste(java.time.LocalDateTime.now());
-                ajuste.setInventarioProducto(inventario);
-                ajusteInventarioRepository.save(ajuste);
-            }
-
-            // Opcional: eliminar el detalle
-            cotizacionesService.eliminarDetalleCotizacion(detalle.getIdDetallesCotizaciones());
-        }
-
-        cotizacionesService.eliminarCotizaciones(id);
-        return ResponseEntity.ok("Cotización eliminada correctamente y stock revertido.");
+    if (dto.getIdCotizaciones() == null) {
+        respuesta.put("status", 400);
+        respuesta.put("Detalle", "Debe proporcionar el ID de la cotización.");
+        return ResponseEntity.badRequest().body(respuesta);
     }
-@GetMapping("/cotizaciones/sucursal/{idSucursal}")
+
+    Optional<Cotizaciones> optionalCotizacion = cotizacionesService.buscarCotizacion(dto.getIdCotizaciones());
+    if (optionalCotizacion.isEmpty()) {
+        respuesta.put("status", 404);
+        respuesta.put("Detalle", "La cotización no existe.");
+        return ResponseEntity.status(404).body(respuesta);
+    }
+
+    Cotizaciones cotizacion = optionalCotizacion.get();
+
+    cotizacion.setFechaCotizacion(dto.getFechaCotizacion());
+    cotizacion.setEstadoCotizacion(dto.getEstadoCotizacion());
+    cotizacion.setNumeroCotizacion(dto.getNumeroCotizacion());
+    cotizacion.setTotalCotizacion(dto.getTotalCotizacion());
+
+    if (dto.getId_cliente() != null &&
+        (cotizacion.getCliente() == null || !cotizacion.getCliente().getIdCliente().equals(dto.getId_cliente()))) {
+
+        Optional<Clientes> clienteOpt = clientesRepository.findById(dto.getId_cliente());
+        if (clienteOpt.isEmpty()) {
+            respuesta.put("status", 400);
+            respuesta.put("Detalle", "Cliente no encontrado con ID: " + dto.getId_cliente());
+            return ResponseEntity.badRequest().body(respuesta);
+        }
+        cotizacion.setCliente(clienteOpt.get());
+    }
+
+    cotizacionesService.guardarCotizacion(cotizacion);
+
+    respuesta.put("status", 200);
+    respuesta.put("Detalle", "Cotización actualizada correctamente.");
+    return ResponseEntity.ok(respuesta);
+}
+
+@DeleteMapping("/cotizaciones/{id}")
+public ResponseEntity<Map<String, Object>> eliminarCotizacion(@PathVariable Integer id) {
+    Map<String, Object> respuesta = new HashMap<>();
+
+    Optional<Cotizaciones> optionalCotizacion = cotizacionesService.buscarCotizacion(id);
+    if (optionalCotizacion.isEmpty()) {
+        respuesta.put("status", 404);
+        respuesta.put("Detalle", "La cotización no existe.");
+        return ResponseEntity.status(404).body(respuesta);
+    }
+
+    Cotizaciones cotizacion = optionalCotizacion.get();
+    List<DetallesCotizaciones> detalles = cotizacionesService.buscarDetallesPorCotizacion(id);
+
+    for (DetallesCotizaciones detalle : detalles) {
+        Integer productoId = detalle.getProductos().getIdproducto();
+        Integer cantidad = detalle.getCantidad();
+
+        List<InventarioProducto> inventarios = inventarioProductoRepository.findAllByProducto_Idproducto(productoId);
+        for (InventarioProducto inventario : inventarios) {
+            inventario.setStockactual(inventario.getStockactual() + cantidad);
+            inventarioProductoRepository.save(inventario);
+
+            AjusteInventario ajuste = new AjusteInventario();
+            ajuste.setCantidad(cantidad);
+            ajuste.setDescripcion("REVERTIR ELIMINACIÓN COTIZACIÓN");
+            ajuste.setFechaAjuste(java.time.LocalDateTime.now());
+            ajuste.setInventarioProducto(inventario);
+            ajusteInventarioRepository.save(ajuste);
+        }
+
+        cotizacionesService.eliminarDetalleCotizacion(detalle.getIdDetallesCotizaciones());
+    }
+
+    cotizacionesService.eliminarCotizaciones(id);
+
+    respuesta.put("status", 200);
+    respuesta.put("Detalle", "Cotización eliminada correctamente y stock revertido.");
+    return ResponseEntity.ok(respuesta);
+}
+
+    @GetMapping("/cotizaciones/sucursal/{idSucursal}")
 public ResponseEntity<List<Cotizaciones>> listarPorSucursal(@PathVariable Integer idSucursal) {
     List<Cotizaciones> cotizaciones = cotizacionesService.findByClienteSucursal(idSucursal);
     return ResponseEntity.ok(cotizaciones);

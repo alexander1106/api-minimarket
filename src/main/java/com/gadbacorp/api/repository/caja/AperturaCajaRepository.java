@@ -15,5 +15,10 @@ Optional<AperturaCaja> findByCaja_Sucursales_IdSucursalAndEstadoCaja(Integer idS
 
 List<AperturaCaja> findByCajaSucursalesIdSucursal(Integer idSucursal);
 
+Optional<AperturaCaja> findByUsuarios_IdUsuarioAndEstadoCaja(Integer idUsuario, String estado);
+
+List<AperturaCaja> findByEstadoCaja(String string);
+
+
     
 }

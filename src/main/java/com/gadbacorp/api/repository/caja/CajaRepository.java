@@ -10,6 +10,6 @@ import com.gadbacorp.api.entity.caja.Caja;
 public interface CajaRepository extends JpaRepository<Caja, Integer>{
 
     boolean existsByNombreCajaAndSucursales_IdSucursal(String trim, Integer idSucursal);
-    List    <Caja> findBySucursalesAndEstadoCaja(Sucursales sucursales, String estado);
+    List<Caja> findBySucursalesAndEstadoCaja(Sucursales sucursales, String estado);
 
 }

@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gadbacorp.api.entity.ventas.Clientes;
 import com.gadbacorp.api.entity.ventas.Ventas;
 
 import jakarta.persistence.Entity;
@@ -41,8 +42,8 @@ public class Delivery {
 private Ventas venta;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idvehiculo")
-    private Vehiculo vehiculo;
+    @JoinColumn(name = "idCliente")
+    private Clientes cliente;
 
     public Delivery() {
     }
@@ -119,20 +120,14 @@ private Ventas venta;
         this.venta = venta;
     }
 
-    public Vehiculo getVehiculo() {
-        return vehiculo;
+    public Clientes getCliente() {
+        return cliente;
     }
 
-    public void setVehiculo(Vehiculo vehiculo) {
-        this.vehiculo = vehiculo;
+    public void setCliente(Clientes cliente) {
+        this.cliente = cliente;
     }
 
-    @Override
-    public String toString() {
-        return "Delivery [iddelivery=" + iddelivery + ", direccion=" + direccion + ", fechaEnvio=" + fechaEnvio
-                + ", fechaEntrega=" + fechaEntrega + ", encargado=" + encargado + ", costoEnvio=" + costoEnvio
-                + ", observaciones=" + observaciones + ", estado=" + estado + ", venta=" + venta + ", vehiculo="
-                + vehiculo + "]";
-    }
+ 
 
 }

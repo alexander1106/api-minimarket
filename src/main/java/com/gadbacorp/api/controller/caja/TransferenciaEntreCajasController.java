@@ -49,11 +49,11 @@ public class TransferenciaEntreCajasController {
     private TransaccionesCajaRepository transaccionCajaRepository;
     @Autowired
     private CajaRepository cajaRepository;
-    @GetMapping("/transeferencias-entre-cajas")
+    @GetMapping("/transferencias-entre-cajas")
     public List<TransferenciasEntreCajas> listarTransferenciasEntreCajas(){
         return transferenciaEntreCajasService.listarTransferenciasEntreCajas();
     }
-    @GetMapping("/transferencia-entre-caja/{id}")
+    @GetMapping("/transferencia-entre-cajas/{id}")
     public Optional<TransferenciasEntreCajas> buscarTransferencia(@PathVariable Integer id){
         return transferenciaEntreCajasService.buscarTranseferenciaEntreCajas(id);
     }
@@ -129,7 +129,7 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
 
     TransaccionesCaja transaccionEntrada = new TransaccionesCaja();
     transaccionEntrada.setAperturaCaja(aperturaDestino);
-    transaccionEntrada.setTipoMovimiento("ENTRADA");
+    transaccionEntrada.setTipoMovimiento("INGRESO");
     transaccionEntrada.setMonto(dto.getMonto());
     transaccionEntrada.setFecha(dto.getFecha());
     transaccionEntrada.setMetodoPago(metodoPago);
@@ -151,7 +151,7 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
     return ResponseEntity.ok(transferenciaGuardada);
 }
 
-@PutMapping("/transferencia-entre-caja")
+@PutMapping("/transferencias-entre-cajas")
 @Transactional
 public ResponseEntity<?> editarTransferencias(@RequestBody TransferenciaEntreCajasDTO dto) {
     if (dto.getIdTransferenciaEntreCajas() == null) {
@@ -209,7 +209,7 @@ public ResponseEntity<?> editarTransferencias(@RequestBody TransferenciaEntreCaj
              t.getMonto() == montoAnterior &&
              t.getObservaciones().contains(cajaDestinoAnterior.getNombreCaja()))
         || (t.getAperturaCaja().getIdAperturaCaja().equals(aperturaDestinoAntiguaOpt.map(AperturaCaja::getIdAperturaCaja).orElse(null)) &&
-            t.getTipoMovimiento().equals("ENTRADA") &&
+            t.getTipoMovimiento().equals("INGRESO") &&
             t.getMonto() == montoAnterior &&
             t.getObservaciones().contains(cajaOrigenAnterior.getNombreCaja()))) {
             transaccionCajaRepository.delete(t);
@@ -231,7 +231,7 @@ public ResponseEntity<?> editarTransferencias(@RequestBody TransferenciaEntreCaj
 
     TransaccionesCaja nuevaEntrada = new TransaccionesCaja();
     nuevaEntrada.setAperturaCaja(aperturaDestinoNueva);
-    nuevaEntrada.setTipoMovimiento("ENTRADA");
+    nuevaEntrada.setTipoMovimiento("INGRESO");
     nuevaEntrada.setMonto(dto.getMonto());
     nuevaEntrada.setObservaciones("Transferencia desde caja " + nuevaCajaOrigen.getNombreCaja());
     transaccionCajaRepository.save(nuevaEntrada);
@@ -255,7 +255,7 @@ public ResponseEntity<?> editarTransferencias(@RequestBody TransferenciaEntreCaj
 }
 
 
-@DeleteMapping("/transferencia-entre-caja/{id}")
+@DeleteMapping("/transferencias-entre-cajas/{id}")
 @Transactional
 public ResponseEntity<?> eliminarTransferenciaEntreCaja(@PathVariable Integer id) {
     // Buscar la transferencia
@@ -284,7 +284,7 @@ public ResponseEntity<?> eliminarTransferenciaEntreCaja(@PathVariable Integer id
     List<TransaccionesCaja> transacciones = transaccionCajaRepository.findAll(); // Considera implementar una búsqueda más específica
     for (TransaccionesCaja t : transacciones) {
         if ((t.getAperturaCaja().getIdAperturaCaja().equals(aperturaOrigen.getIdAperturaCaja()) && t.getTipoMovimiento().equals("SALIDA") && t.getMonto() == monto && t.getObservaciones().contains(cajaDestino.getNombreCaja()))
-            || (t.getAperturaCaja().getIdAperturaCaja().equals(aperturaDestino.getIdAperturaCaja()) && t.getTipoMovimiento().equals("ENTRADA") && t.getMonto() == monto && t.getObservaciones().contains(cajaOrigen.getNombreCaja()))) {
+            || (t.getAperturaCaja().getIdAperturaCaja().equals(aperturaDestino.getIdAperturaCaja()) && t.getTipoMovimiento().equals("INGRESO") && t.getMonto() == monto && t.getObservaciones().contains(cajaOrigen.getNombreCaja()))) {
             transaccionCajaRepository.delete(t);
         }
     }
