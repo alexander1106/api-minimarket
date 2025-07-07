@@ -37,6 +37,7 @@ public class ComprasController {
     @Autowired
     private IDetallesComprasService detalleCompraService;
 
+    // Listar todas las compras
     @GetMapping
     public ResponseEntity<?> listarTodasCompras() {
         try {
@@ -51,6 +52,7 @@ public class ComprasController {
         }
     }
 
+    // Obtener una compra por ID con sus detalles
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerCompraPorId(@PathVariable Integer id) {
         try {
@@ -66,7 +68,7 @@ public class ComprasController {
             
             List<DetallesCompras> detalles = detalleCompraService.buscarPorIdCompra(id);
             
-            // Respuesta usando HashMap
+            // Construir respuesta con compra y detalles
             Map<String, Object> response = new HashMap<>();
             response.put("compra", compra.get());
             response.put("detalles", detalles);
@@ -78,6 +80,7 @@ public class ComprasController {
         }
     }
 
+    // Crear una nueva compra
     @PostMapping
     public ResponseEntity<?> crearCompra(@Valid @RequestBody ComprasDTO compraDTO) {
         try {
@@ -122,7 +125,7 @@ public class ComprasController {
                 }
             }
             
-            // Mapear DTO a entidad
+            // Mapear DTO a entidad Compras
             Compras compra = new Compras();
             compra.setProveedor(proveedor.get());
             compra.setMetodoPago(metodoPago.get());
@@ -158,6 +161,7 @@ public class ComprasController {
         }
     }
 
+    // Actualizar una compra existente
     @PutMapping
     public ResponseEntity<?> actualizarCompra(@Valid @RequestBody ComprasDTO compraDTO) {
         try {
@@ -212,7 +216,7 @@ public class ComprasController {
             
             Compras compraActualizada = comprasService.editarCompra(compra);
             
-            // Eliminar detalles antiguos (lógica mejorada)
+            // Eliminar detalles antiguos
             List<DetallesCompras> detallesExistentes = detalleCompraService.buscarPorIdCompra(compra.getIdCompra());
             for (DetallesCompras detalle : detallesExistentes) {
                 detalleCompraService.eliminarDetalle(detalle.getIdDetalleCompra());
@@ -238,6 +242,22 @@ public class ComprasController {
         }
     }
 
+    // Obtener precios de un producto
+    @GetMapping("/productos/{idProducto}/precios")
+    public ResponseEntity<?> obtenerPreciosProducto(@PathVariable Integer idProducto) {
+        try {
+            DetallesComprasDTO detalleDTO = comprasService.obtenerPreciosProducto(idProducto);
+            if (detalleDTO == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(detalleDTO);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body("Error al obtener precios: " + e.getMessage());
+        }
+    }
+
+    // Eliminar una compra (lógico, cambiando estado a 0)
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarCompra(@PathVariable Integer id) {
         try {
@@ -259,4 +279,4 @@ public class ComprasController {
                 .body("Error al eliminar compra: " + e.getMessage());
         }
     }
-}
+} 
