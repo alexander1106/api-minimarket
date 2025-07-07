@@ -27,7 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gadbacorp.api.entity.administrable.Empresas;
 import com.gadbacorp.api.entity.administrable.Sucursales;
+import com.gadbacorp.api.entity.compras.Proveedores;
 import com.gadbacorp.api.repository.administrable.SucursalesRepository;
+import com.gadbacorp.api.repository.compras.ProveedoresRepository;
 import com.gadbacorp.api.service.administrable.IEmpresasService;
 
 @RestController
@@ -43,6 +45,29 @@ public class EmpresasController {
 
     @Autowired
     private SucursalesRepository sucursalesRepository;
+
+        @Autowired
+    private ProveedoresRepository proveedoresRepository;
+
+     // Endpoint para obtener los proveedores de una empresa
+    @GetMapping("/{idEmpresa}/proveedores")
+    public ResponseEntity<List<Proveedores>> obtenerProveedoresPorEmpresa(@PathVariable Integer idEmpresa) {
+        Optional<Empresas> empresaOpt = serviceEmpresas.buscarId(idEmpresa);
+        if (empresaOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Empresas empresa = empresaOpt.get();
+        List<Proveedores> proveedores = empresa.getProveedores(); // Aquí obtenemos la lista de proveedores de la empresa
+
+        if (proveedores.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(proveedores);
+    }
+
+
 
     @GetMapping
     public List<Empresas> buscarTodos() throws IOException {

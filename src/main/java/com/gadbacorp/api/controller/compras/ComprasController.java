@@ -6,19 +6,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.gadbacorp.api.entity.compras.Compras;
-import com.gadbacorp.api.entity.compras.ComprasDTO;
-import com.gadbacorp.api.entity.compras.Proveedores;
+import com.gadbacorp.api.entity.compras.*;
 import com.gadbacorp.api.entity.ventas.MetodosPago;
-import com.gadbacorp.api.service.compras.IComprasService;
-import com.gadbacorp.api.service.compras.IProveedoresService;
+import com.gadbacorp.api.service.compras.*;
 import com.gadbacorp.api.service.ventas.IMetodosPagoService;
 
 import jakarta.validation.Valid;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -36,7 +34,10 @@ public class ComprasController {
     @Autowired
     private IMetodosPagoService metodosPagoService;
 
-    // Listar todas las compras activas
+    @Autowired
+    private IDetallesComprasService detalleCompraService;
+
+    // Listar todas las compras
     @GetMapping
     public ResponseEntity<?> listarTodasCompras() {
         try {
@@ -51,7 +52,7 @@ public class ComprasController {
         }
     }
 
-    // Obtener una compra por ID
+    // Obtener una compra por ID con sus detalles
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerCompraPorId(@PathVariable Integer id) {
         try {
@@ -65,37 +66,17 @@ public class ComprasController {
                     .body("Compra no encontrada o eliminada");
             }
             
-            return ResponseEntity.ok(compra.get());
+            List<DetallesCompras> detalles = detalleCompraService.buscarPorIdCompra(id);
+            
+            // Construir respuesta con compra y detalles
+            Map<String, Object> response = new HashMap<>();
+            response.put("compra", compra.get());
+            response.put("detalles", detalles);
+            
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                 .body("Error al obtener compra: " + e.getMessage());
-        }
-    }
-
-    // Obtener compras por proveedor
-    @GetMapping("/proveedor/{proveedorId}")
-    public ResponseEntity<?> obtenerComprasPorProveedor(@PathVariable Integer proveedorId) {
-        try {
-            if (proveedorId == null || proveedorId <= 0) {
-                return ResponseEntity.badRequest().body("ID de proveedor inválido");
-            }
-            
-            // Verificar si el proveedor existe
-            Optional<Proveedores> proveedor = proveedoresService.buscarId(proveedorId);
-            if (proveedor.isEmpty() || proveedor.get().getEstado() == 0) {
-                return ResponseEntity.badRequest().body("Proveedor no encontrado o inactivo");
-            }
-            
-            List<Compras> compras = comprasService.obtenerComprasPorProveedor(proveedorId);
-            if (compras.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .body("No hay compras registradas para este proveedor");
-            }
-            
-            return ResponseEntity.ok(compras);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                .body("Error al obtener compras por proveedor: " + e.getMessage());
         }
     }
 
@@ -112,25 +93,8 @@ public class ComprasController {
                 return ResponseEntity.badRequest().body("El método de pago es obligatorio");
             }
             
-            if (compraDTO.getTotal() == null || compraDTO.getTotal().compareTo(BigDecimal.ZERO) <= 0) {
-                return ResponseEntity.badRequest().body("El total debe ser mayor a cero");
-            }
-            
-            if (compraDTO.getPrecioCompra() == null || compraDTO.getPrecioCompra().compareTo(BigDecimal.ZERO) <= 0) {
-                return ResponseEntity.badRequest().body("El precio de compra debe ser mayor a cero");
-            }
-            
-            if (compraDTO.getPrecioVenta() == null || compraDTO.getPrecioVenta().compareTo(BigDecimal.ZERO) <= 0) {
-                return ResponseEntity.badRequest().body("El precio de venta debe ser mayor a cero");
-            }
-            
-            if (compraDTO.getFechaCompra() == null) {
-                return ResponseEntity.badRequest().body("La fecha de compra es obligatoria");
-            }
-            
-            // Validar que la fecha no sea futura
-            if (compraDTO.getFechaCompra().isAfter(LocalDateTime.now())) {
-                return ResponseEntity.badRequest().body("La fecha de compra no puede ser futura");
+            if (compraDTO.getDetalles() == null || compraDTO.getDetalles().isEmpty()) {
+                return ResponseEntity.badRequest().body("Debe incluir al menos un producto");
             }
             
             // Validar proveedor
@@ -145,20 +109,51 @@ public class ComprasController {
                 return ResponseEntity.badRequest().body("Método de pago no encontrado o inactivo");
             }
             
-            // Mapear DTO a entidad
+            // Validar detalles
+            for (DetallesComprasDTO detalle : compraDTO.getDetalles()) {
+                if (detalle.getIdProducto() == null) {
+                    return ResponseEntity.badRequest().body("Producto inválido en uno de los detalles");
+                }
+                if (detalle.getCantidad() == null || detalle.getCantidad() <= 0) {
+                    return ResponseEntity.badRequest().body("Cantidad inválida en uno de los detalles");
+                }
+                if (detalle.getPrecioCompra() == null || detalle.getPrecioCompra().compareTo(BigDecimal.ZERO) <= 0) {
+                    return ResponseEntity.badRequest().body("Precio de compra inválido en uno de los detalles");
+                }
+                if (detalle.getPrecioVenta() == null || detalle.getPrecioVenta().compareTo(BigDecimal.ZERO) <= 0) {
+                    return ResponseEntity.badRequest().body("Precio de venta inválido en uno de los detalles");
+                }
+            }
+            
+            // Mapear DTO a entidad Compras
             Compras compra = new Compras();
             compra.setProveedor(proveedor.get());
             compra.setMetodoPago(metodoPago.get());
-            compra.setTotal(compraDTO.getTotal());
-            compra.setPrecioCompra(compraDTO.getPrecioCompra());
-            compra.setPrecioVenta(compraDTO.getPrecioVenta());
+            compra.setFechaCompra(LocalDateTime.now());
             compra.setDescripcion(compraDTO.getDescripcion());
-            compra.setFechaCompra(compraDTO.getFechaCompra());
-            compra.setEstado(1); // Estado activo por defecto
+            compra.setEstado(1);
             
-            // Guardar compra
-            Compras nuevaCompra = comprasService.guardarCompra(compra);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCompra);
+            // Calcular total
+            BigDecimal total = compraDTO.getDetalles().stream()
+                .map(d -> d.getPrecioCompra().multiply(BigDecimal.valueOf(d.getCantidad())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            compra.setTotal(total);
+            
+            Compras compraGuardada = comprasService.guardarCompra(compra);
+            
+            // Guardar detalles
+            for (DetallesComprasDTO detalleDTO : compraDTO.getDetalles()) {
+                DetallesCompras detalle = new DetallesCompras();
+                detalle.setCompra(compraGuardada);
+                detalle.setCantidad(detalleDTO.getCantidad());
+                detalle.setPrecioUnitario(detalleDTO.getPrecioCompra());
+                detalle.setPrecioCompra(detalleDTO.getPrecioCompra());
+                detalle.setPrecioVenta(detalleDTO.getPrecioVenta());
+                detalle.setSubTotal(detalleDTO.getPrecioCompra().multiply(BigDecimal.valueOf(detalleDTO.getCantidad())));
+                detalleCompraService.guardarDetalle(detalle, compraGuardada.getIdCompra(), detalleDTO.getIdProducto());
+            }
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(compraGuardada);
             
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
@@ -170,12 +165,10 @@ public class ComprasController {
     @PutMapping
     public ResponseEntity<?> actualizarCompra(@Valid @RequestBody ComprasDTO compraDTO) {
         try {
-            // Validar que el ID de la compra viene en el cuerpo
             if (compraDTO.getIdCompra() == null || compraDTO.getIdCompra() <= 0) {
-                return ResponseEntity.badRequest().body("El ID de la compra es obligatorio y debe ser válido");
+                return ResponseEntity.badRequest().body("ID de compra inválido");
             }
             
-            // Validar que existe la compra
             Optional<Compras> compraExistente = comprasService.buscarCompra(compraDTO.getIdCompra());
             if (compraExistente.isEmpty() || compraExistente.get().getEstado() == 0) {
                 return ResponseEntity.notFound().build();
@@ -193,42 +186,54 @@ public class ComprasController {
                 return ResponseEntity.badRequest().body("Método de pago no encontrado o inactivo");
             }
             
-            // Validar total
-            if (compraDTO.getTotal() == null || compraDTO.getTotal().compareTo(BigDecimal.ZERO) <= 0) {
-                return ResponseEntity.badRequest().body("El total debe ser mayor a cero");
+            // Validar detalles
+            for (DetallesComprasDTO detalle : compraDTO.getDetalles()) {
+                if (detalle.getIdProducto() == null) {
+                    return ResponseEntity.badRequest().body("Producto inválido en uno de los detalles");
+                }
+                if (detalle.getCantidad() == null || detalle.getCantidad() <= 0) {
+                    return ResponseEntity.badRequest().body("Cantidad inválida en uno de los detalles");
+                }
+                if (detalle.getPrecioCompra() == null || detalle.getPrecioCompra().compareTo(BigDecimal.ZERO) <= 0) {
+                    return ResponseEntity.badRequest().body("Precio de compra inválido en uno de los detalles");
+                }
+                if (detalle.getPrecioVenta() == null || detalle.getPrecioVenta().compareTo(BigDecimal.ZERO) <= 0) {
+                    return ResponseEntity.badRequest().body("Precio de venta inválido en uno de los detalles");
+                }
             }
             
-            // Validar precios
-            if (compraDTO.getPrecioCompra() == null || compraDTO.getPrecioCompra().compareTo(BigDecimal.ZERO) <= 0) {
-                return ResponseEntity.badRequest().body("El precio de compra debe ser mayor a cero");
-            }
-            
-            if (compraDTO.getPrecioVenta() == null || compraDTO.getPrecioVenta().compareTo(BigDecimal.ZERO) <= 0) {
-                return ResponseEntity.badRequest().body("El precio de venta debe ser mayor a cero");
-            }
-            
-            // Validar fecha
-            if (compraDTO.getFechaCompra() == null) {
-                return ResponseEntity.badRequest().body("La fecha de compra es obligatoria");
-            }
-            
-            if (compraDTO.getFechaCompra().isAfter(LocalDateTime.now())) {
-                return ResponseEntity.badRequest().body("La fecha de compra no puede ser futura");
-            }
-            
-            // Actualizar entidad
+            // Actualizar compra
             Compras compra = compraExistente.get();
             compra.setProveedor(proveedor.get());
             compra.setMetodoPago(metodoPago.get());
-            compra.setTotal(compraDTO.getTotal());
-            compra.setPrecioCompra(compraDTO.getPrecioCompra());
-            compra.setPrecioVenta(compraDTO.getPrecioVenta());
             compra.setDescripcion(compraDTO.getDescripcion());
-            compra.setFechaCompra(compraDTO.getFechaCompra());
-            compra.setEstado(compraDTO.getEstado() != null ? compraDTO.getEstado() : 1);
             
-            // Guardar cambios
+            // Calcular nuevo total
+            BigDecimal total = compraDTO.getDetalles().stream()
+                .map(d -> d.getPrecioCompra().multiply(BigDecimal.valueOf(d.getCantidad())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            compra.setTotal(total);
+            
             Compras compraActualizada = comprasService.editarCompra(compra);
+            
+            // Eliminar detalles antiguos
+            List<DetallesCompras> detallesExistentes = detalleCompraService.buscarPorIdCompra(compra.getIdCompra());
+            for (DetallesCompras detalle : detallesExistentes) {
+                detalleCompraService.eliminarDetalle(detalle.getIdDetalleCompra());
+            }
+            
+            // Crear nuevos detalles
+            for (DetallesComprasDTO detalleDTO : compraDTO.getDetalles()) {
+                DetallesCompras detalle = new DetallesCompras();
+                detalle.setCompra(compraActualizada);
+                detalle.setCantidad(detalleDTO.getCantidad());
+                detalle.setPrecioUnitario(detalleDTO.getPrecioCompra());
+                detalle.setPrecioCompra(detalleDTO.getPrecioCompra());
+                detalle.setPrecioVenta(detalleDTO.getPrecioVenta());
+                detalle.setSubTotal(detalleDTO.getPrecioCompra().multiply(BigDecimal.valueOf(detalleDTO.getCantidad())));
+                detalleCompraService.guardarDetalle(detalle, compraActualizada.getIdCompra(), detalleDTO.getIdProducto());
+            }
+            
             return ResponseEntity.ok(compraActualizada);
             
         } catch (Exception e) {
@@ -237,7 +242,22 @@ public class ComprasController {
         }
     }
 
-    // Eliminar (lógicamente) una compra
+    // Obtener precios de un producto
+    @GetMapping("/productos/{idProducto}/precios")
+    public ResponseEntity<?> obtenerPreciosProducto(@PathVariable Integer idProducto) {
+        try {
+            DetallesComprasDTO detalleDTO = comprasService.obtenerPreciosProducto(idProducto);
+            if (detalleDTO == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(detalleDTO);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body("Error al obtener precios: " + e.getMessage());
+        }
+    }
+
+    // Eliminar una compra (lógico, cambiando estado a 0)
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarCompra(@PathVariable Integer id) {
         try {
@@ -259,4 +279,4 @@ public class ComprasController {
                 .body("Error al eliminar compra: " + e.getMessage());
         }
     }
-}
+} 
