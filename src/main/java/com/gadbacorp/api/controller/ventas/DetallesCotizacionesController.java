@@ -26,6 +26,7 @@ import com.gadbacorp.api.repository.inventario.AjusteInventarioRepository;
 import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
 import com.gadbacorp.api.repository.inventario.ProductosRepository;
 import com.gadbacorp.api.repository.ventas.CotizacionesRepository;
+import com.gadbacorp.api.repository.ventas.DetallesCotizacionesRepository;
 import com.gadbacorp.api.service.ventas.IDetallesCotizacionesService;
 
 @RestController
@@ -37,6 +38,9 @@ public class DetallesCotizacionesController {
 
 	@Autowired
 	private ProductosRepository productosRepository;
+
+	@Autowired
+	private DetallesCotizacionesRepository detallesCotizacionesRepository;
 
 	@Autowired
 	private CotizacionesRepository cotizacionesRepository;
@@ -56,6 +60,11 @@ public class DetallesCotizacionesController {
 	public Optional<DetallesCotizaciones> buscarDeetallesCotizaciones(@PathVariable Integer id) {
 		return detallesCotizacionesService.buscarDetallesCotizaciones(id);
 	}
+	@GetMapping("/detalles-cotizaciones/cotizacion/{idCotizacion}")
+public List<DetallesCotizaciones> listarDetallesPorCotizacion(@PathVariable Integer idCotizacion) {
+    return detallesCotizacionesRepository.findByCotizaciones_IdCotizaciones(idCotizacion);
+}
+
 
 	@PostMapping("/detalles-cotizaciones")
 	public ResponseEntity<?> guardarDetalleCotizacion(@RequestBody DetallesCotizacionesDTO dto) {
