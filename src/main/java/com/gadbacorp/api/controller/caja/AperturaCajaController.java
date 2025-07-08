@@ -80,7 +80,6 @@ public ResponseEntity<List<TransaccionesCaja>> listarTransaccionesPorApertura(@P
 
      @PostMapping("/aperturas-cajas")
 public ResponseEntity<?> guardarAperturaCaja(@RequestBody AperturaCajaDTO dto) {
-    // Validaciones previas
     if (dto.getId_caja() == null) {
         return ResponseEntity.badRequest().body("El ID de la caja no puede ser nulo.");
     }
@@ -93,8 +92,6 @@ public ResponseEntity<?> guardarAperturaCaja(@RequestBody AperturaCajaDTO dto) {
     if (dto.getSaldoInicial() == null || dto.getSaldoInicial().doubleValue() < 0) {
         return ResponseEntity.badRequest().body("El saldo inicial no puede ser nulo ni negativo.");
     }
-
-    // Buscar empleado y caja
     Optional<Usuarios> empleadoOptional = empleadosRepository.findById(dto.getId_empleado());
     if (empleadoOptional.isEmpty()) {
         return ResponseEntity.badRequest().body("No se encontró el empleado con el ID proporcionado.");
@@ -107,11 +104,8 @@ public ResponseEntity<?> guardarAperturaCaja(@RequestBody AperturaCajaDTO dto) {
 
     Caja caja = cajaOptional.get();
 
-    // Cambiar estado de la caja a "abierto"
-    caja.setEstadoCaja("OCUPADA");  // Ajusta el nombre del campo y valor según tu modelo
-    cajaRepository.save(caja);   // Guardar el cambio en la base de datos
-
-    // Crear apertura de caja
+    caja.setEstadoCaja("OCUPADA");
+    cajaRepository.save(caja);
     AperturaCaja aperturaCaja = new AperturaCaja();
     aperturaCaja.setFechaApertura(dto.getFechaApertura());
     aperturaCaja.setFechaCierre(dto.getFechaCierre());
@@ -125,10 +119,8 @@ public ResponseEntity<?> guardarAperturaCaja(@RequestBody AperturaCajaDTO dto) {
     return ResponseEntity.ok(aperturaCajaService.guardarAperturaCaja(aperturaCaja));
 }
 
-
 @PutMapping("/aperturas-cajas")
 public ResponseEntity<?> modificarAperturaCaja(@RequestBody AperturaCajaDTO dto) {
-    // Validar campos nulos
     if(dto.getIdAperturaCaja() == null){
         return ResponseEntity.badRequest().body("El ID de la apertura de caja no puede ser nulo.");
     }
@@ -138,8 +130,6 @@ public ResponseEntity<?> modificarAperturaCaja(@RequestBody AperturaCajaDTO dto)
     if(dto.getId_empleado() == null){
         return ResponseEntity.badRequest().body("El ID del empleado no puede ser nulo.");
     }
-
-    // Validar existencia en la base de datos
     Optional<AperturaCaja> aperturaExistente = aperturaCajaService.buscarAperturaCaja(dto.getIdAperturaCaja());
     if(aperturaExistente.isEmpty()) {
         return ResponseEntity.badRequest().body("No se encontró una apertura de caja con el ID proporcionado.");
@@ -149,22 +139,17 @@ public ResponseEntity<?> modificarAperturaCaja(@RequestBody AperturaCajaDTO dto)
     if(cajaOptional.isEmpty()) {
         return ResponseEntity.badRequest().body("No se encontró la caja con el ID proporcionado.");
     }
-
     Optional<Usuarios> empleadoOptional = empleadosRepository.findById(dto.getId_empleado());
     if(empleadoOptional.isEmpty()) {
         return ResponseEntity.badRequest().body("No se encontró el empleado con el ID proporcionado.");
     }
-
-    // Validar datos financieros y fechas
     if(dto.getSaldoInicial() == null || dto.getSaldoInicial().doubleValue() < 0){
         return ResponseEntity.badRequest().body("El saldo inicial no puede ser negativo o nulo.");
     }
-
     if(dto.getFechaApertura() == null){
         return ResponseEntity.badRequest().body("La fecha de apertura no puede ser nula.");
     }
 
-    // Crear objeto con datos actualizados
     AperturaCaja aperturaCaja = aperturaExistente.get();
     aperturaCaja.setFechaApertura(dto.getFechaApertura());
     aperturaCaja.setFechaCierre(dto.getFechaCierre());
@@ -182,7 +167,6 @@ public ResponseEntity<?> modificarAperturaCaja(@RequestBody AperturaCajaDTO dto)
             return "La apertura de caja  a sido eliminad con exito";    
         }
 
-
 @PostMapping("/aperturas-cajas/{id}/cerrar")
 public ResponseEntity<?>  cerrarAperturaCaja(@PathVariable Integer id) {
     Optional<AperturaCaja> aperturaOptional = aperturaCajaRepository.findById(id);
@@ -191,27 +175,20 @@ public ResponseEntity<?>  cerrarAperturaCaja(@PathVariable Integer id) {
     }
 
     AperturaCaja apertura = aperturaOptional.get();
-        // Validar que la caja esté ABIERTO
     if (!"OCUPADA".equalsIgnoreCase(apertura.getCaja().getEstadoCaja())) {
         System.out.println(apertura.getCaja().getEstadoCaja());
         return ResponseEntity.badRequest().body("La caja no está en estado OCUPADA, no se puede cerrar.");
     }
-
-    // Registrar fecha de cierre
     apertura.setFechaCierre(new java.util.Date());
 
-    // Cambiar estado de la apertura a CERRADO
     apertura.setEstadoCaja("CERRADO");
-    // Cambiar estado de la caja a LIBRE
     Caja caja = apertura.getCaja();
     
     caja.setEstadoCaja("LIBRE");
     caja.setSaldoActual(caja.getSaldoActual()+apertura.getSaldoFinal());
-    // Guardar cambios
     aperturaCajaRepository.save(apertura);
     cajaRepository.save(caja);
 
     return ResponseEntity.ok(Collections.singletonMap("mensaje", "Caja cerrada correctamente"));
-}
-
     }
+}

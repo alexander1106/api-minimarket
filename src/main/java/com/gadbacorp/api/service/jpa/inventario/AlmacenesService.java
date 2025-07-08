@@ -27,6 +27,10 @@ public class AlmacenesService implements IAlmacenesService {
     public Optional<Almacenes> buscarPorNombre(String nombre) {
         return repoAlmacenes.findByNombreIgnoreCase(nombre.trim());
     }
+    @Override
+    public List<Almacenes> buscarTodosPorSucursal(Integer idSucursal) {
+        return repoAlmacenes.findBySucursalIdSucursal(idSucursal);
+    }
 
     @Override
     public List<Almacenes> buscarTodos() {

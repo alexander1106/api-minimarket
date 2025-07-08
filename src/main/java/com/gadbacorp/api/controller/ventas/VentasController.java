@@ -23,7 +23,6 @@ import com.gadbacorp.api.entity.inventario.Inventario;
 import com.gadbacorp.api.entity.inventario.InventarioProducto;
 import com.gadbacorp.api.entity.inventario.Productos;
 import com.gadbacorp.api.entity.ventas.Clientes;
-import com.gadbacorp.api.entity.ventas.Cotizaciones;
 import com.gadbacorp.api.entity.ventas.DetallesVentas;
 import com.gadbacorp.api.entity.ventas.DetallesVentasDTO;
 import com.gadbacorp.api.entity.ventas.MetodosPago;
@@ -36,7 +35,11 @@ import com.gadbacorp.api.repository.inventario.AlmacenesRepository;
 import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
 import com.gadbacorp.api.repository.inventario.InventarioRepository;
 import com.gadbacorp.api.repository.inventario.ProductosRepository;
-import com.gadbacorp.api.repository.ventas.*;
+import com.gadbacorp.api.repository.ventas.ClientesRepository;
+import com.gadbacorp.api.repository.ventas.DetallesVentasRepository;
+import com.gadbacorp.api.repository.ventas.MetodosPagoRepository;
+import com.gadbacorp.api.repository.ventas.PagosRepository;
+import com.gadbacorp.api.repository.ventas.VentasRepository;
 import com.gadbacorp.api.service.ventas.IDetallesVentasService;
 import com.gadbacorp.api.service.ventas.IVentasService;
 
@@ -95,7 +98,6 @@ private AlmacenesRepository almacenRepository;
 @Transactional
 @PostMapping("/ventas")
 public void guardarVentaCompleta(@RequestBody VentaCompletaDTO dto) {
-    // Validaciones mínimas
     if (dto.getId_cliente() == null) {
         throw new IllegalArgumentException("El id_cliente es obligatorio");
     }
@@ -112,7 +114,6 @@ public void guardarVentaCompleta(@RequestBody VentaCompletaDTO dto) {
     MetodosPago metodoPago = metodosPagoRepo.findById(dto.getId_metodo_pago())
             .orElseThrow(() -> new IllegalArgumentException("Método de pago no encontrado"));
 
-    // Crear venta
     Ventas venta = new Ventas();
     venta.setTotal_venta(dto.getTotal_venta());
     venta.setTipo_comprobante(dto.getTipo_comprobante());
@@ -121,7 +122,6 @@ public void guardarVentaCompleta(@RequestBody VentaCompletaDTO dto) {
     venta.setEstado(dto.getEstado());
     venta.setCliente(cliente);
 
-    // Generar comprobante correlativo
     String tipoComprobante = dto.getTipo_comprobante();
     String prefijo = tipoComprobante.equalsIgnoreCase("FACTURA") ? "F" : "B";
    List<String> lista = ventasRepository.findUltimoComprobantePorTipo(tipoComprobante);
@@ -136,13 +136,11 @@ if (ultimoNro != null && !ultimoNro.isEmpty()) {
 }
 String numeroFormateado = String.format("%s-%06d", prefijo, nuevoNumero);
 venta.setNro_comrprobante(numeroFormateado);
-    // Guardar venta inicial
     venta = ventasRepository.save(venta);
 
 
     ventasRepository.save(venta);
 
-    // Preparar descuento de stock
     Integer idSucursal = dto.getIdSucursal();
 
     for (DetallesVentasDTO detalleDTO : dto.getDetalles()) {
@@ -165,7 +163,6 @@ venta.setNro_comrprobante(numeroFormateado);
 
         detallesVentasRepository.save(detalle);
 
-        // Descontar stock del producto en los inventarios de la sucursal
         int cantidadPorDescontar = detalleDTO.getCantidad();
         List<Almacenes> almacenes = almacenRepository.findBySucursalIdSucursal(idSucursal);
 
@@ -204,7 +201,7 @@ venta.setNro_comrprobante(numeroFormateado);
 }
 
             if (cantidadPorDescontar == 0) {
-                break; // Salimos de almacenes
+                break; 
             }
         }
 

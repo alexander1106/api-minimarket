@@ -17,4 +17,6 @@ public interface IInventarioService {
 
     void eliminar(Integer id);
 
+    List<Inventario> buscarTodosPorSucursal(Integer idSucursal);
+
 }

@@ -1,19 +1,28 @@
 package com.gadbacorp.api.controller.compras;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.gadbacorp.api.entity.compras.DetallesCompras;
 import com.gadbacorp.api.entity.compras.DetallesComprasDTO;
 import com.gadbacorp.api.service.compras.IDetallesComprasService;
 
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
@@ -27,7 +36,6 @@ public class DetallesComprasController {
     @PostMapping
     public ResponseEntity<?> crearDetalleCompra(@Valid @RequestBody DetallesComprasDTO detalleDTO) {
         try {
-            // Validar campos obligatorios
             if (detalleDTO.getIdCompra() == null || detalleDTO.getIdProducto() == null) {
                 return ResponseEntity.badRequest().body("ID de compra y producto son obligatorios");
             }
@@ -40,7 +48,6 @@ public class DetallesComprasController {
                 return ResponseEntity.badRequest().body("El precio unitario debe ser mayor a cero");
             }
             
-            // Convertir DTO a entidad
             DetallesCompras detalle = new DetallesCompras();
             detalle.setCantidad(detalleDTO.getCantidad());
             detalle.setPrecioUnitario(detalleDTO.getPrecioUnitario());
@@ -72,12 +79,10 @@ public class DetallesComprasController {
     @PutMapping
     public ResponseEntity<?> actualizarDetalleCompra(@Valid @RequestBody DetallesComprasDTO detalleDTO) {
         try {
-            // Validar que el ID del detalle viene en el cuerpo
             if (detalleDTO.getIdDetalleCompra() == null || detalleDTO.getIdDetalleCompra() <= 0) {
                 return ResponseEntity.badRequest().body("El ID del detalle es obligatorio y debe ser válido");
             }
             
-            // Validar campos obligatorios
             if (detalleDTO.getCantidad() == null || detalleDTO.getCantidad() <= 0) {
                 return ResponseEntity.badRequest().body("La cantidad debe ser mayor a cero");
             }
@@ -86,13 +91,11 @@ public class DetallesComprasController {
                 return ResponseEntity.badRequest().body("El precio unitario debe ser mayor a cero");
             }
             
-            // Convertir DTO a entidad
             DetallesCompras detalle = new DetallesCompras();
             detalle.setIdDetalleCompra(detalleDTO.getIdDetalleCompra());
             detalle.setCantidad(detalleDTO.getCantidad());
             detalle.setPrecioUnitario(detalleDTO.getPrecioUnitario());
             
-            // Calcular subtotal si no viene en el DTO
             if (detalleDTO.getSubTotal() == null) {
                 BigDecimal subTotal = detalleDTO.getPrecioUnitario().multiply(new BigDecimal(detalleDTO.getCantidad()));
                 detalle.setSubTotal(subTotal);
@@ -110,7 +113,6 @@ public class DetallesComprasController {
                 .body("Error al actualizar detalle de compra: " + e.getMessage());
         }
     }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarDetalleCompra(@PathVariable Integer id) {
         try {

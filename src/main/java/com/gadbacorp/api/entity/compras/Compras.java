@@ -1,6 +1,5 @@
 package com.gadbacorp.api.entity.compras;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,6 +9,17 @@ import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.gadbacorp.api.entity.ventas.MetodosPago;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Compras")
@@ -51,91 +61,69 @@ public class Compras {
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
     private List<DevolucionesCompra> devoluciones;
 
-    // Getters y Setters
     public Integer getIdCompra() {
         return idCompra;
     }
-
     public void setIdCompra(Integer idCompra) {
         this.idCompra = idCompra;
     }
-
     public Proveedores getProveedor() {
         return proveedor;
     }
-
     public void setProveedor(Proveedores proveedor) {
         this.proveedor = proveedor;
     }
-
     public MetodosPago getMetodoPago() {
         return metodoPago;
     }
-
     public void setMetodoPago(MetodosPago metodoPago) {
         this.metodoPago = metodoPago;
     }
-
     public BigDecimal getTotal() {
         return total;
     }
-
     public void setTotal(BigDecimal total) {
         this.total = total;
     }
-
     public BigDecimal getPrecioCompra() {
         return precioCompra;
     }
-
     public void setPrecioCompra(BigDecimal precioCompra) {
         this.precioCompra = precioCompra;
     }
-
     public BigDecimal getPrecioVenta() {
         return precioVenta;
     }
-
     public void setPrecioVenta(BigDecimal precioVenta) {
         this.precioVenta = precioVenta;
     }
-
     public String getDescripcion() {
         return descripcion;
     }
-
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
-
     public LocalDateTime getFechaCompra() {
         return fechaCompra;
     }
-
     public void setFechaCompra(LocalDateTime fechaCompra) {
         this.fechaCompra = fechaCompra;
     }
-
     public Integer getEstado() {
         return estado;
     }
-
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
-
     public List<DetallesCompras> getDetalles() {
         return detalles;
     }
-
     public void setDetalles(List<DetallesCompras> detalles) {
         this.detalles = detalles;
     }
-
     public List<DevolucionesCompra> getDevoluciones() {
         return devoluciones;
     }
-
     public void setDevoluciones(List<DevolucionesCompra> devoluciones) {
         this.devoluciones = devoluciones;
     }

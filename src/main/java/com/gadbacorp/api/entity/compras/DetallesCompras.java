@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.gadbacorp.api.entity.inventario.Productos;
 
@@ -30,7 +29,7 @@ public class DetallesCompras {
 
     @ManyToOne
     @JoinColumn(name = "id_compra")
-    @JsonIgnoreProperties({"detalles"}) // evita el ciclo sin ignorar todo
+    @JsonIgnoreProperties({"detalles"}) 
     private Compras compra;
 
     @ManyToOne

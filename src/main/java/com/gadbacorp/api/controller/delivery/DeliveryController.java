@@ -47,7 +47,7 @@ public class DeliveryController {
             d.getCostoEnvio(),
             d.getObservaciones(),
             d.getEstado(),
-            d.getVenta(), // ✅ ahora sí el objeto completo
+            d.getVenta(), 
             d.getVehiculo().getIdvehiculo()
         );
     }
@@ -63,7 +63,6 @@ public class DeliveryController {
     d.setObservaciones(dto.getObservaciones());
     if (dto.getEstado() != null) d.setEstado(dto.getEstado());
 
-    // ✅ Obtener ID desde el objeto dto.getVenta()
     if (dto.getVenta() != null && dto.getVenta().getIdVenta() != null) {
         Ventas venta = ventasRepo.findById(dto.getVenta().getIdVenta())
             .orElseThrow(() -> new ResponseStatusException(

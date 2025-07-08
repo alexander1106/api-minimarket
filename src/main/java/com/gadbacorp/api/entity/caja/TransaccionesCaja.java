@@ -35,7 +35,6 @@ public class TransaccionesCaja {
     @JoinColumn(name = "idAperturaCaja")
     @JsonIgnore
     private AperturaCaja aperturaCaja;
-     // Aquí agregas la relación al método de pago
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idMetodoPago")
     private MetodosPago metodoPago;
@@ -43,67 +42,50 @@ public class TransaccionesCaja {
     public Integer getIdTransaccionesCaja() {
         return idTransaccionesCaja;
     }
-
     public void setIdTransaccionesCaja(Integer idTransaccionesCaja) {
         this.idTransaccionesCaja = idTransaccionesCaja;
     }
-
     public String getTipoMovimiento() {
         return tipoMovimiento;
     }
-
     public void setTipoMovimiento(String tipoMovimiento) {
         this.tipoMovimiento = tipoMovimiento;
     }
-
-
     public Double getMonto() {
         return monto;
     }
-
     public void setMonto(Double monto) {
         this.monto = monto;
     }
-
     public Date getFecha() {
         return fecha;
     }
-
     public void setFecha(Date fecha) {
         this.fecha = fecha;
     }
-
     public String getObservaciones() {
         return observaciones;
     }
-
     public void setObservaciones(String observaciones) {
         this.observaciones = observaciones;
     }
-
     public AperturaCaja getAperturaCaja() {
         return aperturaCaja;
     }
-
     public void setAperturaCaja(AperturaCaja aperturaCaja) {
         this.aperturaCaja = aperturaCaja;
     }
-
     public Integer getEstado() {
         return estado;
     }
-
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
-
     public MetodosPago getMetodoPago() {
         return metodoPago;
     }
-
     public void setMetodoPago(MetodosPago metodoPago) {
         this.metodoPago = metodoPago;
     }
-
   
 }

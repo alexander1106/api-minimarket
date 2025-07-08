@@ -27,6 +27,12 @@ public class InventarioService implements IInventarioService {
     public List<Inventario> buscarTodos() {
         return repoInventario.findAll();
     }
+    @Override
+public List<Inventario> buscarTodosPorSucursal(Integer idSucursal) {
+    // Esto buscará todos los inventarios cuyos almacenes estén en la sucursal dada
+    return repoInventario.findByAlmacen_Sucursal_IdSucursal(idSucursal);
+}
+    
 
     @Override
     public Optional<Inventario> buscarId(Integer id) {

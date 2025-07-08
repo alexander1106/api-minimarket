@@ -53,7 +53,7 @@ public class EmpresasController {
                 if (Files.exists(imgPath)) {
                     byte[] bytes = Files.readAllBytes(imgPath);
                     String base64 = Base64.getEncoder().encodeToString(bytes);
-                    e.setLogo(base64); // Sobrescribimos nombre archivo con base64 para enviar al frontend
+                    e.setLogo(base64); 
                 } else {
                     e.setLogo(null);
                 }
@@ -153,7 +153,6 @@ public class EmpresasController {
 
         serviceEmpresas.modificar(e);
 
-        // Cargar logo en base64 para enviar al frontend
         if (e.getLogo() != null) {
             Path imgPath = Paths.get(uploadDir).resolve(e.getLogo()).toAbsolutePath().normalize();
             if (Files.exists(imgPath)) {

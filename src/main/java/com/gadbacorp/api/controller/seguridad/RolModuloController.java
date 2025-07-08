@@ -19,7 +19,7 @@ import com.gadbacorp.api.service.seguridad.IRolModuloService;
 
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin(origins = "*") // Ajusta según frontend
+@CrossOrigin(origins = "*")
 public class RolModuloController {
 
     @Autowired

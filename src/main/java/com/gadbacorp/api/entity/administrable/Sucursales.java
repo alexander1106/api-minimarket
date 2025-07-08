@@ -65,7 +65,6 @@ private List<MetodosPago> metodosPago;
 @JsonIgnore
 private List<Clientes> clientes = new ArrayList<>();
 
-    // Getters y Setters
     public Integer getIdSucursal() {
         return idSucursal;
     }

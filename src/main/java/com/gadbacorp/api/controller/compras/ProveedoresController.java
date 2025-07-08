@@ -6,11 +6,19 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.gadbacorp.api.entity.compras.Proveedores;
-import com.gadbacorp.api.entity.compras.ProveedorDTO;
 import com.gadbacorp.api.entity.administrable.Empresas;
+import com.gadbacorp.api.entity.compras.ProveedorDTO;
+import com.gadbacorp.api.entity.compras.Proveedores;
 import com.gadbacorp.api.repository.administrable.EmpresasRepository;
 import com.gadbacorp.api.service.compras.IProveedoresService;
 
@@ -25,7 +33,6 @@ public class ProveedoresController {
     @Autowired
     private EmpresasRepository empresasRepository;
 
-    // ✅ Listar todos los proveedores
     @GetMapping
     public List<ProveedorDTO> buscarTodos() {
         return serviceProveedores.buscarTodos().stream()
@@ -33,7 +40,6 @@ public class ProveedoresController {
             .collect(Collectors.toList());
     }
 
-    // ✅ Obtener proveedor por ID
     @GetMapping("/{id}")
     public ResponseEntity<ProveedorDTO> buscarPorId(@PathVariable Integer id) {
         Optional<Proveedores> opt = serviceProveedores.buscarId(id);
@@ -43,7 +49,6 @@ public class ProveedoresController {
         return ResponseEntity.ok(toDto(opt.get()));
     }
 
-    // ✅ Buscar proveedores por empresa
     @GetMapping("/empresas/{idEmpresa}")
     public ResponseEntity<List<ProveedorDTO>> buscarPorEmpresa(@PathVariable Integer idEmpresa) {
         List<Proveedores> proveedores = serviceProveedores.buscarPorEmpresa(idEmpresa);
@@ -56,7 +61,6 @@ public class ProveedoresController {
         return ResponseEntity.ok(dtos);
     }
 
-    // ✅ Obtener la empresa (nombre) de un proveedor específico
     @GetMapping("/{idProveedor}/empresas")
     public ResponseEntity<?> obtenerEmpresaPorProveedor(@PathVariable Integer idProveedor) {
         Optional<Proveedores> proveedorOpt = serviceProveedores.buscarId(idProveedor);
@@ -69,11 +73,9 @@ public class ProveedoresController {
             return ResponseEntity.noContent().build();
         }
 
-        // Solo devolver el nombre de la empresa
         return ResponseEntity.ok(empresa.getRazonsocial());
     }
 
-    // ✅ Guardar proveedor
     @PostMapping
     public ResponseEntity<?> guardar(@RequestBody ProveedorDTO dto) {
         Optional<Empresas> empOpt = empresasRepository.findById(dto.getIdEmpresa());
@@ -95,8 +97,6 @@ public class ProveedoresController {
         Proveedores saved = serviceProveedores.guardar(p);
         return ResponseEntity.ok(toDto(saved));
     }
-
-    // ✅ Actualizar proveedor
     @PutMapping
     public ResponseEntity<?> actualizar(@RequestBody ProveedorDTO dto) {
         if (dto.getIdProveedor() == null) {
@@ -123,15 +123,12 @@ public class ProveedoresController {
         Proveedores updated = serviceProveedores.guardar(p);
         return ResponseEntity.ok(toDto(updated));
     }
-
-    // ✅ Eliminar proveedor (borrado lógico)
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         serviceProveedores.eliminar(id);
         return ResponseEntity.ok("Proveedor eliminado correctamente.");
     }
 
-    // ✅ Método para mapear entidad a DTO
     private ProveedorDTO toDto(Proveedores p) {
         ProveedorDTO dto = new ProveedorDTO();
         dto.setIdProveedor(p.getIdProveedor());

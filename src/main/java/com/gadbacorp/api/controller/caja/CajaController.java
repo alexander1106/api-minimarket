@@ -63,9 +63,6 @@ public ResponseEntity<List<Caja>> obtenerCajasAbiertasMismaSucursal(@PathVariabl
         .orElse(ResponseEntity.notFound().build());
 }
 
-
-
-
     @PutMapping("/cajas")
     public ResponseEntity<?> actualizar( @RequestBody CajaDTO dto) {
     Sucursales sucursales = sucursalesRepository.findById(dto.getIdSucursal()).orElse(null);
@@ -90,8 +87,6 @@ public ResponseEntity<?> guardarCaja(@RequestBody CajaDTO dto) {
     if (sucursales == null) {
         return ResponseEntity.badRequest().body("Sucursal no encontrada con ID: " + dto.getIdSucursal());
     }
-
-    // Verificar duplicado
     boolean existe = cajaRepository.existsByNombreCajaAndSucursales_IdSucursal(
         dto.getNombreCaja().trim(),
         dto.getIdSucursal()
@@ -102,7 +97,6 @@ public ResponseEntity<?> guardarCaja(@RequestBody CajaDTO dto) {
         response.put("mensaje", "Ya existe una caja con ese nombre en esta sucursal.");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
-
     Caja caja = new Caja();
     caja.setEstadoCaja(dto.getEstadoCaja());
     caja.setNombreCaja(dto.getNombreCaja());
@@ -122,13 +116,11 @@ public ResponseEntity<?> eliminarCaja(@PathVariable Integer id) {
 
     Caja caja = optionalCaja.get();
 
-    // Validar si tiene aperturas relacionadas
     if (caja.getAperturaCajas() != null && !caja.getAperturaCajas().isEmpty()) {
         return ResponseEntity
                 .badRequest()
                 .body("No se puede eliminar la caja porque tiene aperturas relacionadas.");
     }
-
     cajaService.eliminarCaja(id);
     return ResponseEntity.ok("La caja ha sido eliminada con éxito.");
 }

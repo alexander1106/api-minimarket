@@ -34,7 +34,5 @@ public class AuthResponse {
     public void setUsuario(Usuarios usuario) {
         this.usuario = usuario;
     }
-
-  
     
 }

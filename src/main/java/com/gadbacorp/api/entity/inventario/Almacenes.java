@@ -28,7 +28,6 @@ public class Almacenes {
     private String encargado;
     private Integer estado = 1;
 
-    // ← NUEVO: referencia a la sucursal
     @ManyToOne
     @JoinColumn(name = "id_sucursal")
     private Sucursales sucursal;

@@ -18,8 +18,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-
-
 @Entity
 @Table(name = "saldoMetodoPago")
 @SQLDelete(sql="UPDATE saldoMetodoPago SET estado = 0 WHERE id_saldo_metodo_pago = ?")
@@ -33,22 +31,20 @@ public class SaldoMetodoPago {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_apertura_caja")
-    @JsonIgnore // 👈 Evita que se serialice
+    @JsonIgnore 
     private AperturaCaja aperturaCaja;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_metodo_pago")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // 👈 Ignora el proxy
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private MetodosPago metodoPago;
 
     public Integer getIdSaldoMetodoPago() {
         return idSaldoMetodoPago;
     }
-
     public void setIdSaldoMetodoPago(Integer idSaldoMetodoPago) {
         this.idSaldoMetodoPago = idSaldoMetodoPago;
     }
-
     public Integer getEstado() {
         return estado;
     }
@@ -82,10 +78,6 @@ public class SaldoMetodoPago {
     }
 
     public Optional<SaldoMetodoPago> findByAperturaCajaAndMetodoPago(AperturaCaja aperturaCaja2, MetodosPago metodo) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findByAperturaCajaAndMetodoPago'");
     }
-
-    
-    
 }

@@ -55,7 +55,6 @@ public class TransaccionesCajaController {
 
 @PostMapping("/transacciones-cajas")
 public ResponseEntity<?> guardarTransaccion(@RequestBody TransaccionesCajaDTO dto) {
-    // Obtener la apertura de caja relacionada
     AperturaCaja aperturaCaja = aperturaCajaRepository.findById(dto.getId_apertura_caja()).orElse(null);
     if (aperturaCaja == null) {
         return ResponseEntity.badRequest().body("No existe la apertura de caja con id: " + dto.getId_apertura_caja());
@@ -66,24 +65,18 @@ public ResponseEntity<?> guardarTransaccion(@RequestBody TransaccionesCajaDTO dt
         return ResponseEntity.badRequest().body("No existe el metodo de pago con id: " + dto.getIdMetodoPago());
     }
 
-    // Obtener el saldo actual de la apertura
     Double saldoActual = aperturaCaja.getSaldoFinal() != null
         ? aperturaCaja.getSaldoFinal()
         : aperturaCaja.getSaldoInicial() != null
             ? aperturaCaja.getSaldoInicial()
             : 0.0;
-
-    // Validar tipo de movimiento
     if (!"INGRESO".equalsIgnoreCase(dto.getTipoMovimiento()) && !"EGRESO".equalsIgnoreCase(dto.getTipoMovimiento())) {
         return ResponseEntity.badRequest().body("Tipo de movimiento inválido: " + dto.getTipoMovimiento());
     }
-
-    // Validar saldo suficiente para egreso
     if ("EGRESO".equalsIgnoreCase(dto.getTipoMovimiento()) && dto.getMonto() > saldoActual) {
         return ResponseEntity.badRequest().body("Saldo insuficiente. No se puede egresar más de lo disponible.");
     }
 
-    // Crear la transacción
     TransaccionesCaja transaccionesCaja = new TransaccionesCaja();
     transaccionesCaja.setFecha(new Date());
     transaccionesCaja.setMonto(dto.getMonto());
@@ -92,7 +85,6 @@ public ResponseEntity<?> guardarTransaccion(@RequestBody TransaccionesCajaDTO dt
     transaccionesCaja.setAperturaCaja(aperturaCaja);
     transaccionesCaja.setMetodoPago(metodosPago);
 
-    // Actualizar saldo total de la caja
     if ("INGRESO".equalsIgnoreCase(dto.getTipoMovimiento())) {
         saldoActual += dto.getMonto();
     } else {
@@ -100,7 +92,6 @@ public ResponseEntity<?> guardarTransaccion(@RequestBody TransaccionesCajaDTO dt
     }
     aperturaCaja.setSaldoFinal(saldoActual);
 
-    // === LÓGICA saldoEfectivo ===
     if ("Efectivo".equalsIgnoreCase(metodosPago.getNombre())) {
         Double saldoEfectivo = aperturaCaja.getSaldoEfectivo() != null ? aperturaCaja.getSaldoEfectivo() : 0.0;
         if ("INGRESO".equalsIgnoreCase(dto.getTipoMovimiento())) {
@@ -125,19 +116,16 @@ public ResponseEntity<?> guardarTransaccion(@RequestBody TransaccionesCajaDTO dt
 
     Double saldoMetodoActual = saldoMetodoPago.getSaldo() != null ? saldoMetodoPago.getSaldo() : 0.0;
 
-    // 🚩🚩 Validar que el egreso no supere el saldo del método de pago
     if ("EGRESO".equalsIgnoreCase(dto.getTipoMovimiento()) && dto.getMonto() > saldoMetodoActual) {
         return ResponseEntity.badRequest().body("Saldo insuficiente en el método de pago. No se puede egresar más de lo disponible.");
     }
 
-    // Actualizar saldo del método de pago
     if ("INGRESO".equalsIgnoreCase(dto.getTipoMovimiento())) {
         saldoMetodoActual += dto.getMonto();
     } else {
         saldoMetodoActual -= dto.getMonto();
     }
     saldoMetodoPago.setSaldo(saldoMetodoActual);
-
     aperturaCajaRepository.save(aperturaCaja);
     saldoMetodoPagoRepository.save(saldoMetodoPago);
     TransaccionesCaja transaccionGuardada = transaccionesCajaService.guardarTransaccion(transaccionesCaja);
@@ -150,8 +138,6 @@ public ResponseEntity<?> editarTransaccion(@RequestBody TransaccionesCajaDTO dto
     if (dto.getIdTransaccionesCaja() == null) {
         return ResponseEntity.badRequest().body("El ID de la transacción es requerido.");
     }
-
-    // Buscar la transacción existente
     Optional<TransaccionesCaja> optionalTransaccion = transaccionesCajaService.buscarTransaccion(dto.getIdTransaccionesCaja());
     if (!optionalTransaccion.isPresent()) {
         return ResponseEntity.badRequest().body("No se encontró la transacción con ID: " + dto.getIdTransaccionesCaja());
@@ -163,38 +149,31 @@ public ResponseEntity<?> editarTransaccion(@RequestBody TransaccionesCajaDTO dto
         return ResponseEntity.badRequest().body("No se encontró la apertura de caja asociada.");
     }
 
-    // Obtener saldo actual
     Double saldoActual = aperturaCaja.getSaldoFinal() != null ? aperturaCaja.getSaldoFinal() : 0.0;
 
-    // Revertir efecto de la transacción anterior
     if ("INGRESO".equalsIgnoreCase(transaccionExistente.getTipoMovimiento())) {
         saldoActual -= transaccionExistente.getMonto();
     } else if ("EGRESO".equalsIgnoreCase(transaccionExistente.getTipoMovimiento())) {
         saldoActual += transaccionExistente.getMonto();
     }
 
-    // Validar nuevo tipo de movimiento
     if (!"INGRESO".equalsIgnoreCase(dto.getTipoMovimiento()) && !"EGRESO".equalsIgnoreCase(dto.getTipoMovimiento())) {
         return ResponseEntity.badRequest().body("Tipo de movimiento inválido: " + dto.getTipoMovimiento());
     }
 
-    // Validar saldo suficiente si es EGRESO nuevo
     if ("EGRESO".equalsIgnoreCase(dto.getTipoMovimiento()) && dto.getMonto() > saldoActual) {
         return ResponseEntity.badRequest().body("Saldo insuficiente para actualizar la transacción.");
     }
 
-    // Aplicar nuevo efecto
     if ("INGRESO".equalsIgnoreCase(dto.getTipoMovimiento())) {
         saldoActual += dto.getMonto();
     } else {
         saldoActual -= dto.getMonto();
     }
 
-    // Actualizar apertura de caja
     aperturaCaja.setSaldoFinal(saldoActual);
     aperturaCajaRepository.save(aperturaCaja);
 
-    // Actualizar transacción
     transaccionExistente.setFecha(new Date());
     transaccionExistente.setMonto(dto.getMonto());
     transaccionExistente.setObservaciones(dto.getObservaciones());
@@ -216,7 +195,6 @@ public ResponseEntity<?> eliminarCaja(@PathVariable Integer id) {
         return ResponseEntity.badRequest().body("La transacción no tiene una apertura de caja válida.");
     }
 
-    // Revertir el efecto de la transacción eliminada
     Double saldoActual = aperturaCaja.getSaldoFinal() != null ? aperturaCaja.getSaldoFinal() : 0.0;
 
     if ("INGRESO".equalsIgnoreCase(transaccion.getTipoMovimiento())) {
@@ -228,7 +206,6 @@ public ResponseEntity<?> eliminarCaja(@PathVariable Integer id) {
     aperturaCaja.setSaldoFinal(saldoActual);
     aperturaCajaRepository.save(aperturaCaja);
 
-    // Eliminar transacción
     transaccionesCajaService.eliminarTransacciones(id);
 
     return ResponseEntity.ok("La transacción fue eliminada correctamente.");

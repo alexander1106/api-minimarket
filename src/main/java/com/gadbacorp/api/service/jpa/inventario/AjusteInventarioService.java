@@ -20,6 +20,10 @@ public class AjusteInventarioService implements IAjusteInventarioService {
     public List<AjusteInventario> buscarTodos() {
         return repoAjuste.findAll();
     }
+    @Override
+    public List<AjusteInventario> buscarPorSucursal(Integer idSucursal) {
+        return repoAjuste.findByInventarioProducto_Inventario_Almacen_Sucursal_IdSucursal(idSucursal);
+    }
 
     @Override
     public Optional<AjusteInventario> buscarId(Integer id) {

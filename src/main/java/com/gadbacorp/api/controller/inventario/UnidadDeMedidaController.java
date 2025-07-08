@@ -41,7 +41,6 @@ public class UnidadDeMedidaController {
         return u;
     }
 
-    /** Listar todas las unidades */
     @GetMapping
     public ResponseEntity<List<UnidadDeMedidaDTO>> listar() {
         List<UnidadDeMedidaDTO> dtos = service.buscarTodos()
@@ -51,7 +50,6 @@ public class UnidadDeMedidaController {
         return ResponseEntity.ok(dtos);
     }
 
-    /** Buscar una unidad por ID */
     @GetMapping("/{id}")
     public ResponseEntity<UnidadDeMedidaDTO> buscar(@PathVariable Integer id) {
         return service.buscarId(id)
@@ -59,7 +57,6 @@ public class UnidadDeMedidaController {
             .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    /** Crear nueva unidad (lanza 409 si ya existe) */
     @PostMapping
     public ResponseEntity<UnidadDeMedidaDTO> crear(@RequestBody UnidadDeMedidaDTO dto) {
         UnidadDeMedida guardada = service.guardar(toEntity(dto));
@@ -68,14 +65,12 @@ public class UnidadDeMedidaController {
             .body(toDTO(guardada));
     }
 
-    /** Actualizar existente (lanza 409 si nombre duplicado) */
     @PutMapping("/unidad_medida")
     public ResponseEntity<UnidadDeMedidaDTO> modificar(@RequestBody UnidadDeMedidaDTO dto) {
         UnidadDeMedida updated = service.modificar(toEntity(dto));
         return ResponseEntity.ok(toDTO(updated));
     }
 
-    /** Eliminar por ID (lanza 400 si está en uso) */
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String,String>> eliminar(@PathVariable Integer id) {
         service.eliminar(id);

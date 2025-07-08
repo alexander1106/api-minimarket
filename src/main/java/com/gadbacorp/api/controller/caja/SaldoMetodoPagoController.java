@@ -3,7 +3,6 @@ package com.gadbacorp.api.controller.caja;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,13 +26,10 @@ public class SaldoMetodoPagoController {
     @Autowired
     private SaldoMetodoPagoService saldoMetodoPagoService;
 
-    // Listar saldos por apertura de caja
     @GetMapping("/apertura/{idAperturaCaja}")
     public List<SaldoMetodoPago> listarPorApertura(@PathVariable Integer idAperturaCaja) {
         return saldoMetodoPagoService.obtenerSaldosPorApertura(idAperturaCaja);
     }
-
-    // Obtener saldo por apertura y método de pago
     @GetMapping("/apertura/{idAperturaCaja}/metodo/{idMetodoPago}")
     public SaldoMetodoPago obtenerPorAperturaYMetodo(@PathVariable Integer idAperturaCaja,
                                                      @PathVariable Integer idMetodoPago) {
@@ -44,20 +40,17 @@ public class SaldoMetodoPagoController {
         return saldoMetodoPagoService.obtenerSaldoPorAperturaYMetodo(apertura, metodo);
     }
 
-    // Crear saldo inicial
     @PostMapping
     public SaldoMetodoPago crear(@RequestBody SaldoMetodoPago saldoMetodoPago) {
         return saldoMetodoPagoService.crearSaldo(saldoMetodoPago);
     }
     
-    // Actualizar saldo
     @PutMapping("/{id}")
     public SaldoMetodoPago actualizar(@PathVariable Integer id, @RequestBody SaldoMetodoPago saldoMetodoPago) {
         saldoMetodoPago.setIdSaldoMetodoPago(id);
         return saldoMetodoPagoService.actualizarSaldo(saldoMetodoPago);
     }
 
-    // Eliminar
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Integer id) {
         saldoMetodoPagoService.eliminarSaldo(id);

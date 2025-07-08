@@ -40,7 +40,6 @@ public class Proveedores {
     @JoinColumn(name = "id_empresa", referencedColumnName = "idempresa")
     private Empresas empresa;
 
-    // Getters y Setters
     public Integer getIdProveedor() {
         return idProveedor;
     }

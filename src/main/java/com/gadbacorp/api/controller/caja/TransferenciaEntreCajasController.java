@@ -87,27 +87,21 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
     }
     MetodosPago metodoPago = metodos.get(0);
 
-    // Validar saldo final de la apertura
     if (aperturaOrigen.getSaldoFinal() < dto.getMonto()) {
         return ResponseEntity.badRequest().body("La caja origen no tiene suficiente saldo para realizar la transferencia.");
     }
-
-    // Buscar el saldo de EFECTIVO de la apertura de la caja origen
     Optional<SaldoMetodoPago> saldoOrigenOpt = saldoMetodoPagoRepository.findByAperturaCajaAndMetodoPago(aperturaOrigen, metodoPago);
     Optional<SaldoMetodoPago> saldoDestinoOpt = saldoMetodoPagoRepository.findByAperturaCajaAndMetodoPago(aperturaDestino, metodoPago);
 
     if (saldoOrigenOpt.isEmpty() || saldoDestinoOpt.isEmpty()) {
         return ResponseEntity.badRequest().body("No se encontró el saldo del método de pago EFECTIVO en alguna de las aperturas.");
     }
-
     SaldoMetodoPago saldoOrigen = saldoOrigenOpt.get();
     SaldoMetodoPago saldoDestino = saldoDestinoOpt.get();
-
     if (saldoOrigen.getSaldo() < dto.getMonto()) {
         return ResponseEntity.badRequest().body("El método de pago EFECTIVO de la caja origen no tiene saldo suficiente.");
     }
 
-    // Registrar transferencia
     TransferenciasEntreCajas transferencia = new TransferenciasEntreCajas();
     transferencia.setCajaOrigen(cajaOrigen);
     transferencia.setCajaDestino(cajaDestino);
@@ -117,7 +111,6 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
 
     TransferenciasEntreCajas transferenciaGuardada = transferenciaEntreCajasService.guardarTransferenciasEntreCajas(transferencia);
 
-    // Crear transacciones
     TransaccionesCaja transaccionSalida = new TransaccionesCaja();
     transaccionSalida.setAperturaCaja(aperturaOrigen);
     transaccionSalida.setTipoMovimiento("SALIDA");
@@ -126,7 +119,6 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
     transaccionSalida.setMetodoPago(metodoPago);
     transaccionSalida.setObservaciones("Transferencia a caja " + cajaDestino.getNombreCaja());
     transaccionCajaRepository.save(transaccionSalida);
-
     TransaccionesCaja transaccionEntrada = new TransaccionesCaja();
     transaccionEntrada.setAperturaCaja(aperturaDestino);
     transaccionEntrada.setTipoMovimiento("ENTRADA");
@@ -136,13 +128,11 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
     transaccionEntrada.setObservaciones("Transferencia desde caja " + cajaOrigen.getNombreCaja());
     transaccionCajaRepository.save(transaccionEntrada);
 
-    // Actualizar saldo final de aperturas
     aperturaOrigen.setSaldoFinal(aperturaOrigen.getSaldoFinal() - dto.getMonto());
     aperturaDestino.setSaldoFinal(aperturaDestino.getSaldoFinal() + dto.getMonto());
     aperturaCajaRepository.save(aperturaOrigen);
     aperturaCajaRepository.save(aperturaDestino);
 
-    // Actualizar saldo del método de pago EFECTIVO
     saldoOrigen.setSaldo(saldoOrigen.getSaldo() - dto.getMonto());
     saldoDestino.setSaldo(saldoDestino.getSaldo() + dto.getMonto());
     saldoMetodoPagoRepository.save(saldoOrigen);
@@ -162,17 +152,14 @@ public ResponseEntity<?> editarTransferencias(@RequestBody TransferenciaEntreCaj
     if (transferenciaOpt.isEmpty()) {
         return ResponseEntity.badRequest().body("Transferencia no encontrada.");
     }
-
     TransferenciasEntreCajas transferenciaExistente = transferenciaOpt.get();
 
-    // Buscar cajas nuevas
     Caja nuevaCajaOrigen = cajaRepository.findById(dto.getId_caja_origen()).orElse(null);
     Caja nuevaCajaDestino = cajaRepository.findById(dto.getId_caja_destino()).orElse(null);
     if (nuevaCajaOrigen == null || nuevaCajaDestino == null) {
         return ResponseEntity.badRequest().body("Una o ambas cajas nuevas no existen.");
     }
 
-    // Buscar aperturas nuevas activas
     Optional<AperturaCaja> aperturaOrigenNuevaOpt = aperturaCajaRepository.findByCaja_IdCajaAndCaja_EstadoCaja(dto.getId_caja_origen(), "ABIERTO");
     Optional<AperturaCaja> aperturaDestinoNuevaOpt = aperturaCajaRepository.findByCaja_IdCajaAndCaja_EstadoCaja(dto.getId_caja_destino(), "ABIERTO");
     if (aperturaOrigenNuevaOpt.isEmpty() || aperturaDestinoNuevaOpt.isEmpty()) {
@@ -182,7 +169,6 @@ public ResponseEntity<?> editarTransferencias(@RequestBody TransferenciaEntreCaj
     AperturaCaja aperturaOrigenNueva = aperturaOrigenNuevaOpt.get();
     AperturaCaja aperturaDestinoNueva = aperturaDestinoNuevaOpt.get();
 
-    // Revertir saldos anteriores
     double montoAnterior = transferenciaExistente.getMonto();
     Caja cajaOrigenAnterior = transferenciaExistente.getCajaOrigen();
     Caja cajaDestinoAnterior = transferenciaExistente.getCajaDestino();
@@ -201,7 +187,6 @@ public ResponseEntity<?> editarTransferencias(@RequestBody TransferenciaEntreCaj
         aperturaCajaRepository.save(aperturaDestinoAntigua);
     }
 
-    // Eliminar transacciones anteriores relacionadas
     List<TransaccionesCaja> transacciones = transaccionCajaRepository.findAll();
     for (TransaccionesCaja t : transacciones) {
         if ((t.getAperturaCaja().getIdAperturaCaja().equals(aperturaOrigenAntiguaOpt.map(AperturaCaja::getIdAperturaCaja).orElse(null)) &&
@@ -216,12 +201,10 @@ public ResponseEntity<?> editarTransferencias(@RequestBody TransferenciaEntreCaj
         }
     }
 
-    // Validar que la nueva caja origen tenga saldo suficiente
     if (aperturaOrigenNueva.getSaldoFinal() < dto.getMonto()) {
         return ResponseEntity.badRequest().body("La caja origen nueva no tiene saldo suficiente.");
     }
 
-    // Registrar nuevas transacciones
     TransaccionesCaja nuevaSalida = new TransaccionesCaja();
     nuevaSalida.setAperturaCaja(aperturaOrigenNueva);
     nuevaSalida.setTipoMovimiento("SALIDA");
@@ -236,13 +219,11 @@ public ResponseEntity<?> editarTransferencias(@RequestBody TransferenciaEntreCaj
     nuevaEntrada.setObservaciones("Transferencia desde caja " + nuevaCajaOrigen.getNombreCaja());
     transaccionCajaRepository.save(nuevaEntrada);
 
-    // Actualizar nuevos saldos
     aperturaOrigenNueva.setSaldoFinal(aperturaOrigenNueva.getSaldoFinal() - dto.getMonto());
     aperturaDestinoNueva.setSaldoFinal(aperturaDestinoNueva.getSaldoFinal() + dto.getMonto());
     aperturaCajaRepository.save(aperturaOrigenNueva);
     aperturaCajaRepository.save(aperturaDestinoNueva);
 
-    // Actualizar entidad transferencia
     transferenciaExistente.setCajaOrigen(nuevaCajaOrigen);
     transferenciaExistente.setCajaDestino(nuevaCajaDestino);
     transferenciaExistente.setFecha(dto.getFecha());
@@ -253,12 +234,9 @@ public ResponseEntity<?> editarTransferencias(@RequestBody TransferenciaEntreCaj
 
     return ResponseEntity.ok("Transferencia actualizada correctamente.");
 }
-
-
 @DeleteMapping("/transferencia-entre-caja/{id}")
 @Transactional
 public ResponseEntity<?> eliminarTransferenciaEntreCaja(@PathVariable Integer id) {
-    // Buscar la transferencia
     Optional<TransferenciasEntreCajas> transferenciaOpt = transferenciaEntreCajasService.buscarTranseferenciaEntreCajas(id);
     if (transferenciaOpt.isEmpty()) {
         return ResponseEntity.badRequest().body("Transferencia no encontrada.");
@@ -269,7 +247,6 @@ public ResponseEntity<?> eliminarTransferenciaEntreCaja(@PathVariable Integer id
     Caja cajaOrigen = transferencia.getCajaOrigen();
     Caja cajaDestino = transferencia.getCajaDestino();
 
-    // Buscar aperturas activas de ambas cajas
     Optional<AperturaCaja> aperturaOrigenOpt = aperturaCajaRepository.findByCaja_IdCajaAndCaja_EstadoCaja(cajaOrigen.getIdCaja(), "ABIERTO");
     Optional<AperturaCaja> aperturaDestinoOpt = aperturaCajaRepository.findByCaja_IdCajaAndCaja_EstadoCaja(cajaDestino.getIdCaja(), "ABIERTO");
 
@@ -280,7 +257,6 @@ public ResponseEntity<?> eliminarTransferenciaEntreCaja(@PathVariable Integer id
     AperturaCaja aperturaOrigen = aperturaOrigenOpt.get();
     AperturaCaja aperturaDestino = aperturaDestinoOpt.get();
 
-    // Eliminar transacciones relacionadas (opcionalmente podrías buscar por observación o relacionarlas con la transferencia)
     List<TransaccionesCaja> transacciones = transaccionCajaRepository.findAll(); // Considera implementar una búsqueda más específica
     for (TransaccionesCaja t : transacciones) {
         if ((t.getAperturaCaja().getIdAperturaCaja().equals(aperturaOrigen.getIdAperturaCaja()) && t.getTipoMovimiento().equals("SALIDA") && t.getMonto() == monto && t.getObservaciones().contains(cajaDestino.getNombreCaja()))
@@ -289,13 +265,11 @@ public ResponseEntity<?> eliminarTransferenciaEntreCaja(@PathVariable Integer id
         }
     }
 
-    // Revertir saldos
     aperturaOrigen.setSaldoFinal(aperturaOrigen.getSaldoFinal() + monto);
     aperturaDestino.setSaldoFinal(aperturaDestino.getSaldoFinal() - monto);
     aperturaCajaRepository.save(aperturaOrigen);
     aperturaCajaRepository.save(aperturaDestino);
 
-    // Eliminar la transferencia
     transferenciaEntreCajasService.eliminarTransferenciaEntreCajas(id);
 
     return ResponseEntity.ok("La transferencia entre cajas ha sido eliminada y los saldos fueron actualizados correctamente.");
