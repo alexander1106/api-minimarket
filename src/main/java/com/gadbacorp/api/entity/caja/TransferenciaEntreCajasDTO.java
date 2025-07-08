@@ -16,7 +16,6 @@ public class TransferenciaEntreCajasDTO {
     private String observaciones; 
     private Integer id_caja_origen; 
     private Integer id_caja_destino;
-        private Integer idMetodoPago;
 
     
     public Integer getIdTransferenciaEntreCajas() {
@@ -62,11 +61,6 @@ public class TransferenciaEntreCajasDTO {
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
-    public Integer getIdMetodoPago() {
-        return idMetodoPago;
-    }
-    public void setIdMetodoPago(Integer idMetodoPago) {
-        this.idMetodoPago = idMetodoPago;
-    }
+    
     
 }

@@ -8,6 +8,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,12 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gadbacorp.api.entity.caja.AperturaCaja;
 import com.gadbacorp.api.entity.caja.SaldoMetodoPago;
 import com.gadbacorp.api.entity.caja.TransaccionesCaja;
+import com.gadbacorp.api.entity.empleados.Usuarios;
 import com.gadbacorp.api.entity.ventas.MetodosPago;
 import com.gadbacorp.api.entity.ventas.Pagos;
 import com.gadbacorp.api.entity.ventas.PagosDTO;
 import com.gadbacorp.api.entity.ventas.Ventas;
 import com.gadbacorp.api.repository.caja.AperturaCajaRepository;
 import com.gadbacorp.api.repository.caja.SaldoMetodoPagoRepository;
+import com.gadbacorp.api.repository.empleados.UsuarioRepository;
 import com.gadbacorp.api.repository.ventas.MetodosPagoRepository;
 import com.gadbacorp.api.repository.ventas.PagosRepository;
 import com.gadbacorp.api.repository.ventas.VentasRepository;
@@ -52,6 +56,9 @@ public class PagosController {
     private SaldoMetodoPagoRepository saldoMetodoPagoRepository;
     @Autowired
     private PagosRepository pagosRepository;
+        @Autowired
+    private UsuarioRepository usuarioRepository;
+
 
     @Autowired
     private ITransaccionesCajaServices transaccionesCajaService;
@@ -93,6 +100,7 @@ public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
         String ultimoNro = (lista == null || lista.isEmpty()) ? null : lista.get(0);
 
         int nuevoNumero = 1;
+        
         if (ultimoNro != null && !ultimoNro.isEmpty()) {
             String[] partes = ultimoNro.split("-");
             if (partes.length == 2) {
@@ -117,12 +125,23 @@ public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
 
     // Cambiar estado de la cotización a 'PAGADA'
     cotizacionesService.marcarCotizacionComoPagada(dto.getId_venta());
+Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+String username = authentication.getName(); // o getPrincipal()
 
+Usuarios usuario = usuarioRepository.findByUsername(username);
+if (usuario == null) {
+    throw new RuntimeException("Usuario no encontrado");
+}
+Integer idUsuario = usuario.getIdUsuario();
     // === CREAR la transacción de caja automáticamente con lógica de validaciones ===
-AperturaCaja aperturaCaja = aperturaCajaRepository
-        .findByCaja_Sucursales_IdSucursalAndEstadoCaja(idSucursal, "ABIERTA")
-        .orElseThrow(() -> new IllegalArgumentException("No existe una apertura de caja activa para la sucursal."));
+List<AperturaCaja> aperturas = aperturaCajaRepository.findByUsuarios_IdUsuarioAndEstadoCaja(usuario.getIdUsuario(), "ABIERTA");
 
+if (aperturas.size() != 1) {
+    throw new IllegalStateException("Se esperaba exactamente una apertura de caja activa, pero se encontraron: " + aperturas.size());
+}
+
+AperturaCaja aperturaCaja = aperturas.get(0);
+  
     // Obtener saldo actual
     Double saldoActual = aperturaCaja.getSaldoFinal() != null
             ? aperturaCaja.getSaldoFinal()

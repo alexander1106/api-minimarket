@@ -74,14 +74,16 @@ public ResponseEntity<List<TransaccionesCaja>> listarTransaccionesPorApertura(@P
 
 @GetMapping("/aperturas-caja/usuario/{idUsuario}/abierta")
 public ResponseEntity<?> obtenerCajaAbiertaPorUsuario(@PathVariable Integer idUsuario) {
-    Optional<AperturaCaja> apertura = aperturaCajaRepository
+    List<AperturaCaja> aperturas = aperturaCajaRepository
         .findByUsuarios_IdUsuarioAndEstadoCaja(idUsuario, "ABIERTA");
 
-    if (apertura.isEmpty()) {
-        return ResponseEntity.ok().body(null); // o un 404 si prefieres
+    if (aperturas.isEmpty()) {
+        return ResponseEntity.ok().body(null); // o 404
     }
 
-    return ResponseEntity.ok(apertura.get());
+    // Elegir una sola si hay varias (por ejemplo la más reciente)
+    AperturaCaja apertura = aperturas.get(0); // o usar un criterio más específico
+    return ResponseEntity.ok(apertura);
 }
 
 

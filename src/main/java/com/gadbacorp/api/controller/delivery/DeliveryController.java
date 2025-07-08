@@ -40,7 +40,7 @@ public class DeliveryController {
     }
 
     @PostMapping("/delivery")
-public ResponseEntity<?> crear(@RequestBody DeliveryDTO dto) {
+    public ResponseEntity<?> crear(@RequestBody DeliveryDTO dto) {
     // Validar que la venta exista
     Ventas venta = ventasRepo.findById(dto.getIdVenta())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venta no encontrada con ID: " + dto.getIdVenta()));
@@ -48,6 +48,8 @@ public ResponseEntity<?> crear(@RequestBody DeliveryDTO dto) {
     // Crear y poblar el entity Delivery
     Delivery nuevo = new Delivery();
     nuevo.setDireccion(dto.getDireccion());
+        nuevo.setEstadoDelivery("Pendiente");
+
     nuevo.setFechaEnvio(dto.getFechaEnvio());
     nuevo.setFechaEntrega(dto.getFechaEntrega());
     nuevo.setEncargado(dto.getEncargado());
@@ -77,6 +79,8 @@ public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody Deliv
     existente.setDireccion(dto.getDireccion());
     existente.setFechaEnvio(dto.getFechaEnvio());
     existente.setFechaEntrega(dto.getFechaEntrega());
+        existente.setEstadoDelivery(dto.getEstadoDelivery());
+
     existente.setEncargado(dto.getEncargado());
     existente.setCostoEnvio(dto.getCostoEnvio());
     existente.setObservaciones(dto.getObservaciones());

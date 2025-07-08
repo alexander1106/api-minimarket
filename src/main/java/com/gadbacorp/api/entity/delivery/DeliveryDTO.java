@@ -13,6 +13,7 @@ public class DeliveryDTO {
     private BigDecimal costoEnvio;
     private String observaciones;
     private Integer estado;
+    private String estadoDelivery;
     private Integer idVenta;
         private Integer idCliente;
 
@@ -102,6 +103,16 @@ public class DeliveryDTO {
 
     public void setIdCliente(Integer idCliente) {
         this.idCliente = idCliente;
+    }
+
+
+    public String getEstadoDelivery() {
+        return estadoDelivery;
+    }
+
+
+    public void setEstadoDelivery(String estadoDelivery) {
+        this.estadoDelivery = estadoDelivery;
     }
     
 }

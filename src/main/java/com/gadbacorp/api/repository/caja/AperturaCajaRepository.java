@@ -11,11 +11,11 @@ public interface AperturaCajaRepository extends JpaRepository<AperturaCaja, Inte
 
 Optional<AperturaCaja> findByCaja_IdCajaAndCaja_EstadoCaja(Integer idCaja, String estadoCaja);
 
-Optional<AperturaCaja> findByCaja_Sucursales_IdSucursalAndEstadoCaja(Integer idSucursal, String estadoCaja);
+List<AperturaCaja> findByCaja_Sucursales_IdSucursalAndEstadoCaja(Integer idSucursal, String estadoCaja);
 
 List<AperturaCaja> findByCajaSucursalesIdSucursal(Integer idSucursal);
 
-Optional<AperturaCaja> findByUsuarios_IdUsuarioAndEstadoCaja(Integer idUsuario, String estado);
+List<AperturaCaja> findByUsuarios_IdUsuarioAndEstadoCaja(Integer idUsuario, String estadoCaja);
 
 List<AperturaCaja> findByEstadoCaja(String string);
 

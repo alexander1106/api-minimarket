@@ -215,20 +215,24 @@ public ResponseEntity<Map<String, Object>> guardarVentaCompleta(@RequestBody Ven
             }
         }
 
-        // Crear pago
-        Pagos pago = new Pagos();
-        pago.setVentas(venta);
-        pago.setEstadoPago(dto.getEstadoPago());
-        pago.setFechaPago(LocalDate.now());
-        pago.setMontoPagado(dto.getMontoPagado());
-        pago.setObservaciones(dto.getObservaciones());
-        pago.setMetodosPago(metodoPago);
+      // Crear pago
+Pagos pago = new Pagos();
+pago.setVentas(venta);
+pago.setEstadoPago(dto.getEstadoPago());
+pago.setFechaPago(LocalDate.now());
+pago.setMontoPagado(dto.getMontoPagado());
+pago.setObservaciones(dto.getObservaciones());
+pago.setMetodosPago(metodoPago);
 
-        pagosRepository.save(pago);
+pagosRepository.save(pago);
 
-        respuesta.put("status", 200);
-        respuesta.put("Detalle", "Venta registrada correctamente.");
-        return ResponseEntity.ok(respuesta);
+// RESPUESTA CON ID DE VENTA
+respuesta.put("status", 200);
+respuesta.put("Detalle", "Venta registrada correctamente.");
+respuesta.put("id_venta", venta.getIdVenta());  // <-- AQUÍ SE AGREGA
+
+return ResponseEntity.ok(respuesta);
+
 
     } catch (IllegalArgumentException e) {
         respuesta.put("status", 400);

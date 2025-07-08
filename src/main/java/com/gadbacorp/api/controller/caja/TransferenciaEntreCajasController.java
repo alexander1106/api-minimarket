@@ -77,7 +77,9 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
     AperturaCaja aperturaOrigen = aperturaOrigenOpt.get();
     AperturaCaja aperturaDestino = aperturaDestinoOpt.get();
 
-    List<MetodosPago> metodos = metodosPagoRepository.findByNombreIgnoreCaseAndSucursal_IdSucursal("EFECTIVO", cajaOrigen.getSucursales().getIdSucursal());
+    // VALIDACIÓN Y OBTENCIÓN DEL MÉTODO DE PAGO EFECTIVO
+    List<MetodosPago> metodos = metodosPagoRepository
+        .findByNombreIgnoreCaseAndSucursal_IdSucursal("EFECTIVO", cajaOrigen.getSucursales().getIdSucursal());
 
     if (metodos.isEmpty()) {
         return ResponseEntity.badRequest().body("No existe método de pago EFECTIVO.");
@@ -85,6 +87,7 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
     if (metodos.size() > 1) {
         return ResponseEntity.badRequest().body("Hay múltiples métodos de pago EFECTIVO configurados en esta sucursal. Corrija la configuración.");
     }
+
     MetodosPago metodoPago = metodos.get(0);
 
     // Validar saldo final de la apertura
@@ -92,7 +95,7 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
         return ResponseEntity.badRequest().body("La caja origen no tiene suficiente saldo para realizar la transferencia.");
     }
 
-    // Buscar el saldo de EFECTIVO de la apertura de la caja origen
+    // Buscar el saldo de EFECTIVO de ambas aperturas
     Optional<SaldoMetodoPago> saldoOrigenOpt = saldoMetodoPagoRepository.findByAperturaCajaAndMetodoPago(aperturaOrigen, metodoPago);
     Optional<SaldoMetodoPago> saldoDestinoOpt = saldoMetodoPagoRepository.findByAperturaCajaAndMetodoPago(aperturaDestino, metodoPago);
 
@@ -150,6 +153,7 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
 
     return ResponseEntity.ok(transferenciaGuardada);
 }
+
 
 @PutMapping("/transferencias-entre-cajas")
 @Transactional

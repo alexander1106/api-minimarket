@@ -32,13 +32,14 @@ public class Delivery {
     private Date fechaEnvio;
     private Date fechaEntrega;
     private String encargado;
+        private String estadoDelivery;
+
     private BigDecimal costoEnvio;
     private String observaciones;
     private Integer estado = 1;
     
 @ManyToOne(fetch = FetchType.EAGER)
 @JoinColumn(name = "idventa")
-@JsonIgnoreProperties({"cliente", "cotizaciones", "detallesVentas", "pagos", "devoluciones"})
 private Ventas venta;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -47,6 +48,8 @@ private Ventas venta;
 
     public Delivery() {
     }
+
+   
 
     public Integer getIddelivery() {
         return iddelivery;
@@ -126,6 +129,18 @@ private Ventas venta;
 
     public void setCliente(Clientes cliente) {
         this.cliente = cliente;
+    }
+
+
+
+    public String getEstadoDelivery() {
+        return estadoDelivery;
+    }
+
+
+
+    public void setEstadoDelivery(String estadoDelivery) {
+        this.estadoDelivery = estadoDelivery;
     }
 
  
