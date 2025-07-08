@@ -80,7 +80,6 @@ public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
         return ResponseEntity.badRequest().body("Debe especificar cotización.");
     }
 
-    // Buscar método de pago
     MetodosPago metodo = metodosPagoRepository.findById(dto.getId_metodo_pago())
             .orElseThrow(() -> new IllegalArgumentException("Método de pago no encontrado"));
 
@@ -89,15 +88,14 @@ public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
     }
     Integer idSucursal = metodo.getSucursal().getIdSucursal();
 
-    // Convertir cotización en venta
     Ventas venta = cotizacionesService.convertirCotizacionAVenta(dto.getId_venta(), idSucursal);
-
 
           // Generar comprobante correlativo
         String tipoComprobante = dto.getComprobantePago();
         String prefijo = tipoComprobante.equalsIgnoreCase("FACTURA") ? "F" : "B";
         List<String> lista = ventasRepository.findUltimoComprobantePorTipo(tipoComprobante);
         String ultimoNro = (lista == null || lista.isEmpty()) ? null : lista.get(0);
+
 
         int nuevoNumero = 1;
         
@@ -123,7 +121,6 @@ public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
 
     Pagos pagoGuardado = pagosService.guardarPago(pago);
 
-    // Cambiar estado de la cotización a 'PAGADA'
     cotizacionesService.marcarCotizacionComoPagada(dto.getId_venta());
 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 String username = authentication.getName(); // o getPrincipal()
@@ -142,14 +139,13 @@ if (aperturas.size() != 1) {
 
 AperturaCaja aperturaCaja = aperturas.get(0);
   
-    // Obtener saldo actual
+
     Double saldoActual = aperturaCaja.getSaldoFinal() != null
             ? aperturaCaja.getSaldoFinal()
             : aperturaCaja.getSaldoInicial() != null
                 ? aperturaCaja.getSaldoInicial()
                 : 0.0;
 
-    // Crear transacción de caja como INGRESO
     TransaccionesCaja transaccion = new TransaccionesCaja();
     transaccion.setFecha(new Date());
     transaccion.setMonto(dto.getMontoPagado());
@@ -158,18 +154,15 @@ AperturaCaja aperturaCaja = aperturas.get(0);
     transaccion.setAperturaCaja(aperturaCaja);
     transaccion.setMetodoPago(metodo);
 
-    // Actualizar saldo total
     saldoActual += dto.getMontoPagado();
     aperturaCaja.setSaldoFinal(saldoActual);
 
-    // === LÓGICA saldoEfectivo ===
     if ("Efectivo".equalsIgnoreCase(metodo.getNombre())) {
         Double saldoEfectivo = aperturaCaja.getSaldoEfectivo() != null ? aperturaCaja.getSaldoEfectivo() : 0.0;
         saldoEfectivo += dto.getMontoPagado();
         aperturaCaja.setSaldoEfectivo(saldoEfectivo);
     }
 
-    // Actualizar saldo por método de pago
     Optional<SaldoMetodoPago> saldoMetodoOpt = saldoMetodoPagoRepository.findByAperturaCajaAndMetodoPago(aperturaCaja, metodo);
     SaldoMetodoPago saldoMetodoPago;
     if (saldoMetodoOpt.isPresent()) {
@@ -186,7 +179,6 @@ AperturaCaja aperturaCaja = aperturas.get(0);
     saldoMetodoActual += dto.getMontoPagado();
     saldoMetodoPago.setSaldo(saldoMetodoActual);
     
-    // Guardar todo
     aperturaCajaRepository.save(aperturaCaja);
     saldoMetodoPagoRepository.save(saldoMetodoPago);
     transaccionesCajaService.guardarTransaccion(transaccion);
@@ -217,7 +209,6 @@ AperturaCaja aperturaCaja = aperturas.get(0);
         pago.setFechaPago(LocalDate.now());
         pago.setMontoPagado(dto.getMontoPagado());
 
-        // Relaciones
         MetodosPago metodo = metodosPagoRepository.findById(dto.getId_metodo_pago()).orElse(null);
         pago.setMetodosPago(metodo);
 

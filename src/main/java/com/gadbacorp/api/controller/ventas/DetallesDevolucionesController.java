@@ -103,32 +103,27 @@ public class DetallesDevolucionesController {
         DetallesDevolucion detalleExistente = detalleOpt.get();
         Integer productoAnteriorId = detalleExistente.getProductos().getIdproducto();
 
-        // Obtener inventario del producto anterior
         InventarioProducto inventarioAnterior = inventarioProductoRepository.findFirstByProducto_Idproducto(productoAnteriorId)
                 .orElse(null);
         if (inventarioAnterior == null) {
             return ResponseEntity.badRequest().body("Inventario no encontrado para producto anterior ID: " + productoAnteriorId);
         }
 
-        // Obtener nuevo producto
         Productos nuevoProducto = productosRepository.findById(dto.getId_producto()).orElse(null);
         if (nuevoProducto == null) {
             return ResponseEntity.badRequest().body("Producto nuevo no encontrado con ID: " + dto.getId_producto());
         }
 
-        // Obtener inventario del nuevo producto
         InventarioProducto inventarioNuevo = inventarioProductoRepository.findFirstByProducto_Idproducto(dto.getId_producto())
                 .orElse(null);
         if (inventarioNuevo == null) {
             return ResponseEntity.badRequest().body("Inventario no encontrado para producto nuevo ID: " + dto.getId_producto());
         }
 
-        // Si es el mismo producto
         if (productoAnteriorId.equals(dto.getId_producto())) {
             int diferencia = dto.getCantidad() - detalleExistente.getCantidad();
 
             if (diferencia == 0) {
-                // Solo actualizar campos no relacionados a inventario
                 detalleExistente.setPecioUnitario(dto.getPecioUnitario());
                 detalleExistente.setSubTotal(dto.getSubTotal());
                 return ResponseEntity.ok(detallesDevoluciones.guardarDetallesDevolucion(detalleExistente));
@@ -149,9 +144,7 @@ public class DetallesDevolucionesController {
             ajuste.setInventarioProducto(inventarioNuevo);
             ajusteInventarioRepository.save(ajuste);
         } else {
-            // Si es un producto diferente
             if (dto.getCantidad() == detalleExistente.getCantidad()) {
-                // No hacer ajustes de inventario, solo actualizar producto, precio y subtotal
                 detalleExistente.setProductos(nuevoProducto);
                 detalleExistente.setPecioUnitario(dto.getPecioUnitario());
                 detalleExistente.setSubTotal(dto.getSubTotal());
@@ -186,7 +179,7 @@ public class DetallesDevolucionesController {
             ajusteInventarioRepository.save(ajusteNuevo);
         }
 
-        // Actualizar todos los campos del detalle
+        
         detalleExistente.setProductos(nuevoProducto);
         detalleExistente.setCantidad(dto.getCantidad());
         detalleExistente.setPecioUnitario(dto.getPecioUnitario());

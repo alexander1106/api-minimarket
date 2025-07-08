@@ -49,6 +49,15 @@ public class AlmacenesController {
         return toDTO(e);
     }
 
+    // Este método faltaba
+    @GetMapping("/almacenes/sucursal/{idSucursal}")
+    public List<AlmacenesDTO> listarPorSucursal(@PathVariable Integer idSucursal) {
+        return service.buscarTodosPorSucursal(idSucursal)   // o como se llame tu service
+              .stream()
+              .map(this::toDTO)
+              .collect(Collectors.toList());
+    }
+
     @PostMapping("/almacenes")
     public ResponseEntity<AlmacenesDTO> crear(@RequestBody AlmacenesDTO dto) {
         // Validar sucursal

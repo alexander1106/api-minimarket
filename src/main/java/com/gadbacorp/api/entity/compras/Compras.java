@@ -1,6 +1,5 @@
 package com.gadbacorp.api.entity.compras;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,7 +8,19 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.gadbacorp.api.entity.administrable.Sucursales;
 import com.gadbacorp.api.entity.ventas.MetodosPago;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Compras")
@@ -30,6 +41,10 @@ public class Compras {
     @JoinColumn(name = "id_metodo_pago")
     private MetodosPago metodoPago;
 
+    @ManyToOne
+    @JoinColumn(name = "id_sucursal")
+    private Sucursales sucursal;
+
     private BigDecimal total;
     private String descripcion;
 
@@ -44,7 +59,6 @@ public class Compras {
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
     private List<DevolucionesCompra> devoluciones;
 
-    // Getters y Setters
     public Integer getIdCompra() {
         return idCompra;
     }
@@ -67,6 +81,14 @@ public class Compras {
 
     public void setMetodoPago(MetodosPago metodoPago) {
         this.metodoPago = metodoPago;
+    }
+
+    public Sucursales getSucursal() {
+        return sucursal;
+    }
+
+    public void setSucursal(Sucursales sucursal) {
+        this.sucursal = sucursal;
     }
 
     public BigDecimal getTotal() {
@@ -116,4 +138,8 @@ public class Compras {
     public void setDevoluciones(List<DevolucionesCompra> devoluciones) {
         this.devoluciones = devoluciones;
     }
+
+    // Getters y Setters
+    
+    
 }

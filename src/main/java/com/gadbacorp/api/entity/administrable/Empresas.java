@@ -45,7 +45,6 @@ public class Empresas {
     private Integer estado = 1;
     
 
-    // NUEVO: Relación con sucursales
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Sucursales> sucursales = new ArrayList<>();
 
@@ -57,11 +56,10 @@ public class Empresas {
     public Empresas(Integer idempresa) {
         this.idempresa = idempresa;
     }
-    // ✅ Constructor vacío requerido por JPA
+
     public Empresas() {
     }
 
-    // Getters y Setters
     public Integer getIdempresa() {
         return idempresa;
     }

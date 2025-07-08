@@ -13,7 +13,7 @@ public interface IAjusteInventarioService {
 
     AjusteInventario modificar(AjusteInventario ajusteInventario);
 
-
+    List<AjusteInventario> buscarPorSucursal(Integer idSucursal);
     Optional<AjusteInventario> buscarId(Integer id);
 
     void eliminar(Integer id);

@@ -42,7 +42,6 @@ public class Proveedores {
     @JsonBackReference
     private Empresas empresa;
 
-    // Getters y Setters
     public Integer getIdProveedor() {
         return idProveedor;
     }

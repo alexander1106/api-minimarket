@@ -77,7 +77,6 @@ public ResponseEntity<Map<String, Object>> guardarMetodoPagoEnSucursal(
         @PathVariable Integer idSucursal,
         @RequestBody MetodosPago metodoPago) {
 
-    // Asignar la sucursal al método
     Sucursales sucursal = new Sucursales();
     sucursal.setIdSucursal(idSucursal);
     metodoPago.setSucursal(sucursal);

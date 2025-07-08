@@ -36,7 +36,7 @@ public class AperturaCaja {
     private Double saldoEfectivo; 
 
     private Double saldoFinal; 
-    private Integer estado=1; // 1 activo, 0 inactivo
+    private Integer estado=1;
 
     public AperturaCaja(Integer idAperturaCaja) {
         this.idAperturaCaja = idAperturaCaja;
@@ -47,112 +47,87 @@ public class AperturaCaja {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idCaja")
-    @JsonIgnoreProperties("aperturaCajas") // ignora el campo que causaría el ciclo
+    @JsonIgnoreProperties("aperturaCajas") 
     private Caja caja;
-    
-  
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idUsuario")
     private Usuarios usuarios;
 
     @OneToMany(mappedBy = "aperturaCaja", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("aperturaCaja") // opcional, para evitar ciclos
+    @JsonIgnoreProperties("aperturaCaja") 
     private List<TransaccionesCaja> transaccionesCajas;
 
     @OneToMany(mappedBy = "aperturaCaja", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<ArqueoCaja> arqueoCaja;
     
-
     public Caja getCaja() {
         return caja;
     }
-
     public void setCaja(Caja caja) {
         this.caja = caja;
     }
-
     public List<TransaccionesCaja> getTransaccionesCajas() {
         return transaccionesCajas;
     }
-
     public void setTransaccionesCajas(List<TransaccionesCaja> transaccionesCajas) {
         this.transaccionesCajas = transaccionesCajas;
     }
-
     public Integer getIdAperturaCaja() {
         return idAperturaCaja;
     }
-
     public void setIdAperturaCaja(Integer idAperturaCaja) {
         this.idAperturaCaja = idAperturaCaja;
     }
-
     public Date getFechaApertura() {
         return fechaApertura;
     }
-
     public void setFechaApertura(Date fechaApertura) {
         this.fechaApertura = fechaApertura;
     }
-
     public Date getFechaCierre() {
         return fechaCierre;
     }
-
     public void setFechaCierre(Date fechaCierre) {
         this.fechaCierre = fechaCierre;
     }
-
     public Double getSaldoInicial() {
         return saldoInicial;
     }
-
     public void setSaldoInicial(Double saldoInicial) {
         this.saldoInicial = saldoInicial;
     }
-
     public Double getSaldoFinal() {
         return saldoFinal;
     }
-
     public void setSaldoFinal(Double saldoFinal) {
         this.saldoFinal = saldoFinal;
     }
-
     public List<ArqueoCaja> getArqueoCaja() {
         return arqueoCaja;
     }
-
     public void setArqueoCaja(List<ArqueoCaja> arqueoCaja) {
         this.arqueoCaja = arqueoCaja;
     }
-
     public Integer getEstado() {
         return estado;
     }
-
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
-
     public Usuarios getUsuarios() {
         return usuarios;
     }
-
     public void setUsuarios(Usuarios usuarios) {
         this.usuarios = usuarios;
     }
-
     public String getEstadoCaja() {
         return estadoCaja;
     }
-
     public void setEstadoCaja(String estadoCaja) {
         this.estadoCaja = estadoCaja;
     }
-
     public Double getSaldoEfectivo() {
         return saldoEfectivo;
     }
@@ -160,6 +135,4 @@ public class AperturaCaja {
     public void setSaldoEfectivo(Double saldoEfectivo) {
         this.saldoEfectivo = saldoEfectivo;
     }
-
-
 }

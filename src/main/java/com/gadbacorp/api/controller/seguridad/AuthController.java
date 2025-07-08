@@ -39,7 +39,7 @@ public class AuthController {
     private AuthService authService;
 
     @Autowired
-    private UserDetailsService userDetailsService; // Asegúrate de registrar una implementación de UserDetailsService que devuelva `Usuarios`
+    private UserDetailsService userDetailsService; 
 
     @Autowired
     private UserDetailsServiceImpl userxDetailsServiceImpl; 
@@ -50,26 +50,19 @@ public class AuthController {
 
 @PostMapping("/login")
 public ResponseEntity<?> generarToken(@RequestBody LoginRequest jwtRequest) throws Exception {
-    // Autenticar
     autenticar(jwtRequest.getUsername(), jwtRequest.getPassword());
 
-    // Cargar detalles del usuario
     UserDetails userDetails = userxDetailsServiceImpl.loadUserByUsername(jwtRequest.getUsername());
 
-    // Generar token
     String token = jwtUtils.generateTokenUsua(userDetails);
 
-    // Obtener usuario
     Usuarios usuario = serviceUsuario.obtenerUsuario(jwtRequest.getUsername());
 
-    // Guardar token si quieres
     usuario.setToken(token);
     serviceUsuario.guardar(usuario);
 
-    // Obtener el rol
     String rol = usuario.getRol().getNombre();
 
-    // Retornar respuesta con token, rol y username
 return ResponseEntity.ok(new AuthResponse(token, rol, usuario));
 }
 

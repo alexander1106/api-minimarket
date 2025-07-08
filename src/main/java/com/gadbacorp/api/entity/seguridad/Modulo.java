@@ -8,7 +8,6 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,10 +29,9 @@ public class Modulo {
     private Integer estado = 1;
 
     @OneToMany(mappedBy = "modulo")
-    @JsonIgnore // Agrega esta línea
+    @JsonIgnore 
     private Set<RolModulo> rolModulos;
 
-    // getters y setters
     public Set<RolModulo> getRolModulos() { return rolModulos; }
     public void setRolModulos(Set<RolModulo> rolModulos) { this.rolModulos = rolModulos; }
 
@@ -56,7 +54,5 @@ public class Modulo {
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
-
-    
 
 }

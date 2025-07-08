@@ -1,6 +1,5 @@
 package com.gadbacorp.api.entity.ventas;
 import java.time.LocalDate;
-import java.util.Date;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -29,18 +28,18 @@ public class Pagos {
     private String observaciones;
     private LocalDate fechaPago; 
     private Double montoPagado;
-    private String referenciaPago; //hace referencia al numero de tarjeta si es el caso
+    private String referenciaPago; 
     private String estadoPago;
     private Integer estado=1;
 
     @ManyToOne
     @JoinColumn(name = "idVenta", referencedColumnName = "idVenta")
-    @JsonIgnore // evita ciclos infinitos si usas JSON
+    @JsonIgnore 
     private Ventas ventas;
 
     @ManyToOne
     @JoinColumn(name = "id_metodo_pago", referencedColumnName = "id_metodo_pago")
-    @JsonIgnore // evita ciclos infinitos si usas JSON
+    @JsonIgnore 
     private MetodosPago metodosPago;
 
      public Integer getIdPago() {

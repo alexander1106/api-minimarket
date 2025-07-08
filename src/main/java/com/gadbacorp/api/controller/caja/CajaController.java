@@ -76,7 +76,9 @@ public ResponseEntity<?> listarCajasAbiertas() {
     List<AperturaCaja> cajasAbiertas = aperturaCajaRepository.findByEstadoCaja("ABIERTA");
     return ResponseEntity.ok(cajasAbiertas);
 }
-   @PutMapping("/cajas")
+   
+
+@PutMapping("/cajas")
     public ResponseEntity<Map<String, Object>> actualizar(@RequestBody CajaDTO dto) {
         Map<String, Object> respuesta = new HashMap<>();
 
@@ -85,8 +87,8 @@ public ResponseEntity<?> listarCajasAbiertas() {
             respuesta.put("status", 400);
             respuesta.put("Detalle", "Sucursal no encontrada con ID: " + dto.getIdSucursal());
             return ResponseEntity.badRequest().body(respuesta);
-        }
 
+        }
         Caja caja = new Caja();
         caja.setIdCaja(dto.getIdCaja());
         caja.setEstadoCaja(dto.getEstadoCaja());
@@ -100,6 +102,8 @@ public ResponseEntity<?> listarCajasAbiertas() {
         respuesta.put("Detalle", "Caja actualizada correctamente.");
         return ResponseEntity.ok(respuesta);
     }
+
+
 
     @DeleteMapping("/cajas/{id}")
     public ResponseEntity<Map<String, Object>> eliminarCaja(@PathVariable Integer id) {
@@ -126,38 +130,31 @@ public ResponseEntity<?> listarCajasAbiertas() {
     }
 
 
-   @PostMapping("/cajas")
-    public ResponseEntity<Map<String, Object>> guardarCaja(@RequestBody CajaDTO dto) {
-        Map<String, Object> respuesta = new HashMap<>();
-
-        Sucursales sucursales = sucursalesRepository.findById(dto.getIdSucursal()).orElse(null);
-        if (sucursales == null) {
-            respuesta.put("status", 400);
-            respuesta.put("Detalle", "Sucursal no encontrada con ID: " + dto.getIdSucursal());
-            return ResponseEntity.badRequest().body(respuesta);
-        }
-
-        boolean existe = cajaRepository.existsByNombreCajaAndSucursales_IdSucursal(
-                dto.getNombreCaja().trim(),
-                dto.getIdSucursal()
-        );
-        if (existe) {
-            respuesta.put("status", 409);
-            respuesta.put("Detalle", "Ya existe una caja con ese nombre en esta sucursal.");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(respuesta);
-        }
-
-        Caja caja = new Caja();
-        caja.setEstadoCaja(dto.getEstadoCaja());
-        caja.setNombreCaja(dto.getNombreCaja());
-        caja.setSaldoActual(dto.getSaldoActual());
-        caja.setSucursales(sucursales);
-        caja.setEstado(dto.getEstado());
-
-        cajaService.guardarCaja(caja);
-        respuesta.put("status", 200);
-        respuesta.put("Detalle", "Caja registrada correctamente.");
-        return ResponseEntity.ok(respuesta);
+@PostMapping("/cajas")
+public ResponseEntity<?> guardarCaja(@RequestBody CajaDTO dto) {
+    Sucursales sucursales = sucursalesRepository.findById(dto.getIdSucursal()).orElse(null);
+    if (sucursales == null) {
+        return ResponseEntity.badRequest().body("Sucursal no encontrada con ID: " + dto.getIdSucursal());
     }
+    boolean existe = cajaRepository.existsByNombreCajaAndSucursales_IdSucursal(
+        dto.getNombreCaja().trim(),
+        dto.getIdSucursal()
+    );
+    if (existe) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "CAJA_DUPLICADA");
+        response.put("mensaje", "Ya existe una caja con ese nombre en esta sucursal.");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+    Caja caja = new Caja();
+    caja.setEstadoCaja(dto.getEstadoCaja());
+    caja.setNombreCaja(dto.getNombreCaja());
+    caja.setSaldoActual(dto.getSaldoActual());
+    caja.setSucursales(sucursales);
+    caja.setEstado(dto.getEstado());
 
+    return ResponseEntity.ok(cajaService.guardarCaja(caja));
+}
+ 
+ 
 }

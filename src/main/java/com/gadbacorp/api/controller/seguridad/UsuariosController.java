@@ -55,12 +55,10 @@ public class UsuariosController {
 
     @GetMapping("/usuarios/logged")
 public ResponseEntity<UsuariosDTO> getLoggedUser(Principal principal) {
-    // 1) Buscar la entidad por username
     Optional<Usuarios> opt = usuariosService.buscarPorUsername(principal.getName());
     if (opt.isEmpty()) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-    // 2) Mapear a DTO (asegúrate que UsuariosDTO tiene idEmpresa e idSucursal)
     Usuarios u = opt.get();
     UsuariosDTO dto = new UsuariosDTO();
     dto.setIdUsuario(u.getIdUsuario());
@@ -71,7 +69,6 @@ public ResponseEntity<UsuariosDTO> getLoggedUser(Principal principal) {
     dto.setDni(u.getDni());
     dto.setTurno(u.getTurno());
     dto.setEstado(u.getEstado());
-    // aquí añadimos:
     dto.setIdEmpresa(u.getSucursal() != null 
         ? u.getSucursal().getEmpresa().getIdempresa() 
         : null);
@@ -82,7 +79,6 @@ public ResponseEntity<UsuariosDTO> getLoggedUser(Principal principal) {
         ? u.getRol().getId() 
         : null);
     dto.setFechaCreacion(u.getFechaCreacion());
-    // 3) devolvemos
     return ResponseEntity.ok(dto);
 }
     @PostMapping("/usuarios")
@@ -113,7 +109,7 @@ public ResponseEntity<UsuariosDTO> getLoggedUser(Principal principal) {
         return ResponseEntity.ok(usuariosService.guardar(usuarios));
     }
     
-    @PutMapping("/usuarios") //La diferencia acá es que subiremos el id, no ponemos "/clientes/id" por temas de seguridad, acuérdate de la caja de la unidad 2, eso no era correcto
+    @PutMapping("/usuarios") 
     public Usuarios modificar(@RequestBody Usuarios empleado) {        
         usuariosService.modificar(empleado);
         return empleado;

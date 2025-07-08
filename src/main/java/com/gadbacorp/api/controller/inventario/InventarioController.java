@@ -65,6 +65,14 @@ public class InventarioController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/inventario/sucursal/{idSucursal}")
+    public List<InventarioDTO> listarPorSucursal(@PathVariable Integer idSucursal) {
+        return inventarioService.buscarTodosPorSucursal(idSucursal)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
     @GetMapping("/inventario/{id}")
     public ResponseEntity<InventarioDTO> obtener(@PathVariable Integer id) {
         Inventario inv = inventarioService.buscarId(id)

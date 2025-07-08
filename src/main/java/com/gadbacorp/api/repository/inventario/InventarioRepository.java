@@ -15,5 +15,7 @@ public interface InventarioRepository extends JpaRepository<Inventario, Integer>
     boolean existsByAlmacen_Idalmacen(Integer idAlmacen);
     boolean existsByAlmacen_IdalmacenAndEstado(Integer idalmacen, Integer estado);
     List<Inventario> findByAlmacen_Idalmacen(Integer idalmacen);
+    
+    List<Inventario> findByAlmacen_Sucursal_IdSucursal(Integer idSucursal);
 
 }

@@ -27,7 +27,7 @@ public class Rol {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String nombre;
-    private Integer estado = 1; // 1 activo, 0 inactivo}
+    private Integer estado = 1;
 
     @OneToMany(mappedBy = "rol")
     @JsonIgnore

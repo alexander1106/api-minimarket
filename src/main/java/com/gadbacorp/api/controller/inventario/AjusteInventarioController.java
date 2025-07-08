@@ -48,6 +48,18 @@ public class AjusteInventarioController {
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
+    @GetMapping("/ajustes/sucursal/{idSucursal}")
+    public ResponseEntity<List<AjusteInventarioDTO>> listarPorSucursal(
+            @PathVariable Integer idSucursal) {
+
+        List<AjusteInventarioDTO> lista = ajusteRepo
+            .findByInventarioProducto_Inventario_Almacen_Sucursal_IdSucursal(idSucursal)
+            .stream()
+            .map(this::toDTO)
+            .collect(Collectors.toList());
+
+        return ResponseEntity.ok(lista);
+    }
 
     @PostMapping("/ajustes")
     public ResponseEntity<AjusteInventarioDTO> crear(@RequestBody AjusteInventarioDTO dto) {

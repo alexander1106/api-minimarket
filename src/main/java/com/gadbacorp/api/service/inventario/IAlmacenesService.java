@@ -18,4 +18,5 @@ public interface IAlmacenesService {
     void eliminar(Integer id);
 
     Optional<Almacenes> buscarPorNombre(String nombre);
+    List<Almacenes> buscarTodosPorSucursal(Integer idSucursal);
 }

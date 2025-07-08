@@ -109,7 +109,5 @@ public Caja() {
     public void setSucursales(Sucursales sucursales) {
         this.sucursales = sucursales;
     }
-   
-
     
 }

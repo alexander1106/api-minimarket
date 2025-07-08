@@ -20,7 +20,7 @@ import com.gadbacorp.api.service.seguridad.IModuloService;
 
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin(origins = "*") // Ajusta según tu frontend
+@CrossOrigin(origins = "*") 
 public class ModuloController {
 
     @Autowired

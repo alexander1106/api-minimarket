@@ -50,7 +50,7 @@ public class Usuarios implements UserDetails {
         private String token;
 
     @ManyToOne
-    @JoinColumn(name = "rol_id", referencedColumnName = "id") // 'id' es el PK de Rol
+    @JoinColumn(name = "rol_id", referencedColumnName = "id") 
     private Rol rol;
 
     
@@ -101,8 +101,6 @@ public class Usuarios implements UserDetails {
         this.dni = dni;
     }
 
-
-    
     public String getUsername() {
         return username;
     }
@@ -188,7 +186,7 @@ public class Usuarios implements UserDetails {
     }
 
     public boolean isEmpty() {
-        return false; // o alguna lógica válida según tu modelo
+        return false; 
     }
   @Override
     @JsonIgnore
@@ -205,7 +203,5 @@ public class Usuarios implements UserDetails {
   public void setEnable(boolean enable) {
     this.enable = enable;
   }
-
-  
 
 }

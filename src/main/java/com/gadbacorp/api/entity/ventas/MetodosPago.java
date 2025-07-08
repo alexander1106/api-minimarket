@@ -31,7 +31,7 @@ public class MetodosPago {
     private Integer estado =1;
     @ManyToOne
     @JoinColumn(name = "id_sucursal", referencedColumnName = "id_sucursal")
-    @JsonBackReference   // ⬅️ ESTA ANOTACIÓN CORTA EL CICLO
+    @JsonBackReference 
     private Sucursales sucursal;
         
     public Integer getIdMetodoPago() {

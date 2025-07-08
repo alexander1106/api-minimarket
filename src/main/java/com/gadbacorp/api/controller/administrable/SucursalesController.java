@@ -69,24 +69,19 @@ public class SucursalesController {
         return ResponseEntity.ok(almacenes);
     }   
     
-
     @GetMapping("/{idSucursal}/empresa")
-public ResponseEntity<Empresas> obtenerEmpresaPorSucursal(@PathVariable Integer idSucursal) {
+    public ResponseEntity<Empresas> obtenerEmpresaPorSucursal(@PathVariable Integer idSucursal) {
     Optional<Sucursales> sucursalOpt = sucursalesService.buscarId(idSucursal);
 
     if (sucursalOpt.isEmpty()) {
         return ResponseEntity.notFound().build();
     }
-
     Empresas empresa = sucursalOpt.get().getEmpresa();
-
     if (empresa == null) {
         return ResponseEntity.noContent().build();
     }
-
     return ResponseEntity.ok(empresa);
 }
-
 
 @GetMapping("/{idSucursal}/usuarios")
 public ResponseEntity<List<Usuarios>> listarUsuariosPorSucursal(@PathVariable Integer idSucursal) {
@@ -97,10 +92,8 @@ public ResponseEntity<List<Usuarios>> listarUsuariosPorSucursal(@PathVariable In
     return ResponseEntity.ok(usuarios);
 }
   
-    
 @GetMapping("/{idSucursal}/cajas")
 public ResponseEntity<?> listarCajasPorSucursal(@PathVariable Integer idSucursal) {
-    // Buscar la sucursal
     Optional<Sucursales> optionalSucursal = sucursalesRepository.findById(idSucursal);
     if (!optionalSucursal.isPresent()) {
         return ResponseEntity.badRequest().body("Sucursal no encontrada con ID: " + idSucursal);
@@ -108,7 +101,6 @@ public ResponseEntity<?> listarCajasPorSucursal(@PathVariable Integer idSucursal
 
     Sucursales sucursal = optionalSucursal.get();
 
-    // Obtener sus cajas
     List<Caja> cajas = sucursal.getCajas();
 
     return ResponseEntity.ok(cajas);
@@ -117,30 +109,22 @@ public ResponseEntity<?> listarCajasPorSucursal(@PathVariable Integer idSucursal
 @GetMapping("/{idSucursal}/productos")
 public ResponseEntity<List<InventarioProducto>> listarProductosPorSucursal(@PathVariable Integer idSucursal) {
 
-    // 1. Obtener almacenes de la sucursal
     List<Almacenes> almacenes = almacenesRepo.findBySucursalIdSucursal(idSucursal);
     if (almacenes.isEmpty()) {
         return ResponseEntity.noContent().build();
     }
 
-    // Lista acumuladora de todos los productos
     List<InventarioProducto> todosProductos = new ArrayList<>();
 
-    // 2. Por cada almacén
     for (Almacenes almacen : almacenes) {
-        // 2.1 Obtener inventarios del almacén
         List<Inventario> inventarios = inventarioRepository.findByAlmacen_Idalmacen(almacen.getIdalmacen());
 
-        // 2.2 Por cada inventario
         for (Inventario inv : inventarios) {
-            // 2.3 Obtener productos del inventario
             List<InventarioProducto> productos = inventarioProductoRepository.findByInventario_Idinventario(inv.getIdinventario());
 
-            // 2.4 Agregar productos a la lista total
             todosProductos.addAll(productos);
         }
     }
-
     if (todosProductos.isEmpty()) {
         return ResponseEntity.noContent().build();
     }
@@ -148,9 +132,6 @@ public ResponseEntity<List<InventarioProducto>> listarProductosPorSucursal(@Path
     return ResponseEntity.ok(todosProductos);
 }
 
-
-    /** Busqueda por id mapeada a 
-     * DTO */
     @GetMapping("/{id}")
     public ResponseEntity<SucursalDTO> buscarPorId(@PathVariable Integer id) {
         Optional<Sucursales> opt = sucursalesService.buscarId(id);
@@ -160,16 +141,13 @@ public ResponseEntity<List<InventarioProducto>> listarProductosPorSucursal(@Path
         return ResponseEntity.ok(toDto(opt.get()));
     }
 
-    /** Crear */
     @PostMapping
     public ResponseEntity<?> guardar(@RequestBody SucursalDTO dto) {
-        // validar empresa
         Optional<Empresas> empOpt = empresasRepository.findById(dto.getId_empresa());
         if (empOpt.isEmpty()) {
             return ResponseEntity.badRequest()
                 .body("Empresa no encontrada con ID: " + dto.getId_empresa());
         }
-        // mapear y guardar
         Sucursales s = new Sucursales();
         s.setNombreSucursal(dto.getNombreSucursal());
         s.setContacto(dto.getContacto());
@@ -180,7 +158,6 @@ public ResponseEntity<List<InventarioProducto>> listarProductosPorSucursal(@Path
         return ResponseEntity.ok(toDto(saved));
     }
 
-    /** Actualizar */
     @PutMapping
     public ResponseEntity<?> actualizar(@RequestBody SucursalDTO dto) {
         if (dto.getIdSucursal() == null) {
@@ -202,14 +179,11 @@ public ResponseEntity<List<InventarioProducto>> listarProductosPorSucursal(@Path
         return ResponseEntity.ok(toDto(updated));
     }
 
-    /** Eliminar lógico */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         sucursalesService.eliminar(id);
         return ResponseEntity.ok("Sucursal eliminada correctamente.");
     }
-
-    /** Utilitario para mapear entidad → DTO */
     private SucursalDTO toDto(Sucursales s) {
         SucursalDTO dto = new SucursalDTO();
         dto.setIdSucursal(s.getIdSucursal());
