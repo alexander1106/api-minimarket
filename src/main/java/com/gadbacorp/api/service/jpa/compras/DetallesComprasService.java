@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 
 import com.gadbacorp.api.entity.compras.Compras;
 import com.gadbacorp.api.entity.compras.DetallesCompras;
-import com.gadbacorp.api.entity.compras.DetallesComprasDTO;
 import com.gadbacorp.api.entity.inventario.Productos;
 import com.gadbacorp.api.repository.compras.DetallesComprasRepository;
 import com.gadbacorp.api.service.compras.IComprasService;
@@ -49,6 +48,16 @@ public class DetallesComprasService implements IDetallesComprasService {
         detalle.setCompra(compra.get());
         detalle.setProducto(producto.get());
         
+        // Validar que los precios requeridos estén presentes
+        if (detalle.getPrecioUnitario() == null) {
+            throw new RuntimeException("El precio unitario es requerido");
+        }
+        
+        // Si precioCompra no viene, usar precioUnitario como valor por defecto
+        if (detalle.getPrecioCompra() == null) {
+            detalle.setPrecioCompra(detalle.getPrecioUnitario());
+        }
+        
         // Calcular subtotal si no está establecido
         if (detalle.getSubTotal() == null) {
             BigDecimal subTotal = detalle.getPrecioUnitario().multiply(new BigDecimal(detalle.getCantidad()));
@@ -75,6 +84,8 @@ public class DetallesComprasService implements IDetallesComprasService {
         DetallesCompras detalleActual = detalleExistente.get();
         detalleActual.setCantidad(detalle.getCantidad());
         detalleActual.setPrecioUnitario(detalle.getPrecioUnitario());
+        detalleActual.setPrecioCompra(detalle.getPrecioCompra());
+        detalleActual.setPrecioVenta(detalle.getPrecioVenta());
         
         // Recalcular subtotal
         BigDecimal subTotal = detalle.getPrecioUnitario().multiply(new BigDecimal(detalle.getCantidad()));

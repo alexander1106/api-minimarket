@@ -7,6 +7,9 @@ import java.util.List;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.gadbacorp.api.entity.compras.Proveedores;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,6 +47,11 @@ public class Empresas {
 
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Sucursales> sucursales = new ArrayList<>();
+
+    // NUEVO: Relación con proveedores
+     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
+     @JsonManagedReference
+    private List<Proveedores> proveedores = new ArrayList<>();
 
     public Empresas(Integer idempresa) {
         this.idempresa = idempresa;
@@ -155,6 +163,14 @@ public class Empresas {
 
     public void setSucursales(List<Sucursales> sucursales) {
         this.sucursales = sucursales;
+    }
+
+    public List<Proveedores> getProveedores() {
+        return proveedores;
+    }
+
+    public void setProveedores(List<Proveedores> proveedores) {
+        this.proveedores = proveedores;
     }
 
     @Override

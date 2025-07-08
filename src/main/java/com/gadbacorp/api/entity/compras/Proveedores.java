@@ -5,6 +5,7 @@ import java.sql.Date;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.gadbacorp.api.entity.administrable.Empresas;
 
 import jakarta.persistence.Column;
@@ -38,6 +39,7 @@ public class Proveedores {
 
     @ManyToOne
     @JoinColumn(name = "id_empresa", referencedColumnName = "idempresa")
+    @JsonBackReference
     private Empresas empresa;
 
     public Integer getIdProveedor() {

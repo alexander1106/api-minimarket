@@ -1,23 +1,25 @@
 package com.gadbacorp.api.entity.compras;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
 
-public class ComprasDTO {
-    private Integer idCompra;
-    private Integer idProveedor;
-    private Integer idMetodoPago;
-    private BigDecimal total;
-    private String descripcion;
-    private LocalDateTime fechaCompra;
-    private Integer estado = 1;
-    private List<DetallesComprasDTO> detalles;
 
-    @NotNull(message = "La sucursal es obligatoria")
-    private Integer idSucursal;
+public class CompraCompletaDTO {
+    private Integer idCompra;
+    
+    @NotNull(message = "El proveedor es obligatorio")
+    private Integer idProveedor;
+    
+    @NotNull(message = "El método de pago es obligatorio")
+    private Integer idMetodoPago;
+    
+    private String descripcion;
+    private BigDecimal total;
+    
+    @NotNull(message = "Debe incluir al menos un producto")
+    private List<DetallesComprasDTO> detalles;
 
     public Integer getIdCompra() {
         return idCompra;
@@ -43,14 +45,6 @@ public class ComprasDTO {
         this.idMetodoPago = idMetodoPago;
     }
 
-    public BigDecimal getTotal() {
-        return total;
-    }
-
-    public void setTotal(BigDecimal total) {
-        this.total = total;
-    }
-
     public String getDescripcion() {
         return descripcion;
     }
@@ -59,20 +53,12 @@ public class ComprasDTO {
         this.descripcion = descripcion;
     }
 
-    public LocalDateTime getFechaCompra() {
-        return fechaCompra;
+    public BigDecimal getTotal() {
+        return total;
     }
 
-    public void setFechaCompra(LocalDateTime fechaCompra) {
-        this.fechaCompra = fechaCompra;
-    }
-
-    public Integer getEstado() {
-        return estado;
-    }
-
-    public void setEstado(Integer estado) {
-        this.estado = estado;
+    public void setTotal(BigDecimal total) {
+        this.total = total;
     }
 
     public List<DetallesComprasDTO> getDetalles() {
@@ -83,13 +69,7 @@ public class ComprasDTO {
         this.detalles = detalles;
     }
 
-    public Integer getIdSucursal() {
-        return idSucursal;
-    }
+    // Getters y Setters
 
-    public void setIdSucursal(Integer idSucursal) {
-        this.idSucursal = idSucursal;
-    }
-    
     
 }
