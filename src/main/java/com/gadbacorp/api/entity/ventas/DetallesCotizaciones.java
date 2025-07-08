@@ -34,7 +34,6 @@ public class DetallesCotizaciones {
 
     @ManyToOne
     @JoinColumn(name = "idCotizaciones")
-    @JsonIgnore
     private Cotizaciones cotizaciones;
 
     @ManyToOne(fetch = FetchType.EAGER)

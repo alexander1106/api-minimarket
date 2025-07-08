@@ -9,5 +9,6 @@ import com.gadbacorp.api.entity.ventas.DetallesCotizaciones;
 public interface DetallesCotizacionesRepository extends JpaRepository<DetallesCotizaciones, Integer>{
         List<DetallesCotizaciones> findByCotizaciones_IdCotizaciones(Integer idCotizaciones);
 
+
 }
 

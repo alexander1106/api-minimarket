@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import com.gadbacorp.api.entity.ventas.Ventas;
-
 public class DeliveryDTO {
     private Integer iddelivery;
     private String direccion;
@@ -14,26 +13,15 @@ public class DeliveryDTO {
     private BigDecimal costoEnvio;
     private String observaciones;
     private Integer estado;
-    private Ventas venta; // en vez de Integer idventa
-    private Integer idvehiculo;
+    private String estadoDelivery;
+    private Integer idVenta;
+        private Integer idCliente;
 
-    public DeliveryDTO() { }
+
+    public DeliveryDTO() {}
 
    
-    public DeliveryDTO(Integer iddelivery, String direccion, Date fechaEnvio, Date fechaEntrega, String encargado,
-            BigDecimal costoEnvio, String observaciones, Integer estado, Ventas venta, Integer idvehiculo) {
-        this.iddelivery = iddelivery;
-        this.direccion = direccion;
-        this.fechaEnvio = fechaEnvio;
-        this.fechaEntrega = fechaEntrega;
-        this.encargado = encargado;
-        this.costoEnvio = costoEnvio;
-        this.observaciones = observaciones;
-        this.estado = estado;
-        this.venta = venta;
-        this.idvehiculo = idvehiculo;
-    }
-
+    // Getters y Setters
 
     public Integer getIddelivery() {
         return iddelivery;
@@ -99,22 +87,32 @@ public class DeliveryDTO {
         this.estado = estado;
     }
 
-
-    public Integer getIdvehiculo() {
-        return idvehiculo;
+    public Integer getIdVenta() {
+        return idVenta;
     }
 
-    public void setIdvehiculo(Integer idvehiculo) {
-        this.idvehiculo = idvehiculo;
+    public void setIdVenta(Integer idVenta) {
+        this.idVenta = idVenta;
     }
 
-    public Ventas getVenta() {
-        return venta;
+
+    public Integer getIdCliente() {
+        return idCliente;
     }
 
-    public void setVenta(Ventas venta) {
-        this.venta = venta;
+
+    public void setIdCliente(Integer idCliente) {
+        this.idCliente = idCliente;
     }
 
+
+    public String getEstadoDelivery() {
+        return estadoDelivery;
+    }
+
+
+    public void setEstadoDelivery(String estadoDelivery) {
+        this.estadoDelivery = estadoDelivery;
+    }
     
 }

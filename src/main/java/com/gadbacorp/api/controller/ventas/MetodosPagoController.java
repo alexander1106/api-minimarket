@@ -1,6 +1,8 @@
 package com.gadbacorp.api.controller.ventas;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,24 +45,35 @@ public class MetodosPagoController {
         return metodosPagoService.obtenerMetodoPago(id);
     }
 
-    @PutMapping("/metodos-pago")
-    public ResponseEntity<?> modificar(@RequestBody MetodosPago metodoPago) {
-        return ResponseEntity.ok(metodosPagoService.editarMetodosPago(metodoPago));
-    }
+@PutMapping("/metodos-pago")
+public ResponseEntity<Map<String, Object>> modificar(@RequestBody MetodosPago metodoPago) {
+    metodosPagoService.editarMetodosPago(metodoPago);
+    
+    Map<String, Object> respuesta = new HashMap<>();
+    respuesta.put("status", 200);
+    respuesta.put("Detalle", "Método de pago actualizado");
+    
+    return ResponseEntity.ok(respuesta);
+}
 
-    @DeleteMapping("/metodos-pago/{id}")
-    public String eliminar(@PathVariable Integer id){
-        metodosPagoService.eliminarMetodoPago(id);
-        return "Método de pago eliminado";
-    }
+   @DeleteMapping("/metodos-pago/{id}")
+public ResponseEntity<Map<String, Object>> eliminar(@PathVariable Integer id) {
+    metodosPagoService.eliminarMetodoPago(id);
+    
+    Map<String, Object> respuesta = new HashMap<>();
+    respuesta.put("status", 200);
+    respuesta.put("Detalle", "Método de pago eliminado");
+    
+    return ResponseEntity.ok(respuesta);
+}
+
     @GetMapping("/sucursales/{idSucursal}/metodos-pago")
 public List<MetodosPago> listarPorSucursal(@PathVariable Integer idSucursal) {
     return metodosPagoService.listarPorSucursal(idSucursal);
 }
 
-
 @PostMapping("/sucursales/{idSucursal}/metodos-pago")
-public ResponseEntity<?> guardarMetodoPagoEnSucursal(
+public ResponseEntity<Map<String, Object>> guardarMetodoPagoEnSucursal(
         @PathVariable Integer idSucursal,
         @RequestBody MetodosPago metodoPago) {
 
@@ -68,15 +81,21 @@ public ResponseEntity<?> guardarMetodoPagoEnSucursal(
     sucursal.setIdSucursal(idSucursal);
     metodoPago.setSucursal(sucursal);
 
+    Map<String, Object> respuesta = new HashMap<>();
     try {
-        MetodosPago guardado = metodosPagoService.guardarMetodoPago(metodoPago);
-        return ResponseEntity.ok(guardado);
+        metodosPagoService.guardarMetodoPago(metodoPago);
+        respuesta.put("status", 200);
+        respuesta.put("Detalle", "Método de pago guardado");
+        return ResponseEntity.ok(respuesta);
     } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+        respuesta.put("status", 400);
+        respuesta.put("Detalle", e.getMessage());
+        return ResponseEntity.badRequest().body(respuesta);
     } catch (Exception e) {
-        return ResponseEntity.status(500).body("Error inesperado al guardar el método de pago.");
+        respuesta.put("status", 500);
+        respuesta.put("Detalle", "Error inesperado al guardar el método de pago.");
+        return ResponseEntity.status(500).body(respuesta);
     }
 }
-
 
 }

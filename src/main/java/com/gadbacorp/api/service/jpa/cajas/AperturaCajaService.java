@@ -39,5 +39,7 @@ public class AperturaCajaService implements IAperturaCajaService{
     public void eliminarAperturaCaja(Integer id) {
         aperturaCajaRepository.deleteById(id);
     }
+
+
     
 }
