@@ -65,8 +65,14 @@ El usuario administrador de la plataforma es **`alez`** con la contrasena que pu
 | Las rutas del frontend dan 404 al recargar | Falta la redireccion a `index.html` (`netlify.toml` / `public/_redirects`) |
 | Las imagenes desaparecen tras un despliegue | No hay volumen en `/app/uploads` |
 
-## Render (alternativa para la API)
+## Render + Aiven (demo gratis, sin tarjeta)
 
-1. **New -> Blueprint** y elige el repositorio: usa `render.yaml`.
-2. Pega `DB_URL` (formato `jdbc:mysql://HOST:PUERTO/BASE?useSSL=false&allowPublicKeyRetrieval=true`), `DB_USERNAME` y `DB_PASSWORD` de una base MySQL externa (Railway, Aiven, TiDB Cloud).
-3. Completa el resto de variables como en el paso 1.3. El plan gratuito duerme el servicio tras 15 minutos sin uso.
+1. **Base de datos en Aiven** (aiven.io): crea una cuenta, **Create service -> MySQL -> plan Free**, elige una region y espera a que este "Running". Anota *Host*, *Port*, *User* (`avnadmin`), *Password* y la base (`defaultdb`).
+2. **API en Render** (render.com): entra con GitHub y haz **New -> Blueprint**, elige el repositorio `api-minimarket`. Lee `render.yaml` y te pide las variables:
+   - `DB_URL` = `jdbc:mysql://HOST:PUERTO/defaultdb?sslMode=REQUIRED` (con los datos de Aiven; `sslMode=REQUIRED` es obligatorio)
+   - `DB_USERNAME` = `avnadmin` y `DB_PASSWORD` = la de Aiven
+   - `APP_CRYPTO_KEY`, `APP_SEED_ADMIN_PASSWORD`, `APP_SEED_EMPRESA_PASSWORD` (paso 0 de esta guia)
+   - `CORS_ALLOWED_ORIGINS` y `FRONTEND_URL` = `http://localhost:4200` por ahora (se cambian al publicar el frontend)
+   - `JWT_SECRET` lo genera Render solo.
+3. Espera el despliegue (la primera construccion tarda varios minutos). Abre `https://TU-SERVICIO.onrender.com/actuator/health`: debe decir `{"status":"UP"}`. El primer arranque crea las tablas y carga los datos de demostracion.
+4. Limitaciones del plan gratuito: la API **duerme tras 15 minutos** sin uso (la primera peticion tarda 30-60 s), tiene 512 MB de memoria (justo para Spring Boot) y el disco es temporal: las imagenes subidas se pierden al reiniciar.

@@ -1,5 +1,6 @@
-# Blueprint de Render para la API. Render no ofrece MySQL: usa una base externa (Railway, Aiven, TiDB Cloud)
-# y pega su cadena en DB_URL. Las variables con sync: false se piden al crear el servicio.
+# Blueprint de Render para la API (demo gratis). Render no ofrece MySQL: usa una base externa gratuita (Aiven) y pega
+# sus datos en DB_URL, DB_USERNAME y DB_PASSWORD. Las variables con sync: false se piden al crear el servicio.
+# DB_URL (Aiven): jdbc:mysql://HOST:PUERTO/defaultdb?sslMode=REQUIRED
 services:
   - type: web
     name: minimarket-api
@@ -9,6 +10,9 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
+      # El plan gratuito tiene 512 MB: la JVM se limita para que no la mate Render por falta de memoria
+      - key: JAVA_TOOL_OPTIONS
+        value: "-XX:MaxRAMPercentage=65 -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xss512k"
       - key: DB_URL
         sync: false
       - key: DB_USERNAME
@@ -27,5 +31,6 @@ services:
         sync: false
       - key: APP_SEED_EMPRESA_PASSWORD
         sync: false
+      # Es una demo: carga productos, ventas y cajas de ejemplo la primera vez
       - key: APP_SEED_DEMO
-        value: "false"
+        value: "true"
