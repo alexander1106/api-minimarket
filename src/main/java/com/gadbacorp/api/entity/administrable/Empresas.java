@@ -32,23 +32,40 @@ public class Empresas {
     private String razonsocial;
     private String ciudad;
     private String direccion;
-    private Integer cant_sucursales;
     private String ruc;
     private LocalDate fechaRegistro;
-    private Integer cant_cajas;
-    private Integer cant_trabajadores;
-    private Integer limit_inventario;
     private String correo;
     @Lob
     @Column(name="logo", columnDefinition="LONGTEXT")
     private String logo;
     private Integer estado = 1;
+
+    /** Nombre comercial (el que ve el cliente). razonsocial es la razon social registrada en SUNAT. */
+    private String nombreComercial;
+    private String propietario;
+    private String departamento;
+    private Boolean facturacionElectronica = false;
+    @jakarta.persistence.Column(length = 1000)
+    private String notas;
+    private String telefono;
+    private String distrito;
+
+    @jakarta.persistence.ManyToOne
+    @jakarta.persistence.JoinColumn(name = "id_plan")
+    private Plan plan;
+
+    /** MENSUAL o ANUAL. */
+    private String ciclo = "MENSUAL";
+    private LocalDate fechaVencimiento;
+    private Boolean enPrueba = false;
+    private Boolean sunatVerificado = false;
+    /** Suspendida por el dueno de la plataforma: la empresa sigue existiendo (estado=1) pero no esta activa. */
+    private Boolean suspendida = false;
     
 
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Sucursales> sucursales = new ArrayList<>();
 
-    // NUEVO: Relación con proveedores
      @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
      @JsonManagedReference
     private List<Proveedores> proveedores = new ArrayList<>();
@@ -59,6 +76,33 @@ public class Empresas {
 
     public Empresas() {
     }
+
+    public String getNombreComercial() { return nombreComercial; }
+    public void setNombreComercial(String nombreComercial) { this.nombreComercial = nombreComercial; }
+    public String getDepartamento() { return departamento; }
+    public void setDepartamento(String departamento) { this.departamento = departamento; }
+    public Boolean getFacturacionElectronica() { return facturacionElectronica; }
+    public void setFacturacionElectronica(Boolean facturacionElectronica) { this.facturacionElectronica = facturacionElectronica; }
+    public String getNotas() { return notas; }
+    public void setNotas(String notas) { this.notas = notas; }
+    public String getPropietario() { return propietario; }
+    public void setPropietario(String propietario) { this.propietario = propietario; }
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
+    public String getDistrito() { return distrito; }
+    public void setDistrito(String distrito) { this.distrito = distrito; }
+    public Plan getPlan() { return plan; }
+    public void setPlan(Plan plan) { this.plan = plan; }
+    public String getCiclo() { return ciclo; }
+    public void setCiclo(String ciclo) { this.ciclo = ciclo; }
+    public LocalDate getFechaVencimiento() { return fechaVencimiento; }
+    public void setFechaVencimiento(LocalDate fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
+    public Boolean getEnPrueba() { return enPrueba; }
+    public void setEnPrueba(Boolean enPrueba) { this.enPrueba = enPrueba; }
+    public Boolean getSunatVerificado() { return sunatVerificado; }
+    public void setSunatVerificado(Boolean sunatVerificado) { this.sunatVerificado = sunatVerificado; }
+    public Boolean getSuspendida() { return suspendida; }
+    public void setSuspendida(Boolean suspendida) { this.suspendida = suspendida; }
 
     public Integer getIdempresa() {
         return idempresa;
@@ -92,14 +136,6 @@ public class Empresas {
         this.fechaRegistro = fechaRegistro;
     }
 
-    public Integer getCant_cajas() {
-        return cant_cajas;
-    }
-
-    public void setCant_cajas(Integer cant_cajas) {
-        this.cant_cajas = cant_cajas;
-    }
-
     public String getCiudad() {
         return ciudad;
     }
@@ -114,30 +150,6 @@ public class Empresas {
 
     public void setDireccion(String direccion) {
         this.direccion = direccion;
-    }
-
-    public Integer getCant_sucursales() {
-        return cant_sucursales;
-    }
-
-    public void setCant_sucursales(Integer cant_sucursales) {
-        this.cant_sucursales = cant_sucursales;
-    }
-
-    public Integer getCant_trabajadores() {
-        return cant_trabajadores;
-    }
-
-    public void setCant_trabajadores(Integer cant_trabajadores) {
-        this.cant_trabajadores = cant_trabajadores;
-    }
-
-    public Integer getLimit_inventario() {
-        return limit_inventario;
-    }
-
-    public void setLimit_inventario(Integer limit_inventario) {
-        this.limit_inventario = limit_inventario;
     }
 
     public String getCorreo() {
@@ -173,13 +185,6 @@ public class Empresas {
         this.proveedores = proveedores;
     }
 
-    @Override
-    public String toString() {
-        return "Empresas [idempresa=" + idempresa + ", razonsocial=" + razonsocial + ", ciudad=" + ciudad
-                + ", direccion=" + direccion + ", cant_sucursales=" + cant_sucursales + ", cant_trabajadores="
-                + cant_trabajadores + ", limit_inventario=" + limit_inventario + ", correo=" + correo + ", logo=" + logo
-                + ", estado=" + estado + "]";
-    }
     public String getLogo() {
         return logo;
     }

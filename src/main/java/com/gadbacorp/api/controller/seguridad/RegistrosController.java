@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +20,10 @@ import com.gadbacorp.api.config.JwtUtil;
 import com.gadbacorp.api.entity.seguridad.Registros;
 import com.gadbacorp.api.service.seguridad.IRegistrosService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Seguridad - Registros de clientes API")
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin(origins = "*") // o especifica el dominio si es necesario
 public class RegistrosController {
     @Autowired
     private IRegistrosService serviceRegistros;

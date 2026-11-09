@@ -7,5 +7,10 @@ import com.gadbacorp.api.entity.seguridad.RolModulo;
 
 @Repository
 public interface RolModuloRepository extends JpaRepository<RolModulo, Integer> {
+
+    @org.springframework.data.jpa.repository.Query(
+            "SELECT m.nombre FROM RolModulo rm JOIN rm.modulo m JOIN rm.rol r WHERE UPPER(r.nombre) = UPPER(:rol)")
+    java.util.List<String> nombresDeModulosPorRol(@org.springframework.data.repository.query.Param("rol") String rol);
+
     
 }

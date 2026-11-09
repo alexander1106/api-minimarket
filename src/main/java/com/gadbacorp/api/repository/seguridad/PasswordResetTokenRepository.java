@@ -11,5 +11,7 @@ import com.gadbacorp.api.service.jpa.seguridad.PasswordResetToken;
 @Repository
 public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, Integer> {
     Optional<PasswordResetToken> findByToken(String token);
+
+    Optional<PasswordResetToken> findByUsuario(com.gadbacorp.api.entity.empleados.Usuarios usuario);
     
 }

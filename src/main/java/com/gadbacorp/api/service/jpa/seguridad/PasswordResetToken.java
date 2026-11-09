@@ -23,7 +23,9 @@ public class PasswordResetToken {
     private String token;
     private String rol;
 
-    // Constructor que recibe el token
+    public PasswordResetToken() {
+    }
+
     public PasswordResetToken(String token) {
         this.token = token;
     }
@@ -74,5 +76,4 @@ public class PasswordResetToken {
         this.rol = rol;
     }
 
-    // Getters y setters
 }

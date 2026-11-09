@@ -9,7 +9,6 @@ public class SucursalDTO {
     private Integer id_empresa; 
     private String empresaNombre; 
 
-    // Constructores
     public SucursalDTO() {}
 
     public Integer getIdSucursal() {

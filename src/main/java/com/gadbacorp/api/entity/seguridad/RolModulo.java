@@ -14,7 +14,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-
 @Entity
 @Table(name = "rol_modulo")
 @SQLDelete(sql = "UPDATE rol_modulo SET estado=0 WHERE id = ?")
@@ -35,7 +34,6 @@ public class RolModulo {
     @JoinColumn(name = "modulo_id")
     private Modulo modulo;
 
-    // getters y setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

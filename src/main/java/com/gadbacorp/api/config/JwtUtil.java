@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -15,9 +16,18 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "clave_muy_secreta_que_debe_tener_muchos_caracteres_1234567890";
-    
-    private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 horas
+    private final String SECRET_KEY;
+
+    private final long EXPIRATION_TIME;
+
+    public JwtUtil(@Value("${jwt.secret}") String secret,
+                   @Value("${jwt.expiration-ms:36000000}") long expirationMs) {
+        if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("jwt.secret debe tener al menos 32 caracteres (definir JWT_SECRET)");
+        }
+        this.SECRET_KEY = secret;
+        this.EXPIRATION_TIME = expirationMs;
+    }
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));

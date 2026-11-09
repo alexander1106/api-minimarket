@@ -47,9 +47,7 @@ public class UsuarioService implements IUsuariosService {
     }
     @Override
     public Optional<Usuarios> buscarPorUsername(String username) {
-        // Llama al nuevo método del repo
         return usuariosRepository.findOptionalByUsername(username);
     }
-
 
 }

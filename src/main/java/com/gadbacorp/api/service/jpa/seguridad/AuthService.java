@@ -31,15 +31,17 @@ private JwtUtil jwtUtil;
     @Autowired
     private PasswordEncoder passwordEncoder; // BCryptPasswordEncoder
 
-
  
 
-    // RESTABLECER CONTRASEÑA
     public ResponseEntity<?> resetPassword(ResetPasswordRequest request) {
         Optional<PasswordResetToken> tokenOpt = tokenRepository.findByToken(request.getToken());
 
         if (tokenOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token inválido");
+        }
+
+        if (request.getNewPassword() == null || request.getNewPassword().length() < 6) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La contraseña debe tener al menos 6 caracteres");
         }
 
         PasswordResetToken token = tokenOpt.get();
@@ -52,7 +54,6 @@ private JwtUtil jwtUtil;
         usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
         usuarioRepository.save(usuario);
 
-        // Opcional: eliminar el token luego de usarlo
         tokenRepository.delete(token);
 
         return ResponseEntity.ok("Contraseña actualizada correctamente");

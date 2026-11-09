@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,13 +27,17 @@ import com.gadbacorp.api.repository.administrable.SucursalesRepository;
 import com.gadbacorp.api.repository.seguridad.RolRepository;
 import com.gadbacorp.api.service.empleados.IUsuariosService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Seguridad - Usuarios")
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/api/minimarket")
 public class UsuariosController {
 
     @Autowired
     private IUsuariosService usuariosService;
+
+    @Autowired
+    private com.gadbacorp.api.service.jpa.administrable.EmpresaResumenService empresaResumenService;
 
     @Autowired
     private SucursalesRepository sucursalesRepository;
@@ -84,14 +87,41 @@ public ResponseEntity<UsuariosDTO> getLoggedUser(Principal principal) {
     @PostMapping("/usuarios")
     public ResponseEntity<?> guardar(@RequestBody UsuariosDTO dto) {
 
-        Sucursales sucursales= sucursalesRepository.findById(dto.getIdSucursal()).orElse(null);
-        if (sucursales == null) {
-            return ResponseEntity.badRequest().body("sucursal no encontrado con ID: " + dto.getIdSucursal());
+        if (dto.getRolId() == null) {
+            return ResponseEntity.badRequest().body("El rol es obligatorio.");
         }
-
         Rol rol = rolRepository.findById(dto.getRolId()).orElse(null);
         if (rol == null) {
             return ResponseEntity.badRequest().body("rol no encontrado con ID: " + dto.getRolId());
+        }
+
+        boolean esSuperadmin = "SUPERADMIN".equalsIgnoreCase(rol.getNombre());
+        if (esSuperadmin && !quienLlamaEsSuperadmin()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo un SUPERADMIN puede crear otro SUPERADMIN.");
+        }
+
+        // Los usuarios pertenecen a una sucursal de una empresa; el SUPERADMIN (dueno de la plataforma) no
+        Sucursales sucursales = null;
+        if (!esSuperadmin) {
+            Integer idSucursal = dto.getIdSucursal();
+            if (idSucursal == null && dto.getIdEmpresa() != null) {
+                // se indico solo la empresa (p. ej. el SUPERADMIN creando al propietario): va a su primera sucursal
+                idSucursal = sucursalesRepository.findByEmpresaIdempresa(dto.getIdEmpresa()).stream()
+                        .map(Sucursales::getIdSucursal).sorted().findFirst().orElse(null);
+                if (idSucursal == null) {
+                    return ResponseEntity.badRequest().body("La empresa no tiene sucursales.");
+                }
+            }
+            if (idSucursal == null) {
+                return ResponseEntity.badRequest().body("La sucursal es obligatoria.");
+            }
+            dto.setIdSucursal(idSucursal);
+            sucursales = sucursalesRepository.findById(dto.getIdSucursal()).orElse(null);
+            if (sucursales == null) {
+                return ResponseEntity.badRequest().body("sucursal no encontrado con ID: " + dto.getIdSucursal());
+            }
+            // el plan de la empresa limita cuantos usuarios puede tener
+            empresaResumenService.verificarCupoUsuarios(sucursales.getEmpresa());
         }
 
         Usuarios usuarios= new Usuarios();
@@ -109,10 +139,59 @@ public ResponseEntity<UsuariosDTO> getLoggedUser(Principal principal) {
         return ResponseEntity.ok(usuariosService.guardar(usuarios));
     }
     
-    @PutMapping("/usuarios") 
-    public Usuarios modificar(@RequestBody Usuarios empleado) {        
-        usuariosService.modificar(empleado);
-        return empleado;
+    private boolean quienLlamaEsSuperadmin() {
+        org.springframework.security.core.Authentication a =
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        return a != null && a.getAuthorities().stream().anyMatch(g -> "SUPERADMIN".equals(g.getAuthority()));
+    }
+
+    /**
+     * Edita un usuario existente. Solo cambia los campos que llegan: sin password se conserva la actual,
+     * y nadie que no sea SUPERADMIN puede asignar ese rol ni modificar a un SUPERADMIN.
+     */
+    @PutMapping("/usuarios")
+    public ResponseEntity<?> modificar(@RequestBody UsuariosDTO dto) {
+        if (dto.getIdUsuario() == null) {
+            return ResponseEntity.badRequest().body("El id del usuario es obligatorio.");
+        }
+        Usuarios usuario = usuariosService.buscarId(dto.getIdUsuario()).orElse(null);
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
+        }
+        boolean llamaSuperadmin = quienLlamaEsSuperadmin();
+        if (!llamaSuperadmin && usuario.getRol() != null && "SUPERADMIN".equalsIgnoreCase(usuario.getRol().getNombre())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo un SUPERADMIN puede modificar a un SUPERADMIN.");
+        }
+
+        if (dto.getRolId() != null) {
+            Rol rol = rolRepository.findById(dto.getRolId()).orElse(null);
+            if (rol == null) {
+                return ResponseEntity.badRequest().body("rol no encontrado con ID: " + dto.getRolId());
+            }
+            if (!llamaSuperadmin && "SUPERADMIN".equalsIgnoreCase(rol.getNombre())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo un SUPERADMIN puede asignar el rol SUPERADMIN.");
+            }
+            usuario.setRol(rol);
+        }
+        if (dto.getIdSucursal() != null) {
+            Sucursales sucursal = sucursalesRepository.findById(dto.getIdSucursal()).orElse(null);
+            if (sucursal == null) {
+                return ResponseEntity.badRequest().body("sucursal no encontrado con ID: " + dto.getIdSucursal());
+            }
+            usuario.setSucursal(sucursal);
+        }
+
+        if (dto.getNombre() != null) usuario.setNombre(dto.getNombre());
+        if (dto.getApellidos() != null) usuario.setApellidos(dto.getApellidos());
+        if (dto.getUsername() != null && !dto.getUsername().isBlank()) usuario.setUsername(dto.getUsername());
+        if (dto.getEmail() != null) usuario.setEmail(dto.getEmail());
+        if (dto.getDni() != null) usuario.setDni(dto.getDni());
+        if (dto.getTurno() != null) usuario.setTurno(dto.getTurno());
+        if (dto.getEstado() != null) usuario.setEstado(dto.getEstado());
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+        return ResponseEntity.ok(usuariosService.modificar(usuario));
     }
 
 
@@ -123,6 +202,12 @@ public ResponseEntity<UsuariosDTO> getLoggedUser(Principal principal) {
 
     @DeleteMapping("/usuarios/{id}")
     public String eliminar(@PathVariable Integer id){
+        usuariosService.buscarId(id).ifPresent(u -> {
+            if (u.getRol() != null && "SUPERADMIN".equalsIgnoreCase(u.getRol().getNombre()) && !quienLlamaEsSuperadmin()) {
+                throw new org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Solo un SUPERADMIN puede eliminar a un SUPERADMIN.");
+            }
+        });
         usuariosService.eliminar(id);
         return "Usuario elimnado";
     }

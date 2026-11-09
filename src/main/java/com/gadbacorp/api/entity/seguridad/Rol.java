@@ -1,6 +1,5 @@
 package com.gadbacorp.api.entity.seguridad;
 
-
 import java.util.Set;
 
 import org.hibernate.annotations.SQLDelete;
@@ -15,7 +14,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 
 @Entity
 @Table(name = "roles")
@@ -33,11 +31,9 @@ public class Rol {
     @JsonIgnore
     private Set<Usuarios> usuarios;
 
-
     @OneToMany(mappedBy = "rol")
     @JsonIgnore 
     private Set<RolModulo> rolModulos;
-    // getters y setters
     public Set<RolModulo> getRolModulos() { return rolModulos; }
     public void setRolModulos(Set<RolModulo> rolModulos) { this.rolModulos = rolModulos; }
         public Integer getId() {

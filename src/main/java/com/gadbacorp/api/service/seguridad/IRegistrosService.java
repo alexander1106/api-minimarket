@@ -6,9 +6,7 @@ import java.util.Optional;
 import com.gadbacorp.api.entity.seguridad.Registros;
 
 public interface IRegistrosService {
-    // Listar todos los registros de la tabla
     List<Registros> buscarTodos();
-    // Guarda los registros
     void guardar(Registros registro);
 
     void modificar(Registros registro);

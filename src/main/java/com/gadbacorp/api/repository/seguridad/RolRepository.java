@@ -10,5 +10,7 @@ import com.gadbacorp.api.entity.seguridad.Rol;
 @Repository
 public interface RolRepository extends JpaRepository<Rol, Integer> {
      Optional<Rol> findByNombre(String nombre);
+
+     Optional<Rol> findByNombreIgnoreCase(String nombre);
    
 }

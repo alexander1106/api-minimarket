@@ -34,6 +34,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private RegistrosRepository registrosRepository;
 
+    /**
+     * Los endpoints reactivos (Mono/Flux, p. ej. la consulta RENIEC/SUNAT) completan su respuesta en un segundo
+     * despacho asincrono. Si el filtro no corriera ahi, ese despacho llegaria sin usuario y se respondia 403.
+     */
+    @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        return false;
+    }
+
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -50,7 +59,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             jwtToken = requestTokenHeader.substring(7);
 
             try {
-                // Extraer username del JWT
                 username = this.jwtUtil.extractUsername(jwtToken);
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
@@ -66,10 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // Si no autenticó con JWT, intentamos con token guardado en BD
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                final String tokenFinal = jwtToken; // Necesario para lambda (final o effectively final)
-                Optional<Registros> match = registrosRepository.findAll().stream()
-                        .filter(r -> tokenFinal.equals(r.getAccess_token()))
-                        .findFirst();
+                Optional<Registros> match = registrosRepository.buscarPorAccessToken(jwtToken);
 
                 if (match.isPresent()) {
                     UsernamePasswordAuthenticationToken authToken =

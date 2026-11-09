@@ -6,8 +6,22 @@ public class AuthResponse {
     private String token;
     private String rol;
     private Usuarios usuario;
+    private java.util.List<String> modulos = java.util.List.of();
 
     public AuthResponse() {}
+
+    public AuthResponse(String token, String rol, Usuarios usuario, java.util.List<String> modulos) {
+        this(token, rol, usuario);
+        this.modulos = modulos;
+    }
+
+    public java.util.List<String> getModulos() {
+        return modulos;
+    }
+
+    public void setModulos(java.util.List<String> modulos) {
+        this.modulos = modulos;
+    }
     public AuthResponse(String token, String rol, Usuarios usuario) {
         this.token = token;
         this.rol = rol;

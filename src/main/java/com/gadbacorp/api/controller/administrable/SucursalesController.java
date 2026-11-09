@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,10 +32,15 @@ import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
 import com.gadbacorp.api.repository.inventario.InventarioRepository;
 import com.gadbacorp.api.service.administrable.ISucursalesService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Administración - Sucursales")
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/api/minimarket/sucursales")
 public class SucursalesController {
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.gadbacorp.api.service.jpa.administrable.EmpresaResumenService empresaResumenService;
+
 
     @Autowired
     private ISucursalesService sucursalesService;
@@ -148,6 +152,8 @@ public ResponseEntity<List<InventarioProducto>> listarProductosPorSucursal(@Path
             return ResponseEntity.badRequest()
                 .body("Empresa no encontrada con ID: " + dto.getId_empresa());
         }
+        // el plan de la empresa limita cuantas sucursales puede tener
+        empresaResumenService.verificarCupoSucursales(empOpt.get());
         Sucursales s = new Sucursales();
         s.setNombreSucursal(dto.getNombreSucursal());
         s.setContacto(dto.getContacto());

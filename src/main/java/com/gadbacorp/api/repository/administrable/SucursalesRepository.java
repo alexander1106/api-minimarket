@@ -15,4 +15,10 @@ public interface SucursalesRepository extends JpaRepository<Sucursales, Integer>
     List<Sucursales> findByEmpresaIdempresa(Integer idEmpresa);
     List<Sucursales> findAllByEmpresa_Idempresa(Integer idEmpresa);
 
+    long countByEmpresaIdempresa(Integer idEmpresa);
+
+    /** [idEmpresa, cantidad de sucursales] por empresa. */
+    @Query("SELECT s.empresa.idempresa, COUNT(s) FROM Sucursales s GROUP BY s.empresa.idempresa")
+    List<Object[]> contarPorEmpresa();
+
 }

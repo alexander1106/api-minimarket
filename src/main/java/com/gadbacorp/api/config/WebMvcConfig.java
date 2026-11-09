@@ -16,7 +16,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Ruta absoluta limpia
         String absolutePath = Paths.get(uploadDir)
                                    .toAbsolutePath()
                                    .normalize()

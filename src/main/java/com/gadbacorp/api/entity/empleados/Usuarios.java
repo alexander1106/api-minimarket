@@ -43,11 +43,13 @@ public class Usuarios implements UserDetails {
     private String dni;
     private boolean enable = true;
 
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
     private String password;
     private Integer estado=1;
     private LocalDateTime fechaCreacion;
     private String turno;
-        private String token;
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
+    private String token;
 
     @ManyToOne
     @JoinColumn(name = "rol_id", referencedColumnName = "id") 
@@ -192,7 +194,7 @@ public class Usuarios implements UserDetails {
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         HashSet<Authority> authorities = new HashSet<>();
-        authorities.add(new Authority(this.rol.getNombre()));
+        authorities.add(new Authority(this.rol.getNombre() == null ? "" : this.rol.getNombre().trim().toUpperCase()));
         return authorities;
     }
 
