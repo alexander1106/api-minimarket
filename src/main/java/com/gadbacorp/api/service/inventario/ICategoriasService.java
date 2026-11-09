@@ -5,13 +5,10 @@ import java.util.Optional;
 
 import com.gadbacorp.api.entity.inventario.Categorias;
 
-
 public interface ICategoriasService {
 
-    //listar todos los clientes de la tabla
     List<Categorias> buscarTodos();
 
-    //guarda los clientes
     Categorias guardar(Categorias categoria);
 
     Categorias modificar(Categorias categoria);

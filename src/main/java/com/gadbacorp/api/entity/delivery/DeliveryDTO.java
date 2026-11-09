@@ -17,11 +17,9 @@ public class DeliveryDTO {
     private Integer idVenta;
         private Integer idCliente;
 
-
     public DeliveryDTO() {}
 
    
-    // Getters y Setters
 
     public Integer getIddelivery() {
         return iddelivery;
@@ -95,21 +93,17 @@ public class DeliveryDTO {
         this.idVenta = idVenta;
     }
 
-
     public Integer getIdCliente() {
         return idCliente;
     }
-
 
     public void setIdCliente(Integer idCliente) {
         this.idCliente = idCliente;
     }
 
-
     public String getEstadoDelivery() {
         return estadoDelivery;
     }
-
 
     public void setEstadoDelivery(String estadoDelivery) {
         this.estadoDelivery = estadoDelivery;

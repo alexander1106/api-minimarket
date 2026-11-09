@@ -29,7 +29,6 @@ public class TipoProductoService implements ITipoProductoService {
 
     @Override
     public TipoProducto guardar(TipoProducto tipo) {
-        // Validación de nombre duplicado (ignore case)
         repoTipoProducto.findByNombreIgnoreCase(tipo.getNombre())
             .ifPresent(t -> {
                 throw new ResponseStatusException(
@@ -42,7 +41,6 @@ public class TipoProductoService implements ITipoProductoService {
 
     @Override
 public TipoProducto modificar(TipoProducto tipo) {
-    // 0) Validar que no esté siendo usado por ningún producto
     boolean enUso = prodRepo.existsByTipoProducto_Idtipoproducto(tipo.getIdtipoproducto());
     if (enUso) {
         throw new ResponseStatusException(
@@ -51,7 +49,6 @@ public TipoProducto modificar(TipoProducto tipo) {
         );
     }
 
-    // 1) Validar duplicado excluyendo la misma entidad
     Optional<TipoProducto> dup = repoTipoProducto.findByNombreIgnoreCase(tipo.getNombre());
     if (dup.isPresent() && !dup.get().getIdtipoproducto().equals(tipo.getIdtipoproducto())) {
         throw new ResponseStatusException(
@@ -60,7 +57,6 @@ public TipoProducto modificar(TipoProducto tipo) {
         );
     }
 
-    // 2) Guardar
     return repoTipoProducto.save(tipo);
 }
 
@@ -71,7 +67,6 @@ public TipoProducto modificar(TipoProducto tipo) {
 
     @Override
     public void eliminar(Integer id) {
-        // Validar que no esté en uso por productos
         if (prodRepo.existsByTipoProducto_Idtipoproducto(id)) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,

@@ -1,4 +1,3 @@
-// src/main/java/com/gadbacorp/api/controller/inventario/AlmacenesController.java
 package com.gadbacorp.api.controller.inventario;
 
 import java.util.List;
@@ -7,7 +6,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,9 +22,10 @@ import com.gadbacorp.api.entity.inventario.AlmacenesDTO;
 import com.gadbacorp.api.service.administrable.ISucursalesService;
 import com.gadbacorp.api.service.inventario.IAlmacenesService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Inventario - Almacenes")
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin(origins = "http://localhost:4200")
 public class AlmacenesController {
 
     @Autowired private IAlmacenesService service;
@@ -49,7 +48,6 @@ public class AlmacenesController {
         return toDTO(e);
     }
 
-    // Este método faltaba
     @GetMapping("/almacenes/sucursal/{idSucursal}")
     public List<AlmacenesDTO> listarPorSucursal(@PathVariable Integer idSucursal) {
         return service.buscarTodosPorSucursal(idSucursal)   // o como se llame tu service
@@ -60,7 +58,6 @@ public class AlmacenesController {
 
     @PostMapping("/almacenes")
     public ResponseEntity<AlmacenesDTO> crear(@RequestBody AlmacenesDTO dto) {
-        // Validar sucursal
         Sucursales suc = sucursalesService.buscarId(dto.getIdSucursal())
             .orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
@@ -81,7 +78,6 @@ public class AlmacenesController {
 
     @PutMapping("/almacenes")
     public AlmacenesDTO actualizar(@RequestBody AlmacenesDTO dto) {
-        // Se validará existencia y duplicados en el service
         Almacenes a = new Almacenes();
         a.setIdalmacen(dto.getIdalmacen());
         a.setNombre(dto.getNombre());
@@ -89,7 +85,6 @@ public class AlmacenesController {
         a.setDireccion(dto.getDireccion());
         a.setEncargado(dto.getEncargado());
         a.setEstado(dto.getEstado());
-        // Referencia a sucursal
         Sucursales suc = sucursalesService.buscarId(dto.getIdSucursal())
             .orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,

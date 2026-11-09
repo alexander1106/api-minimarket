@@ -22,7 +22,6 @@ public class MetodosPagoService implements  IMetodosPagoService{
     private PagosRepository pagosRepository;
 @Override
 public MetodosPago guardarMetodoPago(MetodosPago metodoPago) {
-    // Validar que venga bien seteada la sucursal
     if (metodoPago.getSucursal() == null || metodoPago.getSucursal().getIdSucursal() == null) {
         throw new IllegalArgumentException("La sucursal es obligatoria.");
     }

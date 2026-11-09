@@ -1,12 +1,13 @@
 package com.gadbacorp.api.controller.ventas;
 
-import java.time.LocalDateTime;
+import org.springframework.transaction.annotation.Transactional;
+import com.gadbacorp.api.entity.inventario.MovimientoStock;
+import com.gadbacorp.api.service.jpa.inventario.StockService;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,20 +17,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gadbacorp.api.entity.inventario.AjusteInventario;
-import com.gadbacorp.api.entity.inventario.InventarioProducto;
 import com.gadbacorp.api.entity.inventario.Productos;
 import com.gadbacorp.api.entity.ventas.DetallesVentas;
+import com.gadbacorp.api.service.jpa.inventario.ConversionUnidadesService;
 import com.gadbacorp.api.entity.ventas.DetallesVentasDTO;
 import com.gadbacorp.api.entity.ventas.Ventas;
-import com.gadbacorp.api.repository.inventario.AjusteInventarioRepository;
-import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
 import com.gadbacorp.api.repository.inventario.ProductosRepository;
 import com.gadbacorp.api.repository.ventas.VentasRepository;
 import com.gadbacorp.api.service.ventas.IDetallesVentasService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Ventas - Detalles de ventas")
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/api/minimarket")
 public class DetallesVentasController {
 
@@ -42,11 +41,12 @@ public class DetallesVentasController {
     @Autowired
     private ProductosRepository productosRepository;
 
-    @Autowired
-    private AjusteInventarioRepository ajusteInventarioRepository;
 
-    @Autowired  
-    private InventarioProductoRepository inventarioProductoRepository;
+    @Autowired
+    private StockService stockService;
+
+    @Autowired
+    private ConversionUnidadesService conversionUnidadesService;
 
     @GetMapping("/detalles-ventas")
     public List<DetallesVentas> buscarTodos() {
@@ -68,41 +68,29 @@ public ResponseEntity<?> buscarDetallesPorIdVenta(@PathVariable Integer idVenta)
 
 
     @PostMapping("/detalles-ventas")
+    @Transactional
     public ResponseEntity<?> guardarDetallesVentas(@RequestBody DetallesVentasDTO dto) {
         Productos producto = productosRepository.findById(dto.getId_producto()).orElse(null);
         if (producto == null) {
             return ResponseEntity.badRequest().body("Producto no encontrado con ID: " + dto.getId_producto());
         }
-
         Ventas venta = ventasRepository.findById(dto.getId_venta()).orElse(null);
         if (venta == null) {
             return ResponseEntity.badRequest().body("Venta no encontrada con ID: " + dto.getId_venta());
         }
 
-        Optional<InventarioProducto> inventarioOpt = inventarioProductoRepository.findFirstByProducto_Idproducto(dto.getId_producto());
-        if (inventarioOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("InventarioProducto no encontrado para el producto ID: " + dto.getId_producto());
-        }
-
-        InventarioProducto inventario = inventarioOpt.get();
-        if (inventario.getStockactual() < dto.getCantidad()) {
-            return ResponseEntity.badRequest().body("Stock insuficiente. Disponible: " + inventario.getStockactual());
-        }
-
-        inventario.setStockactual(inventario.getStockactual() - dto.getCantidad());
-        inventarioProductoRepository.save(inventario);
-
-        AjusteInventario ajuste = new AjusteInventario();
-        ajuste.setCantidad(dto.getCantidad());
-        ajuste.setDescripcion("VENTA");
-        ajuste.setFechaAjuste(LocalDateTime.now());
-        ajuste.setInventarioProducto(inventario);
-        ajusteInventarioRepository.save(ajuste);
+        // la cantidad puede venir en una presentacion (2 sacos) o en unidad base (2.5 kg): el stock se mueve en base
+        ConversionUnidadesService.Conversion conversion =
+                conversionUnidadesService.convertir(producto, dto.getIdPresentacion(), dto.getCantidad());
+        stockService.descontar(StockService.sucursalDe(venta), producto.getIdproducto(), conversion.cantidadBase(),
+                MovimientoStock.VENTA, "Venta #" + venta.getIdVenta() + " (linea agregada)");
 
         DetallesVentas detallesVentas = new DetallesVentas();
         detallesVentas.setPrecioUnitario(dto.getPecioUnitario());
         detallesVentas.setFechaVenta(dto.getFechaVenta());
         detallesVentas.setCantidad(dto.getCantidad());
+        detallesVentas.setPresentacion(conversion.presentacion());
+        detallesVentas.setCantidadBase(conversion.cantidadBase());
         detallesVentas.setSubTotal(dto.getSubTotal());
         detallesVentas.setProductos(producto);
         detallesVentas.setVentas(venta);
@@ -111,82 +99,38 @@ public ResponseEntity<?> buscarDetallesPorIdVenta(@PathVariable Integer idVenta)
     }
 
     @PutMapping("/detalles-ventas")
+    @Transactional
     public ResponseEntity<?> actualizarDetalleVenta(@RequestBody DetallesVentasDTO dto) {
         Optional<DetallesVentas> detalleExistenteOpt = detallesVentasService.buscarDetallesVentas(dto.getIdDetallesVenta());
         if (detalleExistenteOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-
         DetallesVentas detalleExistente = detalleExistenteOpt.get();
 
-        Integer idProductoAnterior = detalleExistente.getProductos().getIdproducto();
-        Integer idProductoNuevo = dto.getId_producto();
-
-        if (!idProductoAnterior.equals(idProductoNuevo)) {
-            InventarioProducto inventarioAnterior = inventarioProductoRepository
-                    .findFirstByProducto_Idproducto(idProductoAnterior)
-                    .orElse(null);
-
-            if (inventarioAnterior != null) {
-                inventarioAnterior.setStockactual(inventarioAnterior.getStockactual() + detalleExistente.getCantidad());
-                inventarioProductoRepository.save(inventarioAnterior);
-
-                AjusteInventario ajusteAnterior = new AjusteInventario();
-                ajusteAnterior.setCantidad(detalleExistente.getCantidad());
-                ajusteAnterior.setDescripcion("RESTAURACIÓN POR CAMBIO DE PRODUCTO");
-                ajusteAnterior.setFechaAjuste(LocalDateTime.now());
-                ajusteAnterior.setInventarioProducto(inventarioAnterior);
-                ajusteInventarioRepository.save(ajusteAnterior);
-            }
-
-            InventarioProducto inventarioNuevo = inventarioProductoRepository
-                    .findFirstByProducto_Idproducto(idProductoNuevo)
-                    .orElse(null);
-
-            if (inventarioNuevo == null || inventarioNuevo.getStockactual() < dto.getCantidad()) {
-                return ResponseEntity.badRequest().body("Stock insuficiente para el nuevo producto.");
-            }
-
-            inventarioNuevo.setStockactual(inventarioNuevo.getStockactual() - dto.getCantidad());
-            inventarioProductoRepository.save(inventarioNuevo);
-
-            AjusteInventario ajusteNuevo = new AjusteInventario();
-            ajusteNuevo.setCantidad(dto.getCantidad());
-            ajusteNuevo.setDescripcion("AJUSTE POR EDICIÓN CON NUEVO PRODUCTO");
-            ajusteNuevo.setFechaAjuste(LocalDateTime.now());
-            ajusteNuevo.setInventarioProducto(inventarioNuevo);
-            ajusteInventarioRepository.save(ajusteNuevo);
-
-        } else {
-            InventarioProducto inventario = inventarioProductoRepository
-                    .findFirstByProducto_Idproducto(idProductoNuevo)
-                    .orElse(null);
-
-            int cantidadOriginal = detalleExistente.getCantidad();
-            int diferenciaCantidad = dto.getCantidad() - cantidadOriginal;
-
-            if (inventario == null || inventario.getStockactual() < diferenciaCantidad) {
-                return ResponseEntity.badRequest().body("Stock insuficiente para la modificación.");
-            }
-
-            inventario.setStockactual(inventario.getStockactual() - diferenciaCantidad);
-            inventarioProductoRepository.save(inventario);
-
-            AjusteInventario ajuste = new AjusteInventario();
-            ajuste.setCantidad(Math.abs(diferenciaCantidad));
-            ajuste.setDescripcion("AJUSTE POR CAMBIO DE CANTIDAD");
-            ajuste.setFechaAjuste(LocalDateTime.now());
-            ajuste.setInventarioProducto(inventario);
-            ajusteInventarioRepository.save(ajuste);
-        }
-
-        Productos producto = productosRepository.findById(dto.getId_producto()).orElse(null);
-        if (producto == null) {
+        Productos productoNuevo = productosRepository.findById(dto.getId_producto()).orElse(null);
+        if (productoNuevo == null) {
             return ResponseEntity.badRequest().body("Producto no encontrado.");
         }
-        detalleExistente.setProductos(producto);
+        ConversionUnidadesService.Conversion conversion =
+                conversionUnidadesService.convertir(productoNuevo, dto.getIdPresentacion(), dto.getCantidad());
 
+        // Se devuelve lo vendido antes y se descuenta lo nuevo, en la sucursal de la venta; si falta stock nada cambia
+        Integer idSucursal = StockService.sucursalDe(detalleExistente.getVentas());
+        Productos productoAnterior = detalleExistente.getProductos();
+        if (productoAnterior.getIdproducto().equals(productoNuevo.getIdproducto())) {
+            stockService.mover(idSucursal, productoNuevo, detalleExistente.cantidadEnBase().subtract(conversion.cantidadBase()),
+                    MovimientoStock.VENTA, "Venta #" + detalleExistente.getVentas().getIdVenta() + " (linea editada)");
+        } else {
+            stockService.mover(idSucursal, productoAnterior, detalleExistente.cantidadEnBase(),
+                    MovimientoStock.ANULACION_VENTA, "Venta #" + detalleExistente.getVentas().getIdVenta() + " (cambio de producto)");
+            stockService.descontar(idSucursal, productoNuevo.getIdproducto(), conversion.cantidadBase(),
+                    MovimientoStock.VENTA, "Venta #" + detalleExistente.getVentas().getIdVenta() + " (cambio de producto)");
+        }
+
+        detalleExistente.setProductos(productoNuevo);
         detalleExistente.setCantidad(dto.getCantidad());
+        detalleExistente.setPresentacion(conversion.presentacion());
+        detalleExistente.setCantidadBase(conversion.cantidadBase());
         detalleExistente.setSubTotal(dto.getSubTotal());
         detalleExistente.setFechaVenta(dto.getFechaVenta());
         detalleExistente.setPrecioUnitario(dto.getPecioUnitario());
@@ -195,30 +139,15 @@ public ResponseEntity<?> buscarDetallesPorIdVenta(@PathVariable Integer idVenta)
     }
 
     @DeleteMapping("/detalles-ventas/{id}")
+    @Transactional
     public ResponseEntity<?> eliminarDetalleVenta(@PathVariable Integer id) {
         Optional<DetallesVentas> detalleOpt = detallesVentasService.buscarDetallesVentas(id);
         if (detalleOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-
         DetallesVentas detalle = detalleOpt.get();
-        InventarioProducto inventario = inventarioProductoRepository
-                .findFirstByProducto_Idproducto(detalle.getProductos().getIdproducto())
-                .orElse(null);
-
-        if (inventario == null) {
-            return ResponseEntity.badRequest().body("Inventario no encontrado para producto ID: " + detalle.getProductos().getIdproducto());
-        }
-
-        inventario.setStockactual(inventario.getStockactual() + detalle.getCantidad());
-        inventarioProductoRepository.save(inventario);
-
-        AjusteInventario ajuste = new AjusteInventario();
-        ajuste.setCantidad(detalle.getCantidad());
-        ajuste.setDescripcion("AJUSTE POR ELIMINACIÓN DE VENTA");
-        ajuste.setFechaAjuste(LocalDateTime.now());
-        ajuste.setInventarioProducto(inventario);
-        ajusteInventarioRepository.save(ajuste);
+        stockService.mover(StockService.sucursalDe(detalle.getVentas()), detalle.getProductos(), detalle.cantidadEnBase(),
+                MovimientoStock.ANULACION_VENTA, "Venta #" + detalle.getVentas().getIdVenta() + " (linea eliminada)");
 
         detallesVentasService.eliminarDetallesVentas(id);
         return ResponseEntity.ok().body("Detalle de venta eliminado y stock actualizado.");

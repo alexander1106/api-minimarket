@@ -19,7 +19,9 @@ public class DetallesDevolucionCompra {
     @Column(name = "id_detalle_devoluciones")
     private Integer idDetalleDevolucion;
 
-    private Integer cantidad;
+    @jakarta.persistence.Column(precision = 14, scale = 3)
+
+    private BigDecimal cantidad;
     private Integer estado = 1;
     private BigDecimal precioUnitario;
     private BigDecimal subTotal;
@@ -32,7 +34,6 @@ public class DetallesDevolucionCompra {
     @JoinColumn(name = "idproducto")
     private Productos producto;
 
-    // Getters y Setters
     public Integer getIdDetalleDevolucion() {
         return idDetalleDevolucion;
     }
@@ -41,11 +42,11 @@ public class DetallesDevolucionCompra {
         this.idDetalleDevolucion = idDetalleDevolucion;
     }
 
-    public Integer getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(Integer cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
 

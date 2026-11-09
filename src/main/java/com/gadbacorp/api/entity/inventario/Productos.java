@@ -37,6 +37,17 @@ public class Productos {
     private Integer idproducto;
     private String nombre;
     private String descripcion;
+
+    @Column(length = 40)
+    private String codigo;
+    @Column(name = "codigo_barras", length = 40)
+    private String codigoBarras;
+    @Column(length = 80)
+    private String marca;
+    @Column(name = "stock_minimo", precision = 14, scale = 3)
+    private BigDecimal stockMinimo;
+    @Column(name = "afecto_igv")
+    private Boolean afectoIgv = true;
     private LocalDate fechaVencimiento;
     private String tipoImpuesto;
     private BigDecimal costoCompra;
@@ -45,6 +56,12 @@ public class Productos {
     @Column(columnDefinition = "TEXT")       // o LONGTEXT si usas MySQL
   private String imagen;
     private Integer estado = 1;
+
+    /** Empresa duena del producto: cada empresa tiene su propio catalogo. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_empresa", referencedColumnName = "idempresa")
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private com.gadbacorp.api.entity.administrable.Empresas empresa;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idcategoria")
@@ -233,4 +250,51 @@ public class Productos {
                 + ", tipoProducto=" + tipoProducto + "]";
     }
 
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
+    public String getCodigoBarras() {
+        return codigoBarras;
+    }
+
+    public void setCodigoBarras(String codigoBarras) {
+        this.codigoBarras = codigoBarras;
+    }
+
+    public String getMarca() {
+        return marca;
+    }
+
+    public void setMarca(String marca) {
+        this.marca = marca;
+    }
+
+    public BigDecimal getStockMinimo() {
+        return stockMinimo;
+    }
+
+    public void setStockMinimo(BigDecimal stockMinimo) {
+        this.stockMinimo = stockMinimo;
+    }
+
+    public Boolean getAfectoIgv() {
+        return afectoIgv;
+    }
+
+    public void setAfectoIgv(Boolean afectoIgv) {
+        this.afectoIgv = afectoIgv;
+    }
+
+    public com.gadbacorp.api.entity.administrable.Empresas getEmpresa() {
+        return empresa;
+    }
+
+    public void setEmpresa(com.gadbacorp.api.entity.administrable.Empresas empresa) {
+        this.empresa = empresa;
+    }
 }

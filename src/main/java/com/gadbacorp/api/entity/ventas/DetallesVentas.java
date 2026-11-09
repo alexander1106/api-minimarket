@@ -1,5 +1,6 @@
 package com.gadbacorp.api.entity.ventas;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.hibernate.annotations.SQLDelete;
@@ -26,7 +27,28 @@ public class DetallesVentas {
     private Integer idDetallesVenta;
     private Double precioUnitario;
     private LocalDate fechaVenta;
-    private Integer cantidad;
+    @jakarta.persistence.Column(precision = 14, scale = 3)
+    private BigDecimal cantidad;
+
+    /** Presentacion en la que se expreso la cantidad (saco, paquete...); null = unidad base. */
+    @jakarta.persistence.ManyToOne
+    @jakarta.persistence.JoinColumn(name = "id_presentacion")
+    private com.gadbacorp.api.entity.inventario.ProductoPresentacion presentacion;
+
+    /** La cantidad convertida a la unidad base del producto (la que mueve el stock). */
+    @jakarta.persistence.Column(name = "cantidad_base", precision = 14, scale = 3)
+    private BigDecimal cantidadBase;
+
+    public com.gadbacorp.api.entity.inventario.ProductoPresentacion getPresentacion() { return presentacion; }
+    public void setPresentacion(com.gadbacorp.api.entity.inventario.ProductoPresentacion presentacion) { this.presentacion = presentacion; }
+    public BigDecimal getCantidadBase() { return cantidadBase; }
+    public void setCantidadBase(BigDecimal cantidadBase) { this.cantidadBase = cantidadBase; }
+
+    /** Cantidad en unidad base; para lineas anteriores a las presentaciones es la propia cantidad. */
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public BigDecimal cantidadEnBase() {
+        return cantidadBase != null ? cantidadBase : cantidad;
+    }
     private Double subTotal;  
     private Integer estado=1;
 
@@ -55,11 +77,11 @@ public class DetallesVentas {
         this.fechaVenta = fechaVenta;
     }
 
-    public Integer getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(Integer cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
 

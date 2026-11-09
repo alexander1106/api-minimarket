@@ -1,5 +1,6 @@
 package com.gadbacorp.api.entity.inventario;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,8 @@ public class InventarioProducto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idinventarioproducto;
-    private Integer stockactual;
+    @jakarta.persistence.Column(precision = 14, scale = 3)
+    private BigDecimal stockactual;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -59,7 +61,7 @@ private Productos producto;
 
     public InventarioProducto() { }
 
-    public InventarioProducto(Inventario inventario, Productos producto, Integer stockactual) {
+    public InventarioProducto(Inventario inventario, Productos producto, BigDecimal stockactual) {
         this.inventario = inventario;
         this.producto = producto;
         this.stockactual = stockactual;
@@ -73,11 +75,11 @@ private Productos producto;
         this.idinventarioproducto = idinventarioproducto;
     }
 
-    public Integer getStockactual() {
+    public BigDecimal getStockactual() {
         return stockactual;
     }
 
-    public void setStockactual(Integer stockactual) {
+    public void setStockactual(BigDecimal stockactual) {
         this.stockactual = stockactual;
     }
 
@@ -131,5 +133,23 @@ private Productos producto;
             + ", producto=" + producto
             + ", inventario=" + inventario
             + "]";
+    }
+
+    /** Stock actual, tratando "sin dato" como cero. */
+    public BigDecimal stockOCero() {
+        return stockactual == null ? BigDecimal.ZERO : stockactual;
+    }
+
+    public void sumarStock(BigDecimal cantidad) {
+        this.stockactual = stockOCero().add(cantidad);
+    }
+
+    public void restarStock(BigDecimal cantidad) {
+        this.stockactual = stockOCero().subtract(cantidad);
+    }
+
+    /** true si hay al menos {@code cantidad} disponible. */
+    public boolean tieneStock(BigDecimal cantidad) {
+        return stockOCero().compareTo(cantidad) >= 0;
     }
 }

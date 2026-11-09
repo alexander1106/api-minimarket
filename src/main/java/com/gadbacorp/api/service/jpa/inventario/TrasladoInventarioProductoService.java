@@ -26,6 +26,9 @@ public class TrasladoInventarioProductoService {
     @Autowired
     private InventarioProductoRepository invProdRepo;
 
+    @Autowired
+    private KardexService kardex;
+
     public List<TrasladoInventarioProductoDTO> listarTodos() {
         return trasladoRepo.findAll().stream()
             .map(this::toDTO)
@@ -42,7 +45,6 @@ public class TrasladoInventarioProductoService {
     }
 
     public TrasladoInventarioProductoDTO crearTraslado(TrasladoInventarioProductoDTO dto) {
-        // 1) Origen ≠ Destino
         if (dto.getOrigenId().equals(dto.getDestinoId())) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
@@ -50,7 +52,6 @@ public class TrasladoInventarioProductoService {
             );
         }
 
-        // 2) Cargar entidades
         InventarioProducto origen = invProdRepo.findById(dto.getOrigenId())
             .orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
@@ -62,7 +63,6 @@ public class TrasladoInventarioProductoService {
                 "Destino no encontrado id=" + dto.getDestinoId()
             ));
 
-        // 3) Deben ser mismo producto
         if (!origen.getProducto().getIdproducto()
                    .equals(destino.getProducto().getIdproducto())) {
             throw new ResponseStatusException(
@@ -71,29 +71,36 @@ public class TrasladoInventarioProductoService {
             );
         }
 
-        // 4) Cantidad > 0
-        int cantidad = dto.getCantidad();
-        if (cantidad <= 0) {
+        java.math.BigDecimal cantidad = dto.getCantidad();
+        if (cantidad == null || cantidad.signum() <= 0) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "La cantidad debe ser mayor que cero"
             );
         }
 
-        // 5) Stock suficiente
-        if (origen.getStockactual() < cantidad) {
+        try {
+            ConversionUnidadesService.validarFraccion(origen.getProducto(), cantidad);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+        }
+
+        if (!origen.tieneStock(cantidad)) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Stock insuficiente en origen: actual=" + origen.getStockactual()
             );
         }
 
-        // 6) Aplicar traslado
-        origen.setStockactual(origen.getStockactual() - cantidad);
-        destino.setStockactual(destino.getStockactual() + cantidad);
+        origen.restarStock(cantidad);
+        destino.sumarStock(cantidad);
         invProdRepo.saveAll(List.of(origen, destino));
+        String ref = "Traslado " + (dto.getDescripcion() == null ? "" : dto.getDescripcion());
+        kardex.registrar(origen.getProducto(), KardexService.idSucursalDe(origen), cantidad.negate(),
+            com.gadbacorp.api.entity.inventario.MovimientoStock.TRASLADO_SALIDA, ref);
+        kardex.registrar(destino.getProducto(), KardexService.idSucursalDe(destino), cantidad,
+            com.gadbacorp.api.entity.inventario.MovimientoStock.TRASLADO_ENTRADA, ref);
 
-        // 7) Guardar registro de traslado
         TrasladoInventarioProducto traslado = new TrasladoInventarioProducto();
         traslado.setOrigen(origen);
         traslado.setDestino(destino);

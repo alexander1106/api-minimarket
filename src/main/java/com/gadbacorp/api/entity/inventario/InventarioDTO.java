@@ -9,7 +9,6 @@ public class InventarioDTO {
 
     public InventarioDTO() { }
 
-    // Constructor para crear o actualizar
     public InventarioDTO(Integer idinventario, Integer idalmacen, String nombre, String descripcion, Integer estado) {
         this.idinventario = idinventario;
         this.idalmacen = idalmacen;
@@ -57,7 +56,6 @@ public class InventarioDTO {
     public void setIdalmacen(Integer idalmacen) {
         this.idalmacen = idalmacen;
     }
-
 
     @Override
     public String toString() {

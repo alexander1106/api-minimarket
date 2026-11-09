@@ -1,12 +1,13 @@
 package com.gadbacorp.api.entity.inventario;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class InventarioProductosDTO {
     private Integer idinventarioproducto;
-    private Integer stockactual;
+    private BigDecimal stockactual;
     private LocalDateTime fechaingreso;
     private Integer idproducto;
     private Integer idinventario;
@@ -19,7 +20,7 @@ public class InventarioProductosDTO {
      */
     public InventarioProductosDTO(
             Integer idinventarioproducto,
-            Integer stockactual,
+            BigDecimal stockactual,
             LocalDateTime fechaingreso,
             Integer idproducto,
             Integer idinventario
@@ -39,11 +40,11 @@ public class InventarioProductosDTO {
         this.idinventarioproducto = idinventarioproducto;
     }
 
-    public Integer getStockactual() {
+    public BigDecimal getStockactual() {
         return stockactual;
     }
 
-    public void setStockactual(Integer stockactual) {
+    public void setStockactual(BigDecimal stockactual) {
         this.stockactual = stockactual;
     }
 

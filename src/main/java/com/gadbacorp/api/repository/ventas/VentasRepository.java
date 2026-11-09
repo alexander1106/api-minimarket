@@ -16,4 +16,14 @@ List<String> findUltimoComprobantePorTipo(@Param("tipoComprobante") String tipoC
 List<Ventas> findByCliente_Sucursal_IdSucursal(Integer idSucursal);
 
 
+
+    /** Ventas de un turno de caja agrupadas por vendedor: [vendedor, cantidad de ventas, total]. */
+    @Query("SELECT v.vendedor, COUNT(v), SUM(v.total_venta) FROM Ventas v WHERE v.idAperturaCaja = :idApertura GROUP BY v.vendedor")
+    List<Object[]> resumenPorVendedor(@Param("idApertura") Integer idApertura);
+
+    @Query("SELECT v.nro_comrprobante FROM Ventas v WHERE v.nro_comrprobante LIKE :patron")
+    List<String> listarNumerosPorPrefijo(@Param("patron") String patron);
+
+    @Query("SELECT v FROM Ventas v WHERE v.fecha_venta = :fecha")
+    List<Ventas> listarPorFecha(@Param("fecha") java.time.LocalDate fecha);
 }

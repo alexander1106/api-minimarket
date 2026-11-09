@@ -11,9 +11,6 @@ public class AlmacenesDTO {
     
     public AlmacenesDTO() { }
 
-    // constructor incluyendo idEmpleado
-
-
     public AlmacenesDTO(Integer idalmacen, String nombre, String descripcion, String direccion, Integer estado,
             Integer idSucursal, String encargado) {
         this.idalmacen = idalmacen;
@@ -56,7 +53,6 @@ public class AlmacenesDTO {
         this.direccion = direccion;
     }
 
-
     public Integer getEstado() {
         return estado;
     }
@@ -72,7 +68,6 @@ public class AlmacenesDTO {
     public void setIdSucursal(Integer idSucursal) {
         this.idSucursal = idSucursal;
     }
-
 
     public String getEncargado() {
         return encargado;

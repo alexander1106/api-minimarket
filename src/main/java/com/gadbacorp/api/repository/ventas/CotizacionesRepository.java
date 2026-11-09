@@ -12,4 +12,7 @@ public interface  CotizacionesRepository extends JpaRepository<Cotizaciones, Int
 
     List<Cotizaciones> findByCliente_Sucursal_IdSucursalAndEstadoCotizacion(Integer idSucursal, String estado);
     
+
+    @org.springframework.data.jpa.repository.Query("SELECT c.numeroCotizacion FROM Cotizaciones c WHERE c.numeroCotizacion LIKE :patron")
+    List<String> listarNumerosPorPrefijo(@org.springframework.data.repository.query.Param("patron") String patron);
 }

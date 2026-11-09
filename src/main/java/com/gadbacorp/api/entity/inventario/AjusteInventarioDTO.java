@@ -1,11 +1,12 @@
 package com.gadbacorp.api.entity.inventario;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class AjusteInventarioDTO {
     private Integer idajusteinventario;
     private Integer idinventarioproducto;  // Cambiado para referenciar InventarioProducto
-    private Integer cantidad;
+    private BigDecimal cantidad;
     private String descripcion;
     private LocalDateTime fechaAjuste;
 
@@ -14,7 +15,7 @@ public class AjusteInventarioDTO {
     public AjusteInventarioDTO(
         Integer idajusteinventario,
         Integer idinventarioproducto,
-        Integer cantidad,
+        BigDecimal cantidad,
         String descripcion,
         LocalDateTime fechaAjuste
     ) {
@@ -41,11 +42,11 @@ public class AjusteInventarioDTO {
         this.idinventarioproducto = idinventarioproducto;
     }
 
-    public Integer getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(Integer cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
 

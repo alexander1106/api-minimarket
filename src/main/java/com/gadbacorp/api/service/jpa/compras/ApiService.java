@@ -1,31 +1,41 @@
 package com.gadbacorp.api.service.jpa.compras;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
 
+/** Consulta RUC en SUNAT (apis.net.pe) de forma reactiva y no bloqueante. */
 @Service
 public class ApiService {
-    WebClient web = WebClient.create();
-    private final String TOKEN = "apis-token-14620.8grrglwKnM2Mrk29QMdUKuzrcUmeHHSq";
 
-    public ApiService(WebClient.Builder webClientBuilder) {
-        this.web = webClientBuilder
-            .baseUrl("https://api.apis.net.pe/v2")  // ← Dominio correcto
-            .build();
+    /** API pública y gratuita (sin token, con límite de uso): se usa cuando no hay token configurado. */
+    private static final String URL_GRATUITA = "https://api.apis.net.pe/v1";
+
+    private final WebClient web;
+    private final WebClient webGratuita;
+    private final String token;
+
+    public ApiService(WebClient.Builder webClientBuilder,
+                      @Value("${apis.net.pe.base-url:https://api.apis.net.pe/v2}") String baseUrl,
+                      @Value("${apis.net.pe.token-ruc:}") String token) {
+        this.web = webClientBuilder.clone().baseUrl(baseUrl).build();
+        this.webGratuita = webClientBuilder.clone().baseUrl(URL_GRATUITA).build();
+        this.token = token;
     }
 
-    public String consumirApi(String ruc) {
-        Mono<String> respuesta = web.get()
-            .uri(uriBuilder -> uriBuilder
-                .path("/sunat/ruc/full")
-                .queryParam("numero", ruc)
-                .build()
-            )
-            .header("Authorization", "Bearer " + TOKEN) // Agrega el token en header
-            .retrieve()
-            .bodyToMono(String.class);
-        return respuesta.block(); // bloquea hasta que obtenga respuesta
+    public Mono<String> consumirApi(String ruc) {
+        if (token == null || token.isBlank()) {
+            return webGratuita.get()
+                    .uri(uri -> uri.path("/ruc").queryParam("numero", ruc).build())
+                    .retrieve()
+                    .bodyToMono(String.class);
+        }
+        return web.get()
+                .uri(uri -> uri.path("/sunat/ruc/full").queryParam("numero", ruc).build())
+                .header("Authorization", "Bearer " + token)
+                .retrieve()
+                .bodyToMono(String.class);
     }
 }

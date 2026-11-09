@@ -15,7 +15,6 @@ public interface IComprasService {
     List<Compras> listarCompras();
     List<Compras> obtenerComprasPorProveedor(Integer idProveedor);
     
-    // Nuevos métodos
     DetallesComprasDTO obtenerPreciosProducto(Integer idProducto);
     CompraCompletaDTO crearCompraCompleta(CompraCompletaDTO compraDTO);
 }

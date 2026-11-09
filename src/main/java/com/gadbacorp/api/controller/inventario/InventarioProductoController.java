@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,9 +25,10 @@ import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
 import com.gadbacorp.api.repository.inventario.InventarioRepository;
 import com.gadbacorp.api.repository.inventario.ProductosRepository;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Inventario - Stock por producto")
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin(origins = "http://localhost:4200")
 public class InventarioProductoController {
 
     @Autowired
@@ -70,12 +70,13 @@ public class InventarioProductoController {
         InventarioProducto entidad;
         if (optExistente.isPresent()) {
             entidad = optExistente.get();
-            int stockViejo = entidad.getStockactual() == null ? 0 : entidad.getStockactual();
-            entidad.setStockactual(stockViejo + dto.getStockactual());
+            com.gadbacorp.api.service.jpa.inventario.ConversionUnidadesService.validarFraccion(producto, dto.getStockactual());
+            entidad.setStockactual(entidad.stockOCero().add(dto.getStockactual()));
         } else {
             entidad = new InventarioProducto();
             entidad.setProducto(producto);
             entidad.setInventario(inventario);
+            com.gadbacorp.api.service.jpa.inventario.ConversionUnidadesService.validarFraccion(producto, dto.getStockactual());
             entidad.setStockactual(dto.getStockactual());
         }
 

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,14 +23,26 @@ import com.gadbacorp.api.service.compras.IDetallesComprasService;
 
 import jakarta.validation.Valid;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Compras - Detalles de compras")
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/api/minimarket/detalles-compras")
 @Validated
 public class DetallesComprasController {
 
     @Autowired
     private IDetallesComprasService detallesComprasService;
+
+    private ResponseEntity<?> fallo(Exception e, String contexto) {
+        if (e instanceof com.gadbacorp.api.excepciones.OperacionNoPermitidaException
+                || e instanceof com.gadbacorp.api.excepciones.StockInsuficienteException) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+        if (e instanceof IllegalArgumentException) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.internalServerError().body(contexto + e.getMessage());
+    }
 
     @PostMapping
     public ResponseEntity<?> crearDetalleCompra(@Valid @RequestBody DetallesComprasDTO detalleDTO) {
@@ -40,7 +51,7 @@ public class DetallesComprasController {
                 return ResponseEntity.badRequest().body("ID de compra y producto son obligatorios");
             }
             
-            if (detalleDTO.getCantidad() == null || detalleDTO.getCantidad() <= 0) {
+            if (detalleDTO.getCantidad() == null || detalleDTO.getCantidad().signum() <= 0) {
                 return ResponseEntity.badRequest().body("La cantidad debe ser mayor a cero");
             }
             
@@ -50,11 +61,13 @@ public class DetallesComprasController {
             
             DetallesCompras detalle = new DetallesCompras();
             detalle.setCantidad(detalleDTO.getCantidad());
+            detalle.setIdPresentacionSolicitada(detalleDTO.getIdPresentacion());
+            detalle.setLote(detalleDTO.getLote());
+            detalle.setFechaVencimiento(detalleDTO.getFechaVencimiento());
             detalle.setPrecioUnitario(detalleDTO.getPrecioUnitario());
             
-            // Calcular subtotal si no viene en el DTO
             if (detalleDTO.getSubTotal() == null) {
-                BigDecimal subTotal = detalleDTO.getPrecioUnitario().multiply(new BigDecimal(detalleDTO.getCantidad()));
+                BigDecimal subTotal = detalleDTO.getPrecioUnitario().multiply(detalleDTO.getCantidad());
                 detalle.setSubTotal(subTotal);
             } else {
                 detalle.setSubTotal(detalleDTO.getSubTotal());
@@ -71,8 +84,7 @@ public class DetallesComprasController {
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoDetalle);
             
         } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                .body("Error al crear detalle de compra: " + e.getMessage());
+            return fallo(e, "Error al crear detalle de compra: ");
         }
     }
 
@@ -83,7 +95,7 @@ public class DetallesComprasController {
                 return ResponseEntity.badRequest().body("El ID del detalle es obligatorio y debe ser válido");
             }
             
-            if (detalleDTO.getCantidad() == null || detalleDTO.getCantidad() <= 0) {
+            if (detalleDTO.getCantidad() == null || detalleDTO.getCantidad().signum() <= 0) {
                 return ResponseEntity.badRequest().body("La cantidad debe ser mayor a cero");
             }
             
@@ -94,10 +106,13 @@ public class DetallesComprasController {
             DetallesCompras detalle = new DetallesCompras();
             detalle.setIdDetalleCompra(detalleDTO.getIdDetalleCompra());
             detalle.setCantidad(detalleDTO.getCantidad());
+            detalle.setIdPresentacionSolicitada(detalleDTO.getIdPresentacion());
+            detalle.setLote(detalleDTO.getLote());
+            detalle.setFechaVencimiento(detalleDTO.getFechaVencimiento());
             detalle.setPrecioUnitario(detalleDTO.getPrecioUnitario());
             
             if (detalleDTO.getSubTotal() == null) {
-                BigDecimal subTotal = detalleDTO.getPrecioUnitario().multiply(new BigDecimal(detalleDTO.getCantidad()));
+                BigDecimal subTotal = detalleDTO.getPrecioUnitario().multiply(detalleDTO.getCantidad());
                 detalle.setSubTotal(subTotal);
             } else {
                 detalle.setSubTotal(detalleDTO.getSubTotal());
@@ -109,8 +124,7 @@ public class DetallesComprasController {
             return ResponseEntity.ok(detalleActualizado);
             
         } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                .body("Error al actualizar detalle de compra: " + e.getMessage());
+            return fallo(e, "Error al actualizar detalle de compra: ");
         }
     }
     @DeleteMapping("/{id}")
@@ -124,8 +138,7 @@ public class DetallesComprasController {
             return ResponseEntity.ok("Detalle de compra eliminado correctamente");
             
         } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                .body("Error al eliminar detalle de compra: " + e.getMessage());
+            return fallo(e, "Error al eliminar detalle de compra: ");
         }
     }
 

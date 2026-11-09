@@ -15,6 +15,15 @@ public class ArqueoCajaDTO {
     private String observaciones; 
     private Integer estado=1; 
     private Integer id_apertura_caja;
+    /** Monto contado fisicamente por el cajero (opcional: si viene, se valida contra el efectivo del sistema). */
+    private Double montoContado;
+
+    public Double getMontoContado() {
+        return montoContado;
+    }
+    public void setMontoContado(Double montoContado) {
+        this.montoContado = montoContado;
+    }
     public Integer getIdArqueoCaja() {
         return idArqueoCaja;
     }

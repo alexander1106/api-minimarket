@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gadbacorp.api.entity.delivery.Vehiculo;
 import com.gadbacorp.api.service.delivery.IVehiculoService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Delivery - Vehículos")
 @RestController
 @RequestMapping("/api/minimarket")
 public class VehiculosController {

@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,13 +20,17 @@ import com.gadbacorp.api.entity.caja.ArqueoCajaDTO;
 import com.gadbacorp.api.repository.caja.AperturaCajaRepository;
 import com.gadbacorp.api.service.caja.IArqueoCajaService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Caja - Arqueo de caja")
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin("*")
 public class ArqueoController {
 
     @Autowired
     private IArqueoCajaService arqueoCajaService;
+
+    @Autowired
+    private com.gadbacorp.api.service.jpa.cajas.CierreCajaService cierreCajaService;
 
     @Autowired
     private AperturaCajaRepository aperturaCajaRepository;
@@ -45,19 +48,11 @@ public class ArqueoController {
     
     @PostMapping("/arqueos-cajas")
     public ResponseEntity<?> guardarArqueoCaja(@RequestBody ArqueoCajaDTO dto) {
-        AperturaCaja aperturaCaja = aperturaCajaRepository.findById(dto.getId_apertura_caja()).orElse(null);
-        if (aperturaCaja == null) {
-            return ResponseEntity.badRequest().body("No se encontró la apertura de caja con ID: " + dto.getId_apertura_caja());
+        try {
+            return ResponseEntity.ok(cierreCajaService.registrarArqueo(dto));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        // Crear el arqueo
-        ArqueoCaja arqueoCaja = new ArqueoCaja();
-        arqueoCaja.setFechaArqueo(dto.getFechaArqueo());
-        arqueoCaja.setSaldoSistema(dto.getSaldoSistema());
-        arqueoCaja.setObservaciones(dto.getObservaciones());
-        arqueoCaja.setAperturaCaja(aperturaCaja);
-
-        return ResponseEntity.ok(arqueoCajaService.guardarArqueoCaja(arqueoCaja));
     }
 
 

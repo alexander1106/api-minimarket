@@ -14,6 +14,13 @@ public class ProductosDTO {
     private Integer idproducto;
     private String nombre;
     private String descripcion;
+
+    private Integer idempresa;
+    private String codigo;
+    private String codigoBarras;
+    private String marca;
+    private BigDecimal stockMinimo;
+    private Boolean afectoIgv;
     private LocalDate fechaVencimiento;
     private String tipoImpuesto;
     private BigDecimal costoCompra;
@@ -142,6 +149,51 @@ public class ProductosDTO {
         this.imagen = imagen;
     }
 
-    
+    public String getCodigo() {
+        return codigo;
+    }
 
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
+    public String getCodigoBarras() {
+        return codigoBarras;
+    }
+
+    public void setCodigoBarras(String codigoBarras) {
+        this.codigoBarras = codigoBarras;
+    }
+
+    public String getMarca() {
+        return marca;
+    }
+
+    public void setMarca(String marca) {
+        this.marca = marca;
+    }
+
+    public BigDecimal getStockMinimo() {
+        return stockMinimo;
+    }
+
+    public void setStockMinimo(BigDecimal stockMinimo) {
+        this.stockMinimo = stockMinimo;
+    }
+
+    public Boolean getAfectoIgv() {
+        return afectoIgv;
+    }
+
+    public void setAfectoIgv(Boolean afectoIgv) {
+        this.afectoIgv = afectoIgv;
+    }
+
+    public Integer getIdempresa() {
+        return idempresa;
+    }
+
+    public void setIdempresa(Integer idempresa) {
+        this.idempresa = idempresa;
+    }
 }

@@ -22,6 +22,14 @@ public class PagosDTO {
     private Integer estado=1;
     private Integer id_metodo_pago;
     private Integer id_venta;
+    private Integer id_apertura_caja;
+
+    public Integer getId_apertura_caja() {
+        return id_apertura_caja;
+    }
+    public void setId_apertura_caja(Integer id_apertura_caja) {
+        this.id_apertura_caja = id_apertura_caja;
+    }
     public Integer getIdPago() {
         return idPago;
     }

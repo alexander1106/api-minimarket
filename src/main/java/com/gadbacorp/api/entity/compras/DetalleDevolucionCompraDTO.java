@@ -4,11 +4,10 @@ import java.math.BigDecimal;
 
 public class DetalleDevolucionCompraDTO {
     private Integer idProducto;
-    private Integer cantidad;
+    private BigDecimal cantidad;
     private BigDecimal precioUnitario;
     private BigDecimal subTotal;
 
-    // Getters y Setters
     public Integer getIdProducto() {
         return idProducto;
     }
@@ -17,11 +16,11 @@ public class DetalleDevolucionCompraDTO {
         this.idProducto = idProducto;
     }
 
-    public Integer getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(Integer cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
 

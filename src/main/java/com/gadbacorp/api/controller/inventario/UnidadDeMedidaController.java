@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,22 +21,28 @@ import com.gadbacorp.api.entity.inventario.UnidadDeMedida;
 import com.gadbacorp.api.entity.inventario.UnidadDeMedidaDTO;
 import com.gadbacorp.api.service.inventario.IUnidadDeMedidaService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Inventario - Unidades de medida")
 @RestController
 @RequestMapping("/api/minimarket/unidad_medida")
-@CrossOrigin(origins = "http://localhost:4200")
 public class UnidadDeMedidaController {
 
     @Autowired
     private IUnidadDeMedidaService service;
 
     private UnidadDeMedidaDTO toDTO(UnidadDeMedida u) {
-        return new UnidadDeMedidaDTO(u.getIdunidadmedida(), u.getNombre());
+        UnidadDeMedidaDTO dto = new UnidadDeMedidaDTO(u.getIdunidadmedida(), u.getNombre());
+        dto.setCodigo(u.getCodigo());
+        dto.setPermiteDecimales(Boolean.TRUE.equals(u.getPermiteDecimales()));
+        return dto;
     }
 
     private UnidadDeMedida toEntity(UnidadDeMedidaDTO dto) {
         UnidadDeMedida u = new UnidadDeMedida();
         u.setIdunidadmedida(dto.getIdunidadmedida());
         u.setNombre(dto.getNombre());
+        u.setCodigo(dto.getCodigo() == null || dto.getCodigo().isBlank() ? null : dto.getCodigo().trim().toUpperCase());
+        u.setPermiteDecimales(Boolean.TRUE.equals(dto.getPermiteDecimales()));
         return u;
     }
 
@@ -65,7 +70,7 @@ public class UnidadDeMedidaController {
             .body(toDTO(guardada));
     }
 
-    @PutMapping("/unidad_medida")
+    @PutMapping({"", "/unidad_medida"})
     public ResponseEntity<UnidadDeMedidaDTO> modificar(@RequestBody UnidadDeMedidaDTO dto) {
         UnidadDeMedida updated = service.modificar(toEntity(dto));
         return ResponseEntity.ok(toDTO(updated));

@@ -1,4 +1,3 @@
-// src/main/java/com/gadbacorp/api/service/jpa/inventario/AlmacenesService.java
 package com.gadbacorp.api.service.jpa.inventario;
 
 import java.util.List;
@@ -44,11 +43,9 @@ public class AlmacenesService implements IAlmacenesService {
 
     @Override
     public Almacenes guardar(Almacenes almacen) {
-        // 1) Validar nombre no vacío
         if (almacen.getNombre()==null || almacen.getNombre().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre es obligatorio");
         }
-        // 2) Validar duplicado
         repoAlmacenes.findByNombreIgnoreCase(almacen.getNombre().trim())
             .ifPresent(existing -> {
                 throw new ResponseStatusException(
@@ -61,17 +58,14 @@ public class AlmacenesService implements IAlmacenesService {
 
     @Override
     public Almacenes modificar(Almacenes almacen) {
-        // 1) Existe?
         Almacenes existente = repoAlmacenes.findById(almacen.getIdalmacen())
             .orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Almacén no encontrado id=" + almacen.getIdalmacen()
             ));
-        // 2) Nombre no vacío
         if (almacen.getNombre()==null || almacen.getNombre().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre es obligatorio");
         }
-        // 3) Duplicado distinto
         repoAlmacenes.findByNombreIgnoreCase(almacen.getNombre().trim())
             .filter(other -> !other.getIdalmacen().equals(almacen.getIdalmacen()))
             .ifPresent(other -> {
@@ -80,7 +74,6 @@ public class AlmacenesService implements IAlmacenesService {
                     "Ya existe un almacén con ese nombre"
                 );
             });
-        // 4) Aplicar cambios
         existente.setNombre(almacen.getNombre().trim());
         existente.setDescripcion(almacen.getDescripcion());
         existente.setDireccion(almacen.getDireccion());
@@ -92,20 +85,17 @@ public class AlmacenesService implements IAlmacenesService {
 
     @Override
     public void eliminar(Integer id) {
-        // 1) Existe?
         Almacenes existente = repoAlmacenes.findById(id)
             .orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Almacén no encontrado id=" + id
             ));
-        // 2) Validar inventario asociado
         if (inventarioRepo.existsByAlmacen_Idalmacen(id)) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "No se puede eliminar: el almacén tiene inventario asociado"
             );
         }
-        // 3) Eliminar
         repoAlmacenes.delete(existente);
     }
 }

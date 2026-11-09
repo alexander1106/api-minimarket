@@ -3,7 +3,6 @@ package com.gadbacorp.api.controller.caja;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,8 +17,9 @@ import com.gadbacorp.api.entity.caja.SaldoMetodoPago;
 import com.gadbacorp.api.entity.ventas.MetodosPago;
 import com.gadbacorp.api.service.jpa.cajas.SaldoMetodoPagoService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Caja - Saldo por método de pago")
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/api/minimarket/saldo-metodo")
 public class SaldoMetodoPagoController {
 

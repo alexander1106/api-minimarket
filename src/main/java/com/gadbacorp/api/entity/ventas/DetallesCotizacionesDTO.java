@@ -1,12 +1,17 @@
 package com.gadbacorp.api.entity.ventas;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import jakarta.persistence.Id;
 public class DetallesCotizacionesDTO {
     @Id
     private Integer idDetallesCotizaciones;
     private LocalDate fechaCotizaciones;
-    private Integer cantidad;
+    private BigDecimal cantidad;
+    /** Opcional: presentacion en la que se expresa la cantidad (null = unidad base). */
+    private Integer idPresentacion;
+    public Integer getIdPresentacion() { return idPresentacion; }
+    public void setIdPresentacion(Integer idPresentacion) { this.idPresentacion = idPresentacion; }
     private Double subTotal;  
     private Integer estado=1;
     private Integer id_producto;
@@ -19,10 +24,10 @@ public class DetallesCotizacionesDTO {
     public void setIdDetallesCotizaciones(Integer idDetallesCotizaciones) {
         this.idDetallesCotizaciones = idDetallesCotizaciones;
     }
-    public Integer getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
-    public void setCantidad(Integer cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
     public Double getSubTotal() {

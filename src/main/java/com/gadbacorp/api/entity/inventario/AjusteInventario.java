@@ -1,5 +1,6 @@
 package com.gadbacorp.api.entity.inventario;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.SQLDelete;
@@ -26,7 +27,9 @@ public class AjusteInventario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idajusteinventario;
 
-    private Integer cantidad;
+    @jakarta.persistence.Column(precision = 14, scale = 3)
+
+    private BigDecimal cantidad;
     private LocalDateTime fechaAjuste;
     private String descripcion;
     private Integer estado = 1;
@@ -38,7 +41,7 @@ public class AjusteInventario {
 
     public AjusteInventario() { }
 
-    public AjusteInventario(Integer cantidad, LocalDateTime fechaAjuste, String descripcion) {
+    public AjusteInventario(BigDecimal cantidad, LocalDateTime fechaAjuste, String descripcion) {
         this.cantidad = cantidad;
         this.fechaAjuste = fechaAjuste;
         this.descripcion = descripcion;
@@ -52,11 +55,11 @@ public class AjusteInventario {
         this.idajusteinventario = idajusteinventario;
     }
 
-    public Integer getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(Integer cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
 

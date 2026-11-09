@@ -35,18 +35,21 @@ public class CotizacionesService implements  ICotizacionesService {
     @Autowired
     private ClientesRepository clientesRepository;
     @Autowired
+    private ImpuestoService impuestoService;
+    @Autowired
     private VentasRepository ventasRepository;
     @Autowired
     private DetallesVentasRepository detallesVentasRepository;
     @Autowired
     private ProductosRepository productoRepo;
     @Autowired
+    private com.gadbacorp.api.service.jpa.inventario.StockService stockService;
+    @Autowired
     private InventarioProductoRepository inventarioProductoRepository;
     @Autowired
     private InventarioRepository inventarioRepository;
     @Autowired
     private AlmacenesRepository almacenRepository;
-
 
     @Override
     public Cotizaciones guardarCotizacion(Cotizaciones cotizacion) {
@@ -123,11 +126,16 @@ public class CotizacionesService implements  ICotizacionesService {
 
         venta = ventasRepository.save(venta);
 
+        ImpuestoService.Desglose igv = impuestoService.nuevo();
         for (DetallesCotizaciones detalleCot : cotizacion.getDetallesCotizaciones()) {
+            igv.agregar(detalleCot.getSubTotal() != null ? detalleCot.getSubTotal() : 0,
+                    !Boolean.FALSE.equals(detalleCot.getProductos().getAfectoIgv()));
             DetallesVentas detalleVenta = new DetallesVentas();
             detalleVenta.setVentas(venta);
             detalleVenta.setProductos(detalleCot.getProductos());
             detalleVenta.setCantidad(detalleCot.getCantidad());
+            detalleVenta.setPresentacion(detalleCot.getPresentacion());
+            detalleVenta.setCantidadBase(detalleCot.cantidadEnBase());
             detalleVenta.setPrecioUnitario(detalleCot.getPrecioUnitario());
             detalleVenta.setSubTotal(detalleCot.getSubTotal());
             detalleVenta.setFechaVenta(LocalDate.now());
@@ -135,49 +143,14 @@ public class CotizacionesService implements  ICotizacionesService {
 
             detallesVentasRepository.save(detalleVenta);
 
-            // Descontar stock
-            int cantidadPorDescontar = detalleCot.getCantidad();
-            List<Almacenes> almacenes = almacenRepository.findBySucursalIdSucursal(idSucursal);
-
-            boolean descontado = false;
-
-            for (Almacenes almacen : almacenes) {
-                List<Inventario> inventarios = inventarioRepository.findByAlmacen_Idalmacen(almacen.getIdalmacen());
-                for (Inventario inventario : inventarios) {
-                    Optional<InventarioProducto> inventarioProductoOpt = inventarioProductoRepository
-                            .findByProductoIdproductoAndInventarioIdinventario(
-                                    detalleCot.getProductos().getIdproducto(),
-                                    inventario.getIdinventario()
-                            );
-
-                    if (inventarioProductoOpt.isPresent()) {
-                        InventarioProducto invProd = inventarioProductoOpt.get();
-                        int stockDisponible = invProd.getStockactual();
-
-                        if (stockDisponible >= cantidadPorDescontar) {
-                            invProd.setStockactual(stockDisponible - cantidadPorDescontar);
-                            inventarioProductoRepository.save(invProd);
-                            cantidadPorDescontar = 0;
-                            descontado = true;
-                            break;
-                        } else if (stockDisponible > 0) {
-                            cantidadPorDescontar -= stockDisponible;
-                            invProd.setStockactual(0);
-                            inventarioProductoRepository.save(invProd);
-                        }
-                    }
-                }
-                if (cantidadPorDescontar == 0) {
-                    break;
-                }
-            }
-
-            if (cantidadPorDescontar > 0) {
-                throw new RuntimeException("Stock insuficiente para producto: " + detalleCot.getProductos().getNombre());
-            }
+            stockService.descontar(idSucursal, detalleCot.getProductos().getIdproducto(), detalleCot.cantidadEnBase(),
+                    com.gadbacorp.api.entity.inventario.MovimientoStock.VENTA, "Cotizacion " + idCotizacion + " convertida en venta");
         }
 
-        return venta;
+        venta.setOpGravada(igv.opGravada());
+        venta.setOpInafecta(igv.opInafecta());
+        venta.setIgv(igv.igv());
+        return ventasRepository.save(venta);
     }
 
   

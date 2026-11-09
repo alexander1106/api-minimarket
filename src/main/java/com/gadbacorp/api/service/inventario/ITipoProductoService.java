@@ -6,9 +6,7 @@ import java.util.Optional;
 import com.gadbacorp.api.entity.inventario.TipoProducto;
 
 public interface ITipoProductoService {
-    //listar todos los tipos de producto de la tabla
     List<TipoProducto> buscarTodos();
-    //guarda los tipos de productos
     TipoProducto guardar(TipoProducto tipoproducto);
 
     TipoProducto modificar(TipoProducto tipoproducto);

@@ -19,6 +19,15 @@ List<AperturaCaja> findByUsuarios_IdUsuarioAndEstadoCaja(Integer idUsuario, Stri
 
 List<AperturaCaja> findByEstadoCaja(String string);
 
+List<AperturaCaja> findByCaja_IdCajaAndEstadoCaja(Integer idCaja, String estadoCaja);
+
+boolean existsByCaja_IdCajaAndEstadoCaja(Integer idCaja, String estadoCaja);
+
 
     
+
+    /** Bloquea la fila de la apertura mientras se actualizan los saldos (evita carreras entre cobros). */
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("SELECT a FROM AperturaCaja a WHERE a.idAperturaCaja = :id")
+    Optional<AperturaCaja> buscarBloqueando(@org.springframework.data.repository.query.Param("id") Integer id);
 }

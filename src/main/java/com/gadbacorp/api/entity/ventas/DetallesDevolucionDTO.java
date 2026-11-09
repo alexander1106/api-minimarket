@@ -1,5 +1,6 @@
 package com.gadbacorp.api.entity.ventas;
 
+import java.math.BigDecimal;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -10,7 +11,7 @@ public class DetallesDevolucionDTO {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idDetallesDevoluciones; 
     private Double pecioUnitario;
-    private Integer cantidad;
+    private BigDecimal cantidad;
     private Double subTotal;  
     private Integer estado=1; 
     private Integer id_producto; 
@@ -28,10 +29,10 @@ public class DetallesDevolucionDTO {
         this.pecioUnitario = pecioUnitario;
     }
 
-    public Integer getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
-    public void setCantidad(Integer cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
     public Double getSubTotal() {

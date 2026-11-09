@@ -1,6 +1,7 @@
 package com.gadbacorp.api.entity.ventas;
 
 
+import java.math.BigDecimal;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -25,7 +26,8 @@ public class DetallesDevolucion {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idDetallesDevoluciones; 
     private double pecioUnitario;
-    private Integer cantidad;
+    @jakarta.persistence.Column(precision = 14, scale = 3)
+    private BigDecimal cantidad;
     private double subTotal;  
     private Integer estado=1;
 
@@ -55,11 +57,11 @@ public class DetallesDevolucion {
     }
 
 
-    public Integer getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(Integer cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
 

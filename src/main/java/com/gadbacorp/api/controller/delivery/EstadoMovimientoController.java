@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gadbacorp.api.entity.delivery.EstadoMovimiento;
 import com.gadbacorp.api.service.delivery.IEstadoMovimientoService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Delivery - Estados de movimiento")
 @RestController
 @RequestMapping("/api/minimarket")
 public class EstadoMovimientoController {

@@ -1,12 +1,12 @@
 package com.gadbacorp.api.controller.inventario;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,9 +22,10 @@ import com.gadbacorp.api.entity.inventario.InventarioProducto;
 import com.gadbacorp.api.repository.inventario.AjusteInventarioRepository;
 import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Inventario - Ajustes de inventario")
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin(origins = "http://localhost:4200")
 public class AjusteInventarioController {
 
     @Autowired
@@ -33,9 +34,20 @@ public class AjusteInventarioController {
     @Autowired
     private InventarioProductoRepository invProdRepo;
 
+    @Autowired
+    private com.gadbacorp.api.service.jpa.inventario.KardexService kardex;
+
+    @Autowired
+    private com.gadbacorp.api.tenant.TenantRules reglas;
+
+    private boolean visible(AjusteInventario a) {
+        return com.gadbacorp.api.tenant.TenantService.puedeVer(reglas.empresaDe(a.getInventarioProducto()));
+    }
+
     @GetMapping("/ajustes")
     public ResponseEntity<List<AjusteInventarioDTO>> listar() {
         List<AjusteInventarioDTO> lista = ajusteRepo.findAll().stream()
+            .filter(this::visible)
             .map(this::toDTO)
             .collect(Collectors.toList());
         return ResponseEntity.ok(lista);
@@ -44,6 +56,7 @@ public class AjusteInventarioController {
     @GetMapping("/ajustes/{id}")
     public ResponseEntity<AjusteInventarioDTO> obtener(@PathVariable Integer id) {
         return ajusteRepo.findById(id)
+            .filter(this::visible)
             .map(this::toDTO)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
@@ -66,10 +79,11 @@ public class AjusteInventarioController {
         InventarioProducto invProd = invProdRepo.findById(dto.getIdinventarioproducto())
             .orElseThrow(() -> new IllegalArgumentException("InventarioProducto no encontrado id=" + dto.getIdinventarioproducto()));
 
-        int cantidad = dto.getCantidad();
-        int nuevoStock = invProd.getStockactual() + cantidad;
+        BigDecimal cantidad = dto.getCantidad();
+        com.gadbacorp.api.service.jpa.inventario.ConversionUnidadesService.validarFraccion(invProd.getProducto(), cantidad);
+        BigDecimal nuevoStock = invProd.stockOCero().add(cantidad);
 
-        if (nuevoStock < 0) {
+        if (nuevoStock.signum() < 0) {
             throw new IllegalArgumentException("Stock insuficiente: actual=" + invProd.getStockactual() + ", ajuste=" + cantidad);
         }
 
@@ -83,6 +97,9 @@ public class AjusteInventarioController {
         ajuste.setFechaAjuste(dto.getFechaAjuste() != null ? dto.getFechaAjuste() : LocalDateTime.now());
 
         AjusteInventario guardado = ajusteRepo.save(ajuste);
+        kardex.registrar(invProd.getProducto(),
+            com.gadbacorp.api.service.jpa.inventario.KardexService.idSucursalDe(invProd), cantidad,
+            com.gadbacorp.api.entity.inventario.MovimientoStock.AJUSTE, dto.getDescripcion());
         return ResponseEntity.status(201).body(toDTO(guardado));
     }
 
@@ -93,15 +110,20 @@ public class AjusteInventarioController {
 
         InventarioProducto invProd = original.getInventarioProducto();
 
-        int stockSinAjuste = invProd.getStockactual() - original.getCantidad();
-        int nuevoStock = stockSinAjuste + dto.getCantidad();
+        com.gadbacorp.api.service.jpa.inventario.ConversionUnidadesService.validarFraccion(invProd.getProducto(), dto.getCantidad());
+        BigDecimal stockSinAjuste = invProd.stockOCero().subtract(original.getCantidad());
+        BigDecimal nuevoStock = stockSinAjuste.add(dto.getCantidad());
 
-        if (nuevoStock < 0) {
+        if (nuevoStock.signum() < 0) {
             throw new IllegalArgumentException("El nuevo ajuste dejaría el stock en negativo");
         }
 
         invProd.setStockactual(nuevoStock);
         invProdRepo.save(invProd);
+        kardex.registrar(invProd.getProducto(),
+            com.gadbacorp.api.service.jpa.inventario.KardexService.idSucursalDe(invProd),
+            dto.getCantidad().subtract(original.getCantidad()),
+            com.gadbacorp.api.entity.inventario.MovimientoStock.AJUSTE, "Ajuste editado: " + dto.getDescripcion());
 
         original.setCantidad(dto.getCantidad());
         original.setDescripcion(dto.getDescripcion());

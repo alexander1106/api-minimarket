@@ -1,31 +1,30 @@
 package com.gadbacorp.api.service.jpa.ventas;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
 
+/** Consulta DNI en RENIEC (apis.net.pe) de forma reactiva y no bloqueante. */
 @Service
 public class ApiCliente {
 
     private final WebClient web;
-    private final String TOKEN = "apis-token-16182.k7zU3OrzDT3KDiO543Oi69rAoY8SloQQ";
+    private final String token;
 
-    public ApiCliente(WebClient.Builder webClientBuilder) {
-        this.web = webClientBuilder
-            .baseUrl("https://api.apis.net.pe/v2")  // ← Dominio correcto
-            .build();
+    public ApiCliente(WebClient.Builder webClientBuilder,
+                      @Value("${apis.net.pe.base-url:https://api.apis.net.pe/v2}") String baseUrl,
+                      @Value("${apis.net.pe.token-dni:}") String token) {
+        this.web = webClientBuilder.baseUrl(baseUrl).build();
+        this.token = token;
     }
 
-    public String consumirApi(String dni) {
-        Mono<String> respuesta = web.get()
-            .uri(uriBuilder -> uriBuilder
-                .path("/reniec/dni")
-                .queryParam("numero", dni)
-                .build())
-            .header("Authorization", "Bearer " + TOKEN)
-            .retrieve()
-            .bodyToMono(String.class);
-        return respuesta.block(); // Devuelve la respuesta directamente
+    public Mono<String> consumirApi(String dni) {
+        return web.get()
+                .uri(uri -> uri.path("/reniec/dni").queryParam("numero", dni).build())
+                .header("Authorization", "Bearer " + token)
+                .retrieve()
+                .bodyToMono(String.class);
     }
 }

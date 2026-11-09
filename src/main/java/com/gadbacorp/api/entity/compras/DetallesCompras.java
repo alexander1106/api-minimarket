@@ -36,7 +36,36 @@ public class DetallesCompras {
     @JoinColumn(name = "id_producto")
     private Productos producto;
 
-    private Integer cantidad;
+    @jakarta.persistence.Column(precision = 14, scale = 3)
+
+    private BigDecimal cantidad;
+
+    /** Presentacion en la que se expreso la cantidad (saco, paquete...); null = unidad base. */
+    @jakarta.persistence.ManyToOne
+    @jakarta.persistence.JoinColumn(name = "id_presentacion")
+    private com.gadbacorp.api.entity.inventario.ProductoPresentacion presentacion;
+
+    /** La cantidad convertida a la unidad base del producto (la que mueve el stock). */
+    @jakarta.persistence.Column(name = "cantidad_base", precision = 14, scale = 3)
+    private BigDecimal cantidadBase;
+
+    public com.gadbacorp.api.entity.inventario.ProductoPresentacion getPresentacion() { return presentacion; }
+    public void setPresentacion(com.gadbacorp.api.entity.inventario.ProductoPresentacion presentacion) { this.presentacion = presentacion; }
+    public BigDecimal getCantidadBase() { return cantidadBase; }
+    public void setCantidadBase(BigDecimal cantidadBase) { this.cantidadBase = cantidadBase; }
+
+    /** Cantidad en unidad base; para lineas anteriores a las presentaciones es la propia cantidad. */
+
+    /** Lote y vencimiento de lo comprado en esta linea (opcionales, para perecibles). */
+    @jakarta.persistence.Column(name = "lote", length = 40)
+    private String lote;
+    @jakarta.persistence.Column(name = "fecha_vencimiento")
+    private java.time.LocalDate fechaVencimiento;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public BigDecimal cantidadEnBase() {
+        return cantidadBase != null ? cantidadBase : cantidad;
+    }
     
     @Column(name = "precio_unitario")
     private BigDecimal precioUnitario;
@@ -51,7 +80,6 @@ public class DetallesCompras {
     private BigDecimal subTotal;
     private Integer estado = 1;
 
-    // Getters and Setters
     public Integer getIdDetalleCompra() {
         return idDetalleCompra;
     }
@@ -76,11 +104,11 @@ public class DetallesCompras {
         this.producto = producto;
     }
 
-    public Integer getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(Integer cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
 
@@ -123,4 +151,17 @@ public class DetallesCompras {
     public void setEstado(Integer estado) {
         this.estado = estado;
     }
+
+    /** Presentacion en la que viene la cantidad al crear/editar la linea (no se guarda: se resuelve a presentacion + cantidadBase). */
+    @jakarta.persistence.Transient
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Integer idPresentacionSolicitada;
+
+    public Integer getIdPresentacionSolicitada() { return idPresentacionSolicitada; }
+    public void setIdPresentacionSolicitada(Integer idPresentacionSolicitada) { this.idPresentacionSolicitada = idPresentacionSolicitada; }
+
+    public String getLote() { return lote; }
+    public void setLote(String lote) { this.lote = lote; }
+    public java.time.LocalDate getFechaVencimiento() { return fechaVencimiento; }
+    public void setFechaVencimiento(java.time.LocalDate fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
 }

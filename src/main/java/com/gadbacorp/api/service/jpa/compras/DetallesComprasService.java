@@ -1,15 +1,19 @@
 package com.gadbacorp.api.service.jpa.compras;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import com.gadbacorp.api.service.jpa.inventario.ConversionUnidadesService;
 import org.springframework.stereotype.Service;
 
 import com.gadbacorp.api.entity.compras.Compras;
 import com.gadbacorp.api.entity.compras.DetallesCompras;
+import com.gadbacorp.api.entity.inventario.MovimientoStock;
 import com.gadbacorp.api.entity.inventario.Productos;
 import com.gadbacorp.api.repository.compras.DetallesComprasRepository;
 import com.gadbacorp.api.service.compras.IComprasService;
 import com.gadbacorp.api.service.compras.IDetallesComprasService;
 import com.gadbacorp.api.service.inventario.IProductosService;
+import com.gadbacorp.api.service.jpa.inventario.LoteService;
+import com.gadbacorp.api.service.jpa.inventario.StockService;
 
 import jakarta.transaction.Transactional;
 
@@ -29,10 +33,18 @@ public class DetallesComprasService implements IDetallesComprasService {
     @Autowired
     private IProductosService productosService;
 
+    @Autowired
+    private ConversionUnidadesService conversionUnidadesService;
+
+    @Autowired
+    private StockService stockService;
+
+    @Autowired
+    private LoteService loteService;
+
     @Override
     @Transactional
     public DetallesCompras guardarDetalle(DetallesCompras detalle, Integer idCompra, Integer idProducto) {
-        // Buscar compra y producto
         Optional<Compras> compra = comprasService.buscarCompra(idCompra);
         Optional<Productos> producto = productosService.buscarId(idProducto);
 
@@ -44,11 +56,19 @@ public class DetallesComprasService implements IDetallesComprasService {
             throw new RuntimeException("Producto no encontrado o inactivo");
         }
 
-        // Establecer relaciones
+        if (detalle.getFechaVencimiento() != null && detalle.getFechaVencimiento().isBefore(java.time.LocalDate.now())) {
+            throw new IllegalArgumentException("La fecha de vencimiento no puede ser anterior a hoy");
+        }
+
         detalle.setCompra(compra.get());
         detalle.setProducto(producto.get());
+
+        // La cantidad puede venir en una presentacion (10 sacos): se guarda tambien en unidad base (500 kg)
+        ConversionUnidadesService.Conversion conversion = conversionUnidadesService.convertir(
+                producto.get(), detalle.getIdPresentacionSolicitada(), detalle.getCantidad());
+        detalle.setPresentacion(conversion.presentacion());
+        detalle.setCantidadBase(conversion.cantidadBase());
         
-        // Validar que los precios requeridos estén presentes
         if (detalle.getPrecioUnitario() == null) {
             throw new RuntimeException("El precio unitario es requerido");
         }
@@ -58,18 +78,24 @@ public class DetallesComprasService implements IDetallesComprasService {
             detalle.setPrecioCompra(detalle.getPrecioUnitario());
         }
         
-        // Calcular subtotal si no está establecido
         if (detalle.getSubTotal() == null) {
-            BigDecimal subTotal = detalle.getPrecioUnitario().multiply(new BigDecimal(detalle.getCantidad()));
+            BigDecimal subTotal = detalle.getPrecioUnitario().multiply(detalle.getCantidad());
             detalle.setSubTotal(subTotal);
         }
 
-        // Establecer estado por defecto si no viene
         if (detalle.getEstado() == null) {
             detalle.setEstado(1);
         }
 
-        return detallesComprasRepository.save(detalle);
+        DetallesCompras guardado = detallesComprasRepository.save(detalle);
+        moverStock(compra.get(), producto.get(), conversion.cantidadBase());
+        if (compra.get().getSucursal() != null) {
+            loteService.registrar(producto.get(), compra.get().getSucursal().getIdSucursal(), guardado.getIdDetalleCompra(),
+                    detalle.getLote(), detalle.getFechaVencimiento(), conversion.cantidadBase(),
+                    "Compra #" + compra.get().getIdCompra());
+        }
+        recalcularTotal(compra.get());
+        return guardado;
     }
 
     @Override
@@ -82,18 +108,34 @@ public class DetallesComprasService implements IDetallesComprasService {
         }
 
         DetallesCompras detalleActual = detalleExistente.get();
+        BigDecimal baseAnterior = detalleActual.cantidadEnBase();
         detalleActual.setCantidad(detalle.getCantidad());
+        ConversionUnidadesService.Conversion conversion = conversionUnidadesService.convertir(
+                detalleActual.getProducto(), detalle.getIdPresentacionSolicitada(), detalle.getCantidad());
+        detalleActual.setPresentacion(conversion.presentacion());
+        detalleActual.setCantidadBase(conversion.cantidadBase());
+        detalleActual.setLote(detalle.getLote());
+        detalleActual.setFechaVencimiento(detalle.getFechaVencimiento());
         detalleActual.setPrecioUnitario(detalle.getPrecioUnitario());
         detalleActual.setPrecioCompra(detalle.getPrecioCompra());
         detalleActual.setPrecioVenta(detalle.getPrecioVenta());
         
-        // Recalcular subtotal
-        BigDecimal subTotal = detalle.getPrecioUnitario().multiply(new BigDecimal(detalle.getCantidad()));
+        BigDecimal subTotal = detalle.getPrecioUnitario().multiply(detalle.getCantidad());
         detalleActual.setSubTotal(subTotal);
         
         detalleActual.setEstado(detalle.getEstado());
 
-        return detallesComprasRepository.save(detalleActual);
+        DetallesCompras guardado = detallesComprasRepository.save(detalleActual);
+        moverStock(detalleActual.getCompra(), detalleActual.getProducto(),
+                conversion.cantidadBase().subtract(baseAnterior));
+        if (detalleActual.getCompra().getSucursal() != null) {
+            loteService.sincronizarLinea(detalleActual.getProducto(), detalleActual.getCompra().getSucursal().getIdSucursal(),
+                    detalleActual.getIdDetalleCompra(), detalle.getLote(), detalle.getFechaVencimiento(),
+                    conversion.cantidadBase(), conversion.cantidadBase().subtract(baseAnterior),
+                    "Compra #" + detalleActual.getCompra().getIdCompra());
+        }
+        recalcularTotal(detalleActual.getCompra());
+        return guardado;
     }
 
     @Override
@@ -104,9 +146,36 @@ public class DetallesComprasService implements IDetallesComprasService {
             DetallesCompras detalleActual = detalle.get();
             detalleActual.setEstado(0);
             detallesComprasRepository.save(detalleActual);
+            loteService.retirarDeLinea(detalleActual.getIdDetalleCompra(), detalleActual.cantidadEnBase());
+            moverStock(detalleActual.getCompra(), detalleActual.getProducto(), detalleActual.cantidadEnBase().negate());
+            recalcularTotal(detalleActual.getCompra());
         } else {
             throw new RuntimeException("Detalle no encontrado o ya eliminado");
         }
+    }
+
+    /** Una compra suma stock en su sucursal; quitar o reducir una linea lo devuelve. Compras antiguas sin sucursal no mueven stock. */
+    private void moverStock(Compras compra, Productos producto, BigDecimal cantidadBase) {
+        if (compra.getSucursal() == null || cantidadBase.signum() == 0) {
+            return;
+        }
+        if (cantidadBase.signum() > 0) {
+            stockService.ingresar(compra.getSucursal().getIdSucursal(), producto, cantidadBase,
+                    MovimientoStock.COMPRA, "Compra #" + compra.getIdCompra());
+        } else {
+            stockService.descontar(compra.getSucursal().getIdSucursal(), producto.getIdproducto(), cantidadBase.negate(),
+                    MovimientoStock.ANULACION_COMPRA, "Compra #" + compra.getIdCompra());
+        }
+    }
+
+    /** El total de la compra es la suma de sus lineas activas; se mantiene al agregar, editar o quitar lineas. */
+    private void recalcularTotal(Compras compra) {
+        BigDecimal total = detallesComprasRepository.findByCompraIdCompra(compra.getIdCompra()).stream()
+                .filter(d -> d.getEstado() != null && d.getEstado() == 1 && d.getSubTotal() != null)
+                .map(DetallesCompras::getSubTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        compra.setTotal(total);
+        comprasService.editarCompra(compra);
     }
 
     @Override

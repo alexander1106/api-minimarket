@@ -25,6 +25,20 @@ public class Ventas {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idVenta;
     private Double total_venta; 
+    /** Quien cobro la venta y el turno de caja sobre el que se cobro (null si no se uso caja). */
+    @jakarta.persistence.Column(name = "id_vendedor")
+    private Integer idVendedor;
+    @jakarta.persistence.Column(length = 80)
+    private String vendedor;
+    @jakarta.persistence.Column(name = "id_apertura_caja")
+    private Integer idAperturaCaja;
+    /** Desglose de IGV: base de las lineas afectas, importe de las inafectas e IGV (el total ya lo incluye). */
+    @jakarta.persistence.Column(name = "op_gravada", precision = 12, scale = 2)
+    private java.math.BigDecimal opGravada;
+    @jakarta.persistence.Column(name = "op_inafecta", precision = 12, scale = 2)
+    private java.math.BigDecimal opInafecta;
+    @jakarta.persistence.Column(precision = 12, scale = 2)
+    private java.math.BigDecimal igv;
     private String tipo_comprobante; 
     private String nro_comrprobante; 
     private LocalDate  fecha_venta;
@@ -143,5 +157,51 @@ public class Ventas {
         this.total_venta = total_venta;
     }
 
-   
+    public java.math.BigDecimal getOpGravada() {
+        return opGravada;
+    }
+
+    public void setOpGravada(java.math.BigDecimal opGravada) {
+        this.opGravada = opGravada;
+    }
+
+    public java.math.BigDecimal getOpInafecta() {
+        return opInafecta;
+    }
+
+    public void setOpInafecta(java.math.BigDecimal opInafecta) {
+        this.opInafecta = opInafecta;
+    }
+
+    public java.math.BigDecimal getIgv() {
+        return igv;
+    }
+
+    public void setIgv(java.math.BigDecimal igv) {
+        this.igv = igv;
+    }
+
+    public Integer getIdVendedor() {
+        return idVendedor;
+    }
+
+    public void setIdVendedor(Integer idVendedor) {
+        this.idVendedor = idVendedor;
+    }
+
+    public String getVendedor() {
+        return vendedor;
+    }
+
+    public void setVendedor(String vendedor) {
+        this.vendedor = vendedor;
+    }
+
+    public Integer getIdAperturaCaja() {
+        return idAperturaCaja;
+    }
+
+    public void setIdAperturaCaja(Integer idAperturaCaja) {
+        this.idAperturaCaja = idAperturaCaja;
+    }
 }

@@ -15,7 +15,15 @@ public class DetallesComprasDTO {
     
     @NotNull(message = "La cantidad es obligatoria")
     @Positive(message = "La cantidad debe ser mayor a cero")
-    private Integer cantidad;
+    private BigDecimal cantidad;
+    /** Opcional: presentacion en la que se expresa la cantidad (null = unidad base). */
+    private Integer idPresentacion;
+
+    /** Lote y vencimiento de lo comprado en esta linea (opcionales, para perecibles). */
+    private String lote;
+    private java.time.LocalDate fechaVencimiento;
+    public Integer getIdPresentacion() { return idPresentacion; }
+    public void setIdPresentacion(Integer idPresentacion) { this.idPresentacion = idPresentacion; }
     
     private BigDecimal precioUnitario;
     private BigDecimal precioCompra; // Se cargará automáticamente
@@ -46,10 +54,10 @@ public class DetallesComprasDTO {
     public void setNombreProducto(String nombreProducto) {
         this.nombreProducto = nombreProducto;
     }
-    public Integer getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
-    public void setCantidad(Integer cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
     public BigDecimal getPrecioUnitario() {
@@ -83,7 +91,8 @@ public class DetallesComprasDTO {
         this.estado = estado;
     }
 
-    // Getters y Setters (mantén los existentes y añade el nuevo)
-  
-
+    public String getLote() { return lote; }
+    public void setLote(String lote) { this.lote = lote; }
+    public java.time.LocalDate getFechaVencimiento() { return fechaVencimiento; }
+    public void setFechaVencimiento(java.time.LocalDate fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
 }

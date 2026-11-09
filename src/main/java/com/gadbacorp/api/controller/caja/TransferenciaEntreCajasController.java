@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,8 +30,9 @@ import com.gadbacorp.api.service.caja.ITransferenciaEntreCajasService;
 
 import jakarta.transaction.Transactional;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Caja - Transferencias entre cajas")
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/api/minimarket")
 public class TransferenciaEntreCajasController {
     
@@ -77,7 +77,6 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
     AperturaCaja aperturaOrigen = aperturaOrigenOpt.get();
     AperturaCaja aperturaDestino = aperturaDestinoOpt.get();
 
-    // VALIDACIÓN Y OBTENCIÓN DEL MÉTODO DE PAGO EFECTIVO
     List<MetodosPago> metodos = metodosPagoRepository
         .findByNombreIgnoreCaseAndSucursal_IdSucursal("EFECTIVO", cajaOrigen.getSucursales().getIdSucursal());
 
@@ -145,8 +144,7 @@ public ResponseEntity<?> guardarTranseferenciaEntreCaja(@RequestBody Transferenc
     return ResponseEntity.ok(transferenciaGuardada);
 }
 
-
-@PutMapping("/transferencias-entre-cajas")
+@PutMapping({"/transferencias-entre-cajas", "/transeferencias-entre-cajas"})
 @Transactional
 public ResponseEntity<?> editarTransferencias(@RequestBody TransferenciaEntreCajasDTO dto) {
     if (dto.getIdTransferenciaEntreCajas() == null) {

@@ -1,5 +1,6 @@
 package com.gadbacorp.api.controller.ventas;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,8 +28,9 @@ import com.gadbacorp.api.repository.inventario.InventarioProductoRepository;
 import com.gadbacorp.api.repository.ventas.ClientesRepository;
 import com.gadbacorp.api.service.ventas.ICotizacionesService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Ventas - Cotizaciones")
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/api/minimarket")
 public class CotizacionController {
     
@@ -38,6 +39,9 @@ public class CotizacionController {
 
     @Autowired
     private ClientesRepository clientesRepository;
+
+    @Autowired
+    private com.gadbacorp.api.service.jpa.ventas.NumeracionService numeracionService;
 
     @Autowired
     private AjusteInventarioRepository ajusteInventarioRepository;
@@ -52,8 +56,10 @@ public class CotizacionController {
     
     
     @GetMapping("/cotizaciones/{id}")
-  public List<Cotizaciones> listarCotizacionesPendientesPorSucursal(@PathVariable Integer idSucursal) {
-    return cotizacionesService.listarCotizacionesPendientesPorSucursal(idSucursal);
+  public ResponseEntity<Cotizaciones> buscarCotizacion(@PathVariable Integer id) {
+    return cotizacionesService.buscarCotizacion(id)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
 }
     
 @PostMapping("/cotizaciones")
@@ -70,17 +76,18 @@ public ResponseEntity<Map<String, Object>> guardarCotizacion(@RequestBody Cotiza
     Cotizaciones cotizacion = new Cotizaciones();
     cotizacion.setFechaCotizacion(dto.getFechaCotizacion());
     cotizacion.setEstadoCotizacion(dto.getEstadoCotizacion());
-    cotizacion.setNumeroCotizacion(dto.getNumeroCotizacion());
+    // El numero lo genera el servidor (correlativo unico); se ignora el que envie el cliente
+    cotizacion.setNumeroCotizacion(numeracionService.siguienteCotizacion());
     cotizacion.setTotalCotizacion(dto.getTotalCotizacion());
     cotizacion.setFechaVencimiento(dto.getFechaVencimiento());
     cotizacion.setCliente(cliente);
 
-    // 🚩 Guardar y obtener la entidad con ID
     Cotizaciones cotizacionGuardada = cotizacionesService.guardarCotizacion(cotizacion);
 
     respuesta.put("status", 200);
     respuesta.put("Detalle", "Cotización guardada correctamente.");
     respuesta.put("idCotizaciones", cotizacionGuardada.getIdCotizaciones());
+    respuesta.put("numeroCotizacion", cotizacionGuardada.getNumeroCotizacion());
     return ResponseEntity.ok(respuesta);
 }
 
@@ -105,7 +112,6 @@ public ResponseEntity<Map<String, Object>> actualizarCotizacion(@RequestBody Cot
 
     cotizacion.setFechaCotizacion(dto.getFechaCotizacion());
     cotizacion.setEstadoCotizacion(dto.getEstadoCotizacion());
-    cotizacion.setNumeroCotizacion(dto.getNumeroCotizacion());
     cotizacion.setTotalCotizacion(dto.getTotalCotizacion());
 
     if (dto.getId_cliente() != null &&
@@ -142,29 +148,13 @@ public ResponseEntity<Map<String, Object>> eliminarCotizacion(@PathVariable Inte
     List<DetallesCotizaciones> detalles = cotizacionesService.buscarDetallesPorCotizacion(id);
 
     for (DetallesCotizaciones detalle : detalles) {
-        Integer productoId = detalle.getProductos().getIdproducto();
-        Integer cantidad = detalle.getCantidad();
-
-        List<InventarioProducto> inventarios = inventarioProductoRepository.findAllByProducto_Idproducto(productoId);
-        for (InventarioProducto inventario : inventarios) {
-            inventario.setStockactual(inventario.getStockactual() + cantidad);
-            inventarioProductoRepository.save(inventario);
-
-            AjusteInventario ajuste = new AjusteInventario();
-            ajuste.setCantidad(cantidad);
-            ajuste.setDescripcion("REVERTIR ELIMINACIÓN COTIZACIÓN");
-            ajuste.setFechaAjuste(java.time.LocalDateTime.now());
-            ajuste.setInventarioProducto(inventario);
-            ajusteInventarioRepository.save(ajuste);
-        }
-
         cotizacionesService.eliminarDetalleCotizacion(detalle.getIdDetallesCotizaciones());
     }
 
     cotizacionesService.eliminarCotizaciones(id);
 
     respuesta.put("status", 200);
-    respuesta.put("Detalle", "Cotización eliminada correctamente y stock revertido.");
+    respuesta.put("Detalle", "Cotización eliminada correctamente.");
     return ResponseEntity.ok(respuesta);
 }
 

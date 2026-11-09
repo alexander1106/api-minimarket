@@ -9,4 +9,8 @@ import com.gadbacorp.api.entity.compras.Proveedores;
 public interface ProveedoresRepository extends JpaRepository<Proveedores, Integer>{
 
      List<Proveedores> findByEmpresaIdempresa(Integer idEmpresa);
+
+     boolean existsByRucAndEmpresaIdempresa(String ruc, Integer idEmpresa);
+
+     boolean existsByRucAndEmpresaIdempresaAndIdProveedorNot(String ruc, Integer idEmpresa, Integer idProveedor);
 }

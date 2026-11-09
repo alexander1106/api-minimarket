@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,8 +37,9 @@ import com.gadbacorp.api.service.caja.ITransaccionesCajaServices;
 import com.gadbacorp.api.service.jpa.ventas.CotizacionesService;
 import com.gadbacorp.api.service.ventas.IPagosService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Ventas - Pagos")
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/api/minimarket")
 public class PagosController {
 
@@ -64,7 +64,7 @@ public class PagosController {
     private ITransaccionesCajaServices transaccionesCajaService;
 
     @Autowired
-    private CotizacionesService cotizacionesService;
+    private com.gadbacorp.api.service.jpa.ventas.PagoCotizacionService pagoCotizacionService;
 
     @GetMapping("/pagos")
     public List<Pagos> listarPagos() {
@@ -73,117 +73,12 @@ public class PagosController {
 
 @PostMapping("/pagos")
 public ResponseEntity<?> guardar(@RequestBody PagosDTO dto) {
-    if (dto.getId_metodo_pago() == null) {
-        return ResponseEntity.badRequest().body("Debe especificar método de pago.");
+    try {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(pagoCotizacionService.pagar(dto, username));
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
-    if (dto.getId_venta() == null) {
-        return ResponseEntity.badRequest().body("Debe especificar cotización.");
-    }
-
-    MetodosPago metodo = metodosPagoRepository.findById(dto.getId_metodo_pago())
-            .orElseThrow(() -> new IllegalArgumentException("Método de pago no encontrado"));
-
-    if (metodo.getSucursal() == null) {
-        return ResponseEntity.badRequest().body("El método de pago no tiene una sucursal asignada.");
-    }
-    Integer idSucursal = metodo.getSucursal().getIdSucursal();
-
-    Ventas venta = cotizacionesService.convertirCotizacionAVenta(dto.getId_venta(), idSucursal);
-
-          // Generar comprobante correlativo
-        String tipoComprobante = dto.getComprobantePago();
-        String prefijo = tipoComprobante.equalsIgnoreCase("FACTURA") ? "F" : "B";
-        List<String> lista = ventasRepository.findUltimoComprobantePorTipo(tipoComprobante);
-        String ultimoNro = (lista == null || lista.isEmpty()) ? null : lista.get(0);
-
-
-        int nuevoNumero = 1;
-        
-        if (ultimoNro != null && !ultimoNro.isEmpty()) {
-            String[] partes = ultimoNro.split("-");
-            if (partes.length == 2) {
-                nuevoNumero = Integer.parseInt(partes[1]) + 1;
-            }
-        }
-        String numeroFormateado = String.format("%s-%06d", prefijo, nuevoNumero);
-        venta.setNro_comrprobante(numeroFormateado);
-        venta = ventasRepository.save(venta);
-
-    // Registrar pago
-    Pagos pago = new Pagos();
-    pago.setEstadoPago(dto.getEstadoPago());
-    pago.setObservaciones(dto.getObservaciones());
-    pago.setReferenciaPago(dto.getReferenciaPago());
-    pago.setFechaPago(LocalDate.now());
-    pago.setMontoPagado(dto.getMontoPagado());
-    pago.setMetodosPago(metodo);
-    pago.setVentas(venta);
-
-    Pagos pagoGuardado = pagosService.guardarPago(pago);
-
-    cotizacionesService.marcarCotizacionComoPagada(dto.getId_venta());
-Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-String username = authentication.getName(); // o getPrincipal()
-
-Usuarios usuario = usuarioRepository.findByUsername(username);
-if (usuario == null) {
-    throw new RuntimeException("Usuario no encontrado");
-}
-Integer idUsuario = usuario.getIdUsuario();
-    // === CREAR la transacción de caja automáticamente con lógica de validaciones ===
-List<AperturaCaja> aperturas = aperturaCajaRepository.findByUsuarios_IdUsuarioAndEstadoCaja(usuario.getIdUsuario(), "ABIERTA");
-
-if (aperturas.size() != 1) {
-    throw new IllegalStateException("Se esperaba exactamente una apertura de caja activa, pero se encontraron: " + aperturas.size());
-}
-
-AperturaCaja aperturaCaja = aperturas.get(0);
-  
-
-    Double saldoActual = aperturaCaja.getSaldoFinal() != null
-            ? aperturaCaja.getSaldoFinal()
-            : aperturaCaja.getSaldoInicial() != null
-                ? aperturaCaja.getSaldoInicial()
-                : 0.0;
-
-    TransaccionesCaja transaccion = new TransaccionesCaja();
-    transaccion.setFecha(new Date());
-    transaccion.setMonto(dto.getMontoPagado());
-    transaccion.setObservaciones("Ingreso por pago de cotizacion");
-    transaccion.setTipoMovimiento("INGRESO");
-    transaccion.setAperturaCaja(aperturaCaja);
-    transaccion.setMetodoPago(metodo);
-
-    saldoActual += dto.getMontoPagado();
-    aperturaCaja.setSaldoFinal(saldoActual);
-
-    if ("Efectivo".equalsIgnoreCase(metodo.getNombre())) {
-        Double saldoEfectivo = aperturaCaja.getSaldoEfectivo() != null ? aperturaCaja.getSaldoEfectivo() : 0.0;
-        saldoEfectivo += dto.getMontoPagado();
-        aperturaCaja.setSaldoEfectivo(saldoEfectivo);
-    }
-
-    Optional<SaldoMetodoPago> saldoMetodoOpt = saldoMetodoPagoRepository.findByAperturaCajaAndMetodoPago(aperturaCaja, metodo);
-    SaldoMetodoPago saldoMetodoPago;
-    if (saldoMetodoOpt.isPresent()) {
-        saldoMetodoPago = saldoMetodoOpt.get();
-    } else {
-        saldoMetodoPago = new SaldoMetodoPago();
-        saldoMetodoPago.setAperturaCaja(aperturaCaja);
-        saldoMetodoPago.setMetodoPago(metodo);
-        saldoMetodoPago.setSaldo(0.0);
-        saldoMetodoPago.setEstado(1);
-    }
-
-    Double saldoMetodoActual = saldoMetodoPago.getSaldo() != null ? saldoMetodoPago.getSaldo() : 0.0;
-    saldoMetodoActual += dto.getMontoPagado();
-    saldoMetodoPago.setSaldo(saldoMetodoActual);
-    
-    aperturaCajaRepository.save(aperturaCaja);
-    saldoMetodoPagoRepository.save(saldoMetodoPago);
-    transaccionesCajaService.guardarTransaccion(transaccion);
-
-    return ResponseEntity.ok(pagoGuardado);
 }
 
      @GetMapping("/pagos/{id}")

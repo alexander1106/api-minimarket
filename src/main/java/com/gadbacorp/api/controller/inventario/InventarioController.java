@@ -1,4 +1,3 @@
-// src/main/java/com/gadbacorp/api/controller/inventario/InventarioController.java
 package com.gadbacorp.api.controller.inventario;
 
 import java.util.List;
@@ -7,7 +6,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin; 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,9 +22,10 @@ import com.gadbacorp.api.entity.inventario.InventarioDTO;
 import com.gadbacorp.api.repository.inventario.AlmacenesRepository;
 import com.gadbacorp.api.service.inventario.IInventarioService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Inventario - Inventario")
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin(origins = "http://localhost:4200")
 public class InventarioController {
 
     @Autowired private IInventarioService inventarioService;
@@ -43,7 +42,6 @@ public class InventarioController {
 
     private Inventario toEntity(InventarioDTO dto) {
     Inventario inv = new Inventario();
-    // Sólo le seteamos el id si viene un entero válido (>0):
     if (dto.getIdinventario() != null && dto.getIdinventario() > 0) {
         inv.setIdinventario(dto.getIdinventario());
     }
@@ -55,7 +53,6 @@ public class InventarioController {
     inv.setAlmacen(alm);
     return inv;
 }
-
 
     @GetMapping("/inventario")
     public List<InventarioDTO> listar() {
@@ -90,7 +87,6 @@ public class InventarioController {
 
     @PutMapping("/inventario")
     public ResponseEntity<InventarioDTO> actualizar(@RequestBody InventarioDTO dto) {
-        // valida existencia
         inventarioService.buscarId(dto.getIdinventario())
             .orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Inventario no encontrado id=" + dto.getIdinventario()));
@@ -101,7 +97,6 @@ public class InventarioController {
 
     @DeleteMapping("/inventario/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
-        // aquí invocamos la eliminación con validación en el service
         inventarioService.eliminar(id);
         return ResponseEntity.ok("Inventario eliminado correctamente");
     }

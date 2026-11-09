@@ -57,6 +57,7 @@ public class Compras {
     private List<DetallesCompras> detalles;
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"compra"})
     private List<DevolucionesCompra> devoluciones;
 
     public Integer getIdCompra() {
@@ -139,7 +140,6 @@ public class Compras {
         this.devoluciones = devoluciones;
     }
 
-    // Getters y Setters
     
     
 }

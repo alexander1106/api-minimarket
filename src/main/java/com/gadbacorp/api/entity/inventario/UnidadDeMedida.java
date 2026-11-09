@@ -18,6 +18,11 @@ public class UnidadDeMedida {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idunidadmedida;
     private String nombre;
+    /** Abreviatura (KG, UND, LT...). */
+    @jakarta.persistence.Column(length = 10)
+    private String codigo;
+    /** true = admite cantidades fraccionadas (kg, litros); false = solo enteras (unidades, paquetes). */
+    private Boolean permiteDecimales = false;
     private Integer estado = 1;
 
     public UnidadDeMedida(){}
@@ -38,6 +43,11 @@ public class UnidadDeMedida {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+    public String getCodigo() { return codigo; }
+    public void setCodigo(String codigo) { this.codigo = codigo; }
+    public Boolean getPermiteDecimales() { return permiteDecimales; }
+    public void setPermiteDecimales(Boolean permiteDecimales) { this.permiteDecimales = permiteDecimales; }
+
     public Integer getEstado() {
         return estado;
     }

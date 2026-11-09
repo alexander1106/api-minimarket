@@ -19,7 +19,6 @@ public List<SaldoMetodoPago> obtenerSaldosPorApertura(Integer idAperturaCaja) {
     return saldoMetodoPagoRepository.findByAperturaCaja_IdAperturaCaja(idAperturaCaja);
 }
 
-
     public SaldoMetodoPago obtenerSaldoPorAperturaYMetodo(AperturaCaja aperturaCaja, MetodosPago metodoPago) {
         return saldoMetodoPagoRepository.findByAperturaCajaAndMetodoPago(aperturaCaja, metodoPago)
                 .orElseThrow(() -> new RuntimeException("Saldo no encontrado para ese método de pago"));
@@ -36,7 +35,6 @@ public List<SaldoMetodoPago> obtenerSaldosPorApertura(Integer idAperturaCaja) {
     public void eliminarSaldo(Integer idSaldoMetodoPago) {
         saldoMetodoPagoRepository.deleteById(idSaldoMetodoPago);
     }
-    // Método para incrementar saldo
     public void incrementarSaldo(AperturaCaja aperturaCaja, MetodosPago metodoPago, Double monto) {
         SaldoMetodoPago saldo = saldoMetodoPagoRepository
                 .findByAperturaCajaAndMetodoPago(aperturaCaja, metodoPago)

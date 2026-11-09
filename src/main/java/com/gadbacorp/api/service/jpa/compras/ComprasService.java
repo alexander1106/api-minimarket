@@ -1,12 +1,12 @@
 package com.gadbacorp.api.service.jpa.compras;
 
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import com.gadbacorp.api.service.jpa.inventario.ConversionUnidadesService;
 import org.springframework.stereotype.Service;
 
 import com.gadbacorp.api.entity.compras.CompraCompletaDTO;
@@ -24,6 +24,8 @@ import com.gadbacorp.api.service.jpa.ventas.MetodosPagoService;
 
 @Service
 public class ComprasService implements IComprasService {
+    @Autowired
+    private ConversionUnidadesService conversionUnidadesService;
 
     @Autowired
     private ComprasRepository comprasRepository;
@@ -87,15 +89,12 @@ public class ComprasService implements IComprasService {
 
     @Override
     public CompraCompletaDTO crearCompraCompleta(CompraCompletaDTO compraDTO) {
-        // Validar proveedor
         Proveedores proveedor = proveedoresService.buscarId(compraDTO.getIdProveedor())
             .orElseThrow(() -> new RuntimeException("Proveedor no encontrado"));
         
-        // Validar método de pago
         MetodosPago metodoPago = metodosPagoService.obtenerMetodoPago(compraDTO.getIdMetodoPago())
             .orElseThrow(() -> new RuntimeException("Método de pago no encontrado"));
         
-        // Crear la compra
         Compras compra = new Compras();
         compra.setProveedor(proveedor);
         compra.setMetodoPago(metodoPago);
@@ -103,16 +102,13 @@ public class ComprasService implements IComprasService {
         compra.setFechaCompra(LocalDateTime.now());
         compra.setEstado(1);
         
-        // Calcular total
         BigDecimal total = compraDTO.getDetalles().stream()
-            .map(d -> d.getPrecioCompra().multiply(BigDecimal.valueOf(d.getCantidad())))
+            .map(d -> d.getPrecioCompra().multiply(d.getCantidad()))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
         compra.setTotal(total);
         
-        // Guardar compra
         Compras compraGuardada = comprasRepository.save(compra);
         
-        // Guardar detalles
         for (DetallesComprasDTO detalleDTO : compraDTO.getDetalles()) {
             Productos producto = productosRepo.findById(detalleDTO.getIdProducto())
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
@@ -121,10 +117,14 @@ public class ComprasService implements IComprasService {
             detalle.setCompra(compraGuardada);
             detalle.setProducto(producto);
             detalle.setCantidad(detalleDTO.getCantidad());
+            ConversionUnidadesService.Conversion conversion = conversionUnidadesService.convertir(
+                    producto, detalleDTO.getIdPresentacion(), detalleDTO.getCantidad());
+            detalle.setPresentacion(conversion.presentacion());
+            detalle.setCantidadBase(conversion.cantidadBase());
             detalle.setPrecioUnitario(detalleDTO.getPrecioUnitario());
             detalle.setPrecioCompra(detalleDTO.getPrecioCompra());
             detalle.setPrecioVenta(detalleDTO.getPrecioVenta());
-            detalle.setSubTotal(detalleDTO.getPrecioCompra().multiply(BigDecimal.valueOf(detalleDTO.getCantidad())));
+            detalle.setSubTotal(detalleDTO.getPrecioCompra().multiply(detalleDTO.getCantidad()));
             detalle.setEstado(1);
             
             detallesRepo.save(detalle);
@@ -134,6 +134,5 @@ public class ComprasService implements IComprasService {
         compraDTO.setTotal(total);
         return compraDTO;
     }
-
 
 }

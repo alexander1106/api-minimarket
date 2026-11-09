@@ -7,7 +7,6 @@ import com.gadbacorp.api.entity.delivery.EstadoMovimiento;
 
 public interface IEstadoMovimientoService {
 
-        //listar todos los clientes de la tabla
     List<EstadoMovimiento> buscarTodos();
 
     EstadoMovimiento guardar(EstadoMovimiento estadoMovimiento);

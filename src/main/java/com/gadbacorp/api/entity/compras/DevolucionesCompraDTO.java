@@ -11,7 +11,6 @@ public class DevolucionesCompraDTO {
     private String observaciones;
     private List<DetalleDevolucionCompraDTO> detalles;
 
-    // Getters y Setters
     public Integer getIdCompra() {
         return idCompra;
     }

@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,9 +27,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.gadbacorp.api.entity.inventario.ProductosDTO;
 import com.gadbacorp.api.service.jpa.inventario.ProductosService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Inventario - Productos")
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin(origins = "http://localhost:4200")
 public class ProductosController {
 
     @Autowired
@@ -42,6 +42,18 @@ public class ProductosController {
     @GetMapping("/productos")
     public ResponseEntity<List<ProductosDTO>> listar() {
         return ResponseEntity.ok(productosService.listarProductosDTO());
+    }
+
+    @GetMapping("/productos/stock-bajo")
+    public ResponseEntity<List<java.util.Map<String, Object>>> stockBajo(
+            @RequestParam(required = false) Integer idSucursal) {
+        return ResponseEntity.ok(productosService.stockBajo(idSucursal));
+    }
+
+    /** Para el lector de codigos del punto de venta: codigo de barras, SKU o codigo de barras de una presentacion. */
+    @GetMapping("/productos/codigo/{codigo}")
+    public ResponseEntity<java.util.Map<String, Object>> porCodigo(@PathVariable String codigo) {
+        return ResponseEntity.ok(productosService.buscarPorCodigo(codigo));
     }
 
     @GetMapping("/productos/{id}")

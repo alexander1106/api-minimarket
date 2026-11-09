@@ -13,5 +13,11 @@ public interface ProductosRepository extends JpaRepository<Productos, Integer>{
     boolean existsByUnidadMedida_Idunidadmedida(Integer idunidadmedida);
     boolean existsByTipoProducto_Idtipoproducto(Integer idtipoproducto);
     boolean existsByCategoria_Idcategoria(Integer idcategoria);
+    List<Productos> findByStockMinimoNotNull();
+    /** El codigo (SKU) y el de barras son unicos dentro de cada empresa, no en toda la plataforma. */
+    Optional<Productos> findByCodigoIgnoreCaseAndEmpresa_Idempresa(String codigo, Integer idEmpresa);
+    Optional<Productos> findByCodigoBarrasAndEmpresa_Idempresa(String codigoBarras, Integer idEmpresa);
+    Optional<Productos> findByCodigoIgnoreCaseAndEmpresaIsNull(String codigo);
+    Optional<Productos> findByCodigoBarrasAndEmpresaIsNull(String codigoBarras);
     
 }

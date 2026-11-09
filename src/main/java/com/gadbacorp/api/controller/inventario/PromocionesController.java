@@ -22,6 +22,8 @@ import com.gadbacorp.api.repository.inventario.CategoriasRepository;
 import com.gadbacorp.api.repository.inventario.ProductosRepository;
 import com.gadbacorp.api.repository.inventario.PromocionesRepository;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Inventario - Promociones")
 @RestController
 @RequestMapping("/api/minimarket")
 public class PromocionesController {

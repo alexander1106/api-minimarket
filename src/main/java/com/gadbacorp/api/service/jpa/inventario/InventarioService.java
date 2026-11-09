@@ -1,4 +1,3 @@
-// src/main/java/com/gadbacorp/api/service/jpa/inventario/InventarioService.java
 package com.gadbacorp.api.service.jpa.inventario;
 
 import java.util.List;
@@ -29,7 +28,6 @@ public class InventarioService implements IInventarioService {
     }
     @Override
 public List<Inventario> buscarTodosPorSucursal(Integer idSucursal) {
-    // Esto buscará todos los inventarios cuyos almacenes estén en la sucursal dada
     return repoInventario.findByAlmacen_Sucursal_IdSucursal(idSucursal);
 }
     
@@ -57,7 +55,6 @@ public List<Inventario> buscarTodosPorSucursal(Integer idSucursal) {
 
     @Override
     public Inventario modificar(Inventario inventario) {
-        // 1) Compruebo asociación en inventario_producto
         boolean tieneProductos = repoInvProd.existsByInventarioIdinventario(
             inventario.getIdinventario()
         );
@@ -67,15 +64,12 @@ public List<Inventario> buscarTodosPorSucursal(Integer idSucursal) {
                 "No se puede modificar: este inventario tiene productos asociados."
             );
         }
-        // 2) Si no, guardo la modificación
         return repoInventario.save(inventario);
     }
-
 
     
     @Override
     public void eliminar(Integer id) {
-        // validamos antes de borrar
         if (repoInvProd.existsByInventario_Idinventario(id)) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,

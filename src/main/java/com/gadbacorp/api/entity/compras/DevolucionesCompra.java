@@ -27,12 +27,13 @@ public class DevolucionesCompra {
 
     @ManyToOne
     @JoinColumn(name = "id_compra")
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"devoluciones"})
     private Compras compra;
 
     @OneToMany(mappedBy = "devolucionCompra", cascade = CascadeType.ALL)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"devolucionCompra"})
     private List<DetallesDevolucionCompra> detalles;
 
-    // Getters y Setters
     public Integer getIdDevolucionCompra() {
         return idDevolucionCompra;
     }

@@ -1,11 +1,11 @@
 package com.gadbacorp.api.controller.ventas;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,10 +29,14 @@ import com.gadbacorp.api.service.ventas.IDetallesDevoluciones;
 import com.gadbacorp.api.service.ventas.IDetallesVentasService;
 import com.gadbacorp.api.service.ventas.IDevolucionesService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Ventas - Devoluciones")
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin("*")
 public class DevolucionesController {
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.gadbacorp.api.service.jpa.inventario.StockService stockService;
+
 
     @Autowired
     private IDevolucionesService devolucionesService;
@@ -63,6 +67,7 @@ public class DevolucionesController {
     }
 
     @PostMapping("/devoluciones")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<?> guardarDevolucion(@RequestBody DevolucionesDTO dto) {
         Ventas venta = ventasRepository.findById(dto.getId_venta()).orElse(null);
         if (venta == null) {
@@ -87,32 +92,22 @@ public class DevolucionesController {
             DetallesDevolucion nuevoDetalleDev = new DetallesDevolucion();
             nuevoDetalleDev.setDevoluciones(devolucionGuardada);
             nuevoDetalleDev.setProductos(detalle.getProductos());
-            nuevoDetalleDev.setCantidad(detalle.getCantidad());
+            nuevoDetalleDev.setCantidad(detalle.cantidadEnBase());
             detallesDevolucionesService.guardarDetallesDevolucion(nuevoDetalleDev);
         }
 
         for (DetallesVentas detalle : detalles) {
             Integer productoId = detalle.getProductos().getIdproducto();
-            Integer cantidadVendida = detalle.getCantidad();
-            List<InventarioProducto> inventarioList = inventarioProductoRepository.findAllByProducto_Idproducto(productoId);
-
-            for (InventarioProducto inventario : inventarioList) {
-                inventario.setStockactual(inventario.getStockactual() + cantidadVendida);
-                inventarioProductoRepository.save(inventario);
-
-                AjusteInventario ajuste = new AjusteInventario();
-                ajuste.setCantidad(cantidadVendida);
-                ajuste.setDescripcion("DEVOLUCIÓN");
-                ajuste.setFechaAjuste(java.time.LocalDateTime.now());
-                ajuste.setInventarioProducto(inventario);
-                ajusteInventarioRepository.save(ajuste);
-            }
+            BigDecimal cantidadVendida = detalle.cantidadEnBase();
+            stockService.mover(com.gadbacorp.api.service.jpa.inventario.StockService.sucursalDe(venta), detalle.getProductos(), cantidadVendida,
+                com.gadbacorp.api.entity.inventario.MovimientoStock.DEVOLUCION, "Devolucion de venta #" + venta.getIdVenta());
         }
 
         return ResponseEntity.ok(devolucionGuardada);
     }
 
     @DeleteMapping("/devoluciones/{id}")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<?> eliminarDevolucion(@PathVariable Integer id) {
         Optional<Devoluciones> optionalDevolucion = devolucionesService.buscarDevolucion(id);
         if (optionalDevolucion.isEmpty()) {
@@ -131,20 +126,10 @@ public class DevolucionesController {
         List<DetallesDevolucion> detallesDevolucion = detallesDevolucionesService.buscarPorIdDevolucion(id);
         for (DetallesDevolucion detalleDev : detallesDevolucion) {
             Integer productoId = detalleDev.getProductos().getIdproducto();
-            Integer cantidadDevuelta = detalleDev.getCantidad();
+            BigDecimal cantidadDevuelta = detalleDev.getCantidad();
 
-            List<InventarioProducto> inventarioList = inventarioProductoRepository.findAllByProducto_Idproducto(productoId);
-            for (InventarioProducto inventario : inventarioList) {
-                inventario.setStockactual(inventario.getStockactual() - cantidadDevuelta);
-                inventarioProductoRepository.save(inventario);
-
-                AjusteInventario ajuste = new AjusteInventario();
-                ajuste.setCantidad(-cantidadDevuelta);
-                ajuste.setDescripcion("REVERTIR ELIMINACIÓN DEVOLUCIÓN");
-                ajuste.setFechaAjuste(java.time.LocalDateTime.now());
-                ajuste.setInventarioProducto(inventario);
-                ajusteInventarioRepository.save(ajuste);
-            }
+            stockService.mover(com.gadbacorp.api.service.jpa.inventario.StockService.sucursalDe(venta), detalleDev.getProductos(), cantidadDevuelta.negate(),
+                com.gadbacorp.api.entity.inventario.MovimientoStock.DEVOLUCION, "Devolucion eliminada, venta #" + venta.getIdVenta());
 
             detallesDevolucionesService.eliminarDetallesCotizaciones(detalleDev.getIdDetallesDevoluciones());
         }
@@ -154,6 +139,7 @@ public class DevolucionesController {
     }
 
     @PutMapping("/devoluciones")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<?> actualizarDevolucion(@RequestBody DevolucionesDTO dto) {
         if (dto.getId_devolucion() == null) {
             return ResponseEntity.badRequest().body("Debe proporcionar el ID de la devolución.");
@@ -172,20 +158,9 @@ public class DevolucionesController {
                 List<DetallesVentas> detallesAnteriores = detallesVentasService.buscarPorIdVenta(ventaAnterior.getIdVenta());
                 for (DetallesVentas detalle : detallesAnteriores) {
                     Integer productoId = detalle.getProductos().getIdproducto();
-                    Integer cantidad = detalle.getCantidad();
-                    List<InventarioProducto> inventarios = inventarioProductoRepository.findAllByProducto_Idproducto(productoId);
-
-                    for (InventarioProducto inventario : inventarios) {
-                        inventario.setStockactual(inventario.getStockactual() - cantidad);
-                        inventarioProductoRepository.save(inventario);
-
-                        AjusteInventario ajuste = new AjusteInventario();
-                        ajuste.setCantidad(-cantidad);
-                        ajuste.setDescripcion("REVERTIR DEVOLUCIÓN POR CAMBIO DE VENTA");
-                        ajuste.setFechaAjuste(java.time.LocalDateTime.now());
-                        ajuste.setInventarioProducto(inventario);
-                        ajusteInventarioRepository.save(ajuste);
-                    }
+                    BigDecimal cantidad = detalle.cantidadEnBase();
+                    stockService.mover(com.gadbacorp.api.service.jpa.inventario.StockService.sucursalDe(ventaAnterior), detalle.getProductos(), cantidad.negate(),
+                com.gadbacorp.api.entity.inventario.MovimientoStock.DEVOLUCION, "Cambio de venta en devolucion");
                 }
             }
 
@@ -198,20 +173,9 @@ public class DevolucionesController {
             List<DetallesVentas> nuevosDetalles = detallesVentasService.buscarPorIdVenta(nuevaVenta.getIdVenta());
             for (DetallesVentas detalle : nuevosDetalles) {
                 Integer productoId = detalle.getProductos().getIdproducto();
-                Integer cantidad = detalle.getCantidad();
-                List<InventarioProducto> inventarios = inventarioProductoRepository.findAllByProducto_Idproducto(productoId);
-
-                for (InventarioProducto inventario : inventarios) {
-                    inventario.setStockactual(inventario.getStockactual() + cantidad);
-                    inventarioProductoRepository.save(inventario);
-
-                    AjusteInventario ajuste = new AjusteInventario();
-                    ajuste.setCantidad(cantidad);
-                    ajuste.setDescripcion("AJUSTE POR NUEVA VENTA EN DEVOLUCIÓN");
-                    ajuste.setFechaAjuste(java.time.LocalDateTime.now());
-                    ajuste.setInventarioProducto(inventario);
-                    ajusteInventarioRepository.save(ajuste);
-                }
+                BigDecimal cantidad = detalle.cantidadEnBase();
+                stockService.mover(com.gadbacorp.api.service.jpa.inventario.StockService.sucursalDe(nuevaVenta), detalle.getProductos(), cantidad,
+                com.gadbacorp.api.entity.inventario.MovimientoStock.DEVOLUCION, "Cambio de venta en devolucion");
             }
 
             devolucion.setVentas(nuevaVenta);

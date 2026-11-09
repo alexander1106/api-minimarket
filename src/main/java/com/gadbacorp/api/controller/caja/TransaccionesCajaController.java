@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,8 +25,9 @@ import com.gadbacorp.api.repository.caja.SaldoMetodoPagoRepository;
 import com.gadbacorp.api.repository.ventas.MetodosPagoRepository;
 import com.gadbacorp.api.service.caja.ITransaccionesCajaServices;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Caja - Transacciones de caja")
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/api/minimarket")
 public class TransaccionesCajaController {
     
@@ -43,6 +43,9 @@ public class TransaccionesCajaController {
     @Autowired
     private MetodosPagoRepository metodosPagoRepository;
 
+    @Autowired
+    private com.gadbacorp.api.service.jpa.cajas.CajaMovimientoService cajaMovimientoService;
+
     @GetMapping("/transacciones-cajas")
     public List<TransaccionesCaja> listarTransaccionesCajas(){
         return transaccionesCajaService.listarTransaccionesCajas();
@@ -55,85 +58,25 @@ public class TransaccionesCajaController {
 
 @PostMapping("/transacciones-cajas")
 public ResponseEntity<?> guardarTransaccion(@RequestBody TransaccionesCajaDTO dto) {
-    AperturaCaja aperturaCaja = aperturaCajaRepository.findById(dto.getId_apertura_caja()).orElse(null);
-    if (aperturaCaja == null) {
-        return ResponseEntity.badRequest().body("No existe la apertura de caja con id: " + dto.getId_apertura_caja());
+    if (dto.getId_apertura_caja() == null) {
+        return ResponseEntity.badRequest().body("La apertura de caja es obligatoria.");
     }
-
+    if (dto.getIdMetodoPago() == null) {
+        return ResponseEntity.badRequest().body("El metodo de pago es obligatorio.");
+    }
     MetodosPago metodosPago = metodosPagoRepository.findById(dto.getIdMetodoPago()).orElse(null);
     if (metodosPago == null) {
         return ResponseEntity.badRequest().body("No existe el metodo de pago con id: " + dto.getIdMetodoPago());
     }
-
-    Double saldoActual = aperturaCaja.getSaldoFinal() != null
-        ? aperturaCaja.getSaldoFinal()
-        : aperturaCaja.getSaldoInicial() != null
-            ? aperturaCaja.getSaldoInicial()
-            : 0.0;
-    if (!"INGRESO".equalsIgnoreCase(dto.getTipoMovimiento()) && !"EGRESO".equalsIgnoreCase(dto.getTipoMovimiento())) {
-        return ResponseEntity.badRequest().body("Tipo de movimiento inválido: " + dto.getTipoMovimiento());
+    try {
+        return ResponseEntity.ok(cajaMovimientoService.registrar(dto.getId_apertura_caja(), metodosPago,
+                dto.getTipoMovimiento(), dto.getMonto(), dto.getObservaciones()));
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
-    if ("EGRESO".equalsIgnoreCase(dto.getTipoMovimiento()) && dto.getMonto() > saldoActual) {
-        return ResponseEntity.badRequest().body("Saldo insuficiente. No se puede egresar más de lo disponible.");
-    }
-
-    TransaccionesCaja transaccionesCaja = new TransaccionesCaja();
-    transaccionesCaja.setFecha(new Date());
-    transaccionesCaja.setMonto(dto.getMonto());
-    transaccionesCaja.setObservaciones(dto.getObservaciones());
-    transaccionesCaja.setTipoMovimiento(dto.getTipoMovimiento());
-    transaccionesCaja.setAperturaCaja(aperturaCaja);
-    transaccionesCaja.setMetodoPago(metodosPago);
-
-    if ("INGRESO".equalsIgnoreCase(dto.getTipoMovimiento())) {
-        saldoActual += dto.getMonto();
-    } else {
-        saldoActual -= dto.getMonto();
-    }
-    aperturaCaja.setSaldoFinal(saldoActual);
-
-    if ("Efectivo".equalsIgnoreCase(metodosPago.getNombre())) {
-        Double saldoEfectivo = aperturaCaja.getSaldoEfectivo() != null ? aperturaCaja.getSaldoEfectivo() : 0.0;
-        if ("INGRESO".equalsIgnoreCase(dto.getTipoMovimiento())) {
-            saldoEfectivo += dto.getMonto();
-        } else {
-            saldoEfectivo -= dto.getMonto();
-        }
-        aperturaCaja.setSaldoEfectivo(saldoEfectivo);
-    }
-
-    Optional<SaldoMetodoPago> saldoMetodoOpt = saldoMetodoPagoRepository.findByAperturaCajaAndMetodoPago(aperturaCaja, metodosPago);
-    SaldoMetodoPago saldoMetodoPago;
-    if (saldoMetodoOpt.isPresent()) {
-        saldoMetodoPago = saldoMetodoOpt.get();
-    } else {
-        saldoMetodoPago = new SaldoMetodoPago();
-        saldoMetodoPago.setAperturaCaja(aperturaCaja);
-        saldoMetodoPago.setMetodoPago(metodosPago);
-        saldoMetodoPago.setSaldo(0.0);
-        saldoMetodoPago.setEstado(1);
-    }
-
-    Double saldoMetodoActual = saldoMetodoPago.getSaldo() != null ? saldoMetodoPago.getSaldo() : 0.0;
-
-    if ("EGRESO".equalsIgnoreCase(dto.getTipoMovimiento()) && dto.getMonto() > saldoMetodoActual) {
-        return ResponseEntity.badRequest().body("Saldo insuficiente en el método de pago. No se puede egresar más de lo disponible.");
-    }
-
-    if ("INGRESO".equalsIgnoreCase(dto.getTipoMovimiento())) {
-        saldoMetodoActual += dto.getMonto();
-    } else {
-        saldoMetodoActual -= dto.getMonto();
-    }
-    saldoMetodoPago.setSaldo(saldoMetodoActual);
-    aperturaCajaRepository.save(aperturaCaja);
-    saldoMetodoPagoRepository.save(saldoMetodoPago);
-    TransaccionesCaja transaccionGuardada = transaccionesCajaService.guardarTransaccion(transaccionesCaja);
-
-    return ResponseEntity.ok(transaccionGuardada);
 }
 
-@PutMapping("/transaccion-cajas")
+@PutMapping({"/transacciones-cajas", "/transaccion-cajas"})
 public ResponseEntity<?> editarTransaccion(@RequestBody TransaccionesCajaDTO dto) {
     if (dto.getIdTransaccionesCaja() == null) {
         return ResponseEntity.badRequest().body("El ID de la transacción es requerido.");
@@ -182,7 +125,7 @@ public ResponseEntity<?> editarTransaccion(@RequestBody TransaccionesCajaDTO dto
     return ResponseEntity.ok(transaccionesCajaService.editarTransacciones(transaccionExistente));
 }
 
-@DeleteMapping("/transaccion-caja/{id}")
+@DeleteMapping({"/transacciones-cajas/{id}", "/transaccion-caja/{id}"})
 public ResponseEntity<?> eliminarCaja(@PathVariable Integer id) {
     Optional<TransaccionesCaja> optionalTransaccion = transaccionesCajaService.buscarTransaccion(id);
     if (!optionalTransaccion.isPresent()) {

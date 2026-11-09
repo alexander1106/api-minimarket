@@ -5,7 +5,6 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
 
-
 public class CompraCompletaDTO {
     private Integer idCompra;
     
@@ -68,8 +67,6 @@ public class CompraCompletaDTO {
     public void setDetalles(List<DetallesComprasDTO> detalles) {
         this.detalles = detalles;
     }
-
-    // Getters y Setters
 
     
 }

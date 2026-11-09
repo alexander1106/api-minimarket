@@ -1,5 +1,6 @@
 package com.gadbacorp.api.entity.inventario;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.SQLDelete;
@@ -32,7 +33,9 @@ public class TrasladoInventarioProducto {
     @JoinColumn(name = "idinventarioproducto_destino", nullable = false)
     private InventarioProducto destino;
 
-    private Integer cantidad;
+    @jakarta.persistence.Column(precision = 14, scale = 3)
+
+    private BigDecimal cantidad;
     private String Descripcion;
     private LocalDateTime fechaTraslado;
     private Integer estado = 1;
@@ -42,7 +45,7 @@ public class TrasladoInventarioProducto {
     
 
     public TrasladoInventarioProducto(Integer idtraslado, InventarioProducto origen, InventarioProducto destino,
-            Integer cantidad, String descripcion, LocalDateTime fechaTraslado, Integer estado) {
+            BigDecimal cantidad, String descripcion, LocalDateTime fechaTraslado, Integer estado) {
         this.idtraslado = idtraslado;
         this.origen = origen;
         this.destino = destino;
@@ -74,10 +77,10 @@ public class TrasladoInventarioProducto {
         this.destino = destino;
     }
 
-    public Integer getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
-    public void setCantidad(Integer cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
 

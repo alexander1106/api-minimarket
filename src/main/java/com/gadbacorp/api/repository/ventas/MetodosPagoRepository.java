@@ -18,6 +18,8 @@ public interface MetodosPagoRepository extends JpaRepository<MetodosPago, Intege
 boolean existsByNombreAndSucursal(String nombre, Sucursales sucursal);
 
 List<MetodosPago> findBySucursalIdSucursal(Integer idSucursal);
+boolean existsByCatalogo_IdCatalogo(Integer idCatalogo);
+boolean existsByCatalogo_IdCatalogoAndSucursal_IdSucursal(Integer idCatalogo, Integer idSucursal);
 boolean existsByNombreAndSucursalIdSucursal(String nombre, Sucursales idSucursal);
 List<MetodosPago> findByNombreIgnoreCaseAndSucursal_IdSucursal(String nombre, Integer idSucursal);
 

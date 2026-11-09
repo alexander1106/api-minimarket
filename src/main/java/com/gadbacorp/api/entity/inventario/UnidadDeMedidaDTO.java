@@ -3,6 +3,8 @@ package com.gadbacorp.api.entity.inventario;
 public class UnidadDeMedidaDTO {
 private Integer idunidadmedida;
     private String nombre;
+    private String codigo;
+    private Boolean permiteDecimales = false;
 
     public UnidadDeMedidaDTO() {}
 
@@ -18,6 +20,11 @@ private Integer idunidadmedida;
     public void setIdunidadmedida(Integer idunidadmedida) {
         this.idunidadmedida = idunidadmedida;
     }
+
+    public String getCodigo() { return codigo; }
+    public void setCodigo(String codigo) { this.codigo = codigo; }
+    public Boolean getPermiteDecimales() { return permiteDecimales; }
+    public void setPermiteDecimales(Boolean permiteDecimales) { this.permiteDecimales = permiteDecimales; }
 
     public String getNombre() {
         return nombre;

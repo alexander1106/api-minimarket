@@ -8,7 +8,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,9 +27,10 @@ import com.gadbacorp.api.repository.caja.CajaRepository;
 import com.gadbacorp.api.service.caja.ICajaService;
 import com.gadbacorp.api.service.jpa.cajas.AperturaCajaService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "Caja - Cajas")
 @RestController
 @RequestMapping("/api/minimarket")
-@CrossOrigin("*")
 public class CajaController {
     @Autowired
     private ICajaService cajaService;
@@ -71,7 +71,7 @@ public ResponseEntity<List<Caja>> obtenerCajasAbiertasMismaSucursal(@PathVariabl
         .orElse(ResponseEntity.notFound().build());
 }
 
-@GetMapping("/cajas-abiertas")
+@GetMapping({"/cajas-abiertas", "/aperturas-caja/cajas-abiertas", "/aperturas-cajas/cajas-abiertas"})
 public ResponseEntity<?> listarCajasAbiertas() {
     List<AperturaCaja> cajasAbiertas = aperturaCajaRepository.findByEstadoCaja("ABIERTA");
     return ResponseEntity.ok(cajasAbiertas);

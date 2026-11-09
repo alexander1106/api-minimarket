@@ -7,7 +7,6 @@ import com.gadbacorp.api.entity.inventario.Productos;
 
 public interface IProductosService {
     
-    // Métodos para entidades
     List<Productos> buscarTodos();
     Productos guardar(Productos producto);
     Productos modificar(Productos producto);

@@ -5,11 +5,8 @@ import java.util.Optional;
 
 import com.gadbacorp.api.entity.inventario.UnidadDeMedida;
 
-
 public interface IUnidadDeMedidaService {
-    //listar todos los tipos de unidad de medida de la tabla
     List<UnidadDeMedida> buscarTodos();
-    //guarda la unidad de medida
     UnidadDeMedida guardar(UnidadDeMedida unidaddemedida);
 
     UnidadDeMedida modificar(UnidadDeMedida unidaddemedida);

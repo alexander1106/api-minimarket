@@ -29,6 +29,13 @@ public class MetodosPago {
     private Integer idMetodoPago; 
     private String nombre; 
     private Integer estado =1;
+    /** Metodo del catalogo de la plataforma del que viene (null en datos antiguos). */
+    @ManyToOne
+    @JoinColumn(name = "id_catalogo")
+    private MetodoPagoCatalogo catalogo;
+    /** Dato propio de la empresa para este metodo: numero de Yape, cuenta bancaria, alias... */
+    @Column(length = 120)
+    private String detalle;
     @ManyToOne
     @JoinColumn(name = "id_sucursal", referencedColumnName = "id_sucursal")
     @JsonBackReference 
@@ -67,5 +74,21 @@ public class MetodosPago {
     }
     public void setSucursal(Sucursales sucursal) {
         this.sucursal = sucursal;
+    }
+
+    public MetodoPagoCatalogo getCatalogo() {
+        return catalogo;
+    }
+
+    public void setCatalogo(MetodoPagoCatalogo catalogo) {
+        this.catalogo = catalogo;
+    }
+
+    public String getDetalle() {
+        return detalle;
+    }
+
+    public void setDetalle(String detalle) {
+        this.detalle = detalle;
     }
 }

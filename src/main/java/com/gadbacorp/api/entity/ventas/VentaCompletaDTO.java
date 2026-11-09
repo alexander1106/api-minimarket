@@ -23,6 +23,24 @@ public class VentaCompletaDTO {
     private String observaciones;
     private Integer id_metodo_pago;
 
+    /** Opcional: si viene, el delivery se registra dentro de la misma transaccion de la venta. */
+    private com.gadbacorp.api.entity.delivery.DeliveryDTO delivery;
+    /** Opcional: si viene, el ingreso en caja se registra dentro de la misma transaccion. */
+    private Integer id_apertura_caja;
+
+    public com.gadbacorp.api.entity.delivery.DeliveryDTO getDelivery() {
+        return delivery;
+    }
+    public void setDelivery(com.gadbacorp.api.entity.delivery.DeliveryDTO delivery) {
+        this.delivery = delivery;
+    }
+    public Integer getId_apertura_caja() {
+        return id_apertura_caja;
+    }
+    public void setId_apertura_caja(Integer id_apertura_caja) {
+        this.id_apertura_caja = id_apertura_caja;
+    }
+
     public double getTotal_venta() {
         return total_venta;
     }

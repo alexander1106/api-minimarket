@@ -8,7 +8,6 @@ import com.gadbacorp.api.entity.inventario.AjusteInventario;
 public interface IAjusteInventarioService {
 
     List<AjusteInventario> buscarTodos();
-    //guarda los Productos
     AjusteInventario guardar(AjusteInventario ajusteInventario);
 
     AjusteInventario modificar(AjusteInventario ajusteInventario);
