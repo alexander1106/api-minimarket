@@ -1,0 +1,31 @@
+# Blueprint de Render para la API. Render no ofrece MySQL: usa una base externa (Railway, Aiven, TiDB Cloud)
+# y pega su cadena en DB_URL. Las variables con sync: false se piden al crear el servicio.
+services:
+  - type: web
+    name: minimarket-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: APP_CRYPTO_KEY
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: APP_SEED_ADMIN_PASSWORD
+        sync: false
+      - key: APP_SEED_EMPRESA_PASSWORD
+        sync: false
+      - key: APP_SEED_DEMO
+        value: "false"

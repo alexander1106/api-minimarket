@@ -1,0 +1,76 @@
+# Entorno completo:  docker compose up --build
+# Con SQL Server en vez de MySQL:  docker compose --profile sqlserver up --build  (y DB_* en .env)
+# Con Jenkins local:               docker compose --profile ci up -d jenkins
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?define DB_PASSWORD en .env}
+      MYSQL_DATABASE: rapimarket_minimarket
+    ports: ["3306:3306"]
+    volumes: [mysql-data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_PASSWORD}"]
+      interval: 10s
+      retries: 10
+
+  sqlserver:
+    profiles: [sqlserver]
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${DB_PASSWORD:?define DB_PASSWORD en .env}
+    ports: ["1433:1433"]
+    volumes: [mssql-data:/var/opt/mssql]
+
+  kafka:
+    image: apache/kafka:3.8.0
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    ports: ["9092:9092"]
+
+  api:
+    build: .
+    depends_on:
+      mysql: {condition: service_healthy}
+      kafka: {condition: service_started}
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/rapimarket_minimarket
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?define JWT_SECRET en .env}
+      KAFKA_ENABLED: "true"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
+      APIS_TOKEN_RUC: ${APIS_TOKEN_RUC:-}
+      APIS_TOKEN_DNI: ${APIS_TOKEN_DNI:-}
+    ports: ["8080:8080"]
+    volumes: [uploads:/app/uploads]
+
+  reportes:
+    build: ./quarkus-reportes
+    depends_on: [kafka]
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports: ["8081:8081"]
+
+  jenkins:
+    profiles: [ci]
+    image: jenkins/jenkins:lts-jdk17
+    ports: ["8089:8080", "50000:50000"]
+    volumes: [jenkins-data:/var/jenkins_home]
+
+volumes:
+  mysql-data:
+  mssql-data:
+  uploads:
+  jenkins-data:

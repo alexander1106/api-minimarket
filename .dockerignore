@@ -1,0 +1,8 @@
+target/
+uploads/
+.git/
+.github/
+.vscode/
+quarkus-reportes/
+.env
+*.p12

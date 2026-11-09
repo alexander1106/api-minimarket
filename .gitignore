@@ -31,3 +31,21 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Secretos / entorno
+.env
+*.p12
+*.jks
+certs/
+
+# Archivos subidos por usuarios
+uploads/
+
+# Gradle / Quarkus
+.gradle/
+build/
+
+# Ruido de npm en un proyecto Java
+/package-lock.json
+/package.json
+/node_modules/
